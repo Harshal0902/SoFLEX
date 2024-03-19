@@ -1,4 +1,4 @@
-# SolFLEX(Solana NFT Flexible Lending Exchange)
+# SoFLEX(Solana NFT Flexible Lending Exchange)
 
 Solana NFT and Synthetic Asset Lending and Borrowing Platform
 
