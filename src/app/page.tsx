@@ -56,6 +56,7 @@ export default function Page() {
             <li className='list-disc ml-5'>Early access to our platform.</li>
             <li className='list-disc ml-5'>Gain access to an exclusive Discord private channel.</li>
             <li className='list-disc ml-5'>Waitlist rewards in form of platform exclusive token.</li>
+            <li className='list-disc ml-5'>Exclusive NFT for waitlist members.</li>
             <li className='list-disc ml-5'>Stay informed with regular updates on development progress, new features, and upcoming events.</li>
           </ul>
           <Form {...form}>
