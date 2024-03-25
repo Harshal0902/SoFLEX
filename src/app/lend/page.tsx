@@ -1,8 +1,7 @@
 "use client"
 
-import { useState } from 'react'
-import axios from 'axios'
-import Image from 'next/image'
+import { useState } from 'react';
+import Image from 'next/image';
 
 const YourComponent = () => {
   const [imageUris, setImageUris] = useState<string[]>([]);
@@ -12,24 +11,28 @@ const YourComponent = () => {
 
   const fetchNFTs = () => {
     let nftUrl = `https://api.shyft.to/sol/v1/nft/compressed/search?network=mainnet-beta&address=${wallID}&wallet=2nHUxjFzxFfwnbF1sdAXcpVwgUEZBw6uFDBUu2dNYwbG`;
-    axios({
-      url: nftUrl,
+
+    fetch(nftUrl, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
         "x-api-key": xKey,
       },
     })
-      .then((res) => {
-        console.log(res.data);
-        const data = res.data;
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log(data);
         const nfts = data.result.nfts;
         const uris = nfts.map((nft: any) => nft.image_uri);
         setImageUris(uris);
       })
-
-      .catch((err) => {
-        console.warn(err);
+      .catch((error) => {
+        console.error('There was a problem with your fetch operation:', error);
       });
   };
 
