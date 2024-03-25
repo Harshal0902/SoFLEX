@@ -15,6 +15,14 @@ const nextConfig = {
     compiler: {
         removeConsole: process.env.NODE_ENV === 'production',
     },
+    images: {
+        remotePatterns: [
+            {
+                protocol: "https",
+                hostname: "**",
+            },
+        ],
+    },
     webpack: (config) => {
         config.externals.push('pino-pretty', 'lokijs', 'encoding');
         return config;

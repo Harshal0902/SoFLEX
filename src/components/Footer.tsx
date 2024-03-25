@@ -72,7 +72,7 @@ const companySocial: SocialLinkType[] = [
     //     imageName: 'linkedin.svg',
     // },
     {
-        link: 'https://github.com/SoFLEX',
+        link: 'https://github.com/Harshal0902/SoFLEX',
         imageName: 'github.svg',
     },
     // {

@@ -8,9 +8,12 @@ create table
 
 create table
   public.users (
-    user_id text primary key not null,
+    user_id text not null,
     email text null,
     user_address text not null,
     name text null,
-    created_at timestamp with time zone not null
+    created_at timestamp with time zone not null,
+    constraint users_pkey primary key (user_id, user_address),
+    constraint users_user_address_key unique (user_address)
   ) tablespace pg_default;
+  

@@ -4,6 +4,8 @@ import React, { useEffect } from 'react'
 import Link from 'next/link'
 import { WalletDisconnectButton, WalletMultiButton } from '@solana/wallet-adapter-react-ui'
 import { useWallet } from '@solana/wallet-adapter-react'
+import { addNewUser } from '@/lib/supabaseRequests'
+import { toast } from 'sonner'
 import { Button } from './ui/button'
 import ResponsiveNavbar from './ResponsiveNavbar'
 import ModeToggle from './ModeToggle'
@@ -17,20 +19,20 @@ export default function Navbar() {
     const wallet = useWallet();
 
     useEffect(() => {
-        const addUserToWaitlistAsync = async () => {
+        const addUserToDB = async () => {
             if (connected) {
                 try {
-                    // await addUserToWaitlist({
-                    //     address: address,
-                    // });
-                    console.log(wallet.publicKey?.toString());
+                    await addNewUser({
+                        walletAddress: wallet.publicKey?.toString(),
+                    });
+                    toast.success('Wallet connected successfully!');
                 } catch (error) {
-                    console.error('Error setting your account. Please try again.');
+                    toast.error('An error occurred while setting up your account. Please try again later.');
                 }
             }
         };
 
-        addUserToWaitlistAsync();
+        addUserToDB();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [connected]);
 
@@ -56,12 +58,12 @@ export default function Navbar() {
                                 Lend
                             </Link>
                         </Button>
-                        {connected ?
+                        {connected ? (
                             <>
                                 <Popover>
                                     <PopoverTrigger>
                                         <div className='relative'>
-                                            <Bell className='cursor-pointer hover:text-primary' />
+                                            <Bell className='hover:text-primary' />
                                             <div className='w-2.5 h-2.5 absolute -top-0.5 right-1 bg-green-600 rounded-full'></div>
                                         </div>
                                     </PopoverTrigger>
@@ -70,26 +72,27 @@ export default function Navbar() {
                                     </PopoverContent>
                                 </Popover>
                                 <Link href='/my-portfolio'>
-                                    <User />
+                                    <User className='hover:text-primary' />
                                 </Link>
                                 <div className='relative'>
                                     <Button variant='destructive' className='text-md'>
                                         Disconnect Wallet
                                     </Button>
-                                    <div className='absolute top-0 right-0 w-[133px] h-[40px] opacity-0'>
+                                    <div className='absolute top-0 left-0 opacity-0'>
                                         <WalletDisconnectButton />
                                     </div>
                                 </div>
-                            </> :
+                            </>
+                        ) : (
                             <div className='relative'>
                                 <Button className='text-white text-md'>
                                     Connect Wallet
                                 </Button>
-                                <div className='absolute top-0 right-0 w-[133px] h-[40px] opacity-0'>
+                                <div className='absolute top-8 left-0 opacity-0'>
                                     <WalletMultiButton />
                                 </div>
                             </div>
-                        }
+                        )}
                     </div>
                 </div>
 

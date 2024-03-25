@@ -1,15 +1,15 @@
 "use client"
 
 import React, { useState, useEffect } from 'react'
-import { usePathname, useRouter } from 'next/navigation'
-import { Menu, X } from 'lucide-react'
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { Home, Bell, BellRing, User, LogOut } from 'lucide-react'
+import { usePathname } from 'next/navigation'
 import { WalletDisconnectButton, WalletMultiButton } from '@solana/wallet-adapter-react-ui'
 import { useWallet } from '@solana/wallet-adapter-react'
-import { Switch } from '@/components/ui/switch'
+import { addNewUser } from '@/lib/supabaseRequests'
 import { toast } from 'sonner'
+import { Menu, X, Home, HandCoins, Gem, Bell, BellRing, User } from 'lucide-react'
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
+import { Switch } from '@/components/ui/switch'
 
 interface Notification {
     title: string
@@ -37,8 +37,6 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
         notification: false,
     });
 
-    const router = useRouter();
-
     // @ts-ignore
     const toggleDropdown = (dropdown) => setDropdownVisible((prev) => ({ ...prev, [dropdown]: !prev[dropdown] }));
     const toggleDropdownNotification = () => toggleDropdown('notification');
@@ -57,6 +55,27 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
             toggleOpen()
         }
     }
+
+    const { connected } = useWallet();
+    const wallet = useWallet();
+
+    useEffect(() => {
+        const addUserToDB = async () => {
+            if (connected) {
+                try {
+                    await addNewUser({
+                        walletAddress: wallet.publicKey?.toString(),
+                    });
+                    toast.success('Wallet connected successfully!');
+                } catch (error) {
+                    toast.error('An error occurred while setting up your account. Please try again later.');
+                }
+            }
+        };
+
+        addUserToDB();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [connected]);
 
     return (
         <div className='lg:hidden'>
@@ -93,6 +112,24 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
                                             <div className='flex flex-row justify-between items-center'>
                                                 Home
                                                 <Home />
+                                            </div>
+                                        </Link>
+                                    </div>
+
+                                    <div className='border-t-2 pt-2 px-2 cursor-pointer w-full'>
+                                        <Link onClick={() => closeOnCurrent('/borrow')} href='/borrow'>
+                                            <div className='flex flex-row justify-between items-center'>
+                                                Borrow
+                                                <HandCoins />
+                                            </div>
+                                        </Link>
+                                    </div>
+
+                                    <div className='border-t-2 pt-2 px-2 cursor-pointer w-full'>
+                                        <Link onClick={() => closeOnCurrent('/lend')} href='/lend'>
+                                            <div className='flex flex-row justify-between items-center'>
+                                                Lend
+                                                <Gem />
                                             </div>
                                         </Link>
                                     </div>
