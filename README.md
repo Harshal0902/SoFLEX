@@ -4,7 +4,7 @@ Solana Compressed NFT and Synthetic Asset Lending and Borrowing Platform
 
 ## Introduction
 
-Our platform introduces a comprehensive solution for lending and borrowing compressed NFTs and synthetic assets within the Solana ecosystem. Designed to address the increasing demand for liquidity and financial flexibility in the compressed NFT and synthetic asset space, our platform empowers users to leverage their assets efficiently. Whether you're seeking to access funds or earn passive income through lending, our platform provides a seamless and secure environment to meet your financial needs.
+SoFLEX introduces a comprehensive solution for lending and borrowing compressed NFTs and synthetic assets within the Solana ecosystem. Designed to address the increasing demand for liquidity and financial flexibility in the compressed NFT and synthetic asset space, our platform empowers users to leverage their assets efficiently. Whether you're seeking to access funds or earn passive income through lending, our platform provides a seamless and secure environment to meet your financial needs.
 
 ## Key Features
 
@@ -23,6 +23,14 @@ Our platform introduces a comprehensive solution for lending and borrowing compr
 6. AI-Powered Credit Assessment: Our platform utilizes AI algorithms to analyze user data, transaction history, and asset characteristics, enabling accurate credit assessments and risk profiling for borrowers. By evaluating factors such as repayment history and market trends, AI enhances lending decisions and mitigates default risks.
 
 7. AI-Driven Portfolio Management: We offer AI-driven portfolio management tools to optimize asset allocation, rebalancing strategies, and risk management techniques for users' NFT and synthetic asset portfolios. By analyzing portfolio performance and market trends, AI assists users in maximizing returns while minimizing downside risks.
+
+## Build with
+
+- Solana
+- Next Js
+- Solana Wallet Adapter
+- Zod
+- shadcn/ui
 
 ## Benefits
 
