@@ -1,49 +1,38 @@
 "use client"
 
-import { useState } from 'react';
-import Image from 'next/image';
+import React from 'react'
 
-const YourComponent = () => {
-  const [imageUris, setImageUris] = useState<string[]>([]);
+export default function Page() {
+    const url = `https://rpc.shyft.to/?api_key=<key>`
 
-  const xKey = "";
-  const wallID = '2nHUxjFzxFfwnbF1sdAXcpVwgUEZBw6uFDBUu2dNYwbG';
+    const getAssetsByOwner1 = async () => {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                jsonrpc: '2.0',
+                id: 'rpc-id',
+                method: 'getAssetsByOwner',
+                params: {
+                    ownerAddress: '2nHUxjFzxFfwnbF1sdAXcpVwgUEZBw6uFDBUu2dNYwbG',
+                    page: 1, // Starts at 1
+                    limit: 1000
+                },
+            }),
+        });
+        const { result } = await response.json();
+        console.log("Assets owned by a wallet: ", result.items);
+    };
 
-  const fetchNFTs = () => {
-    let nftUrl = `https://api.shyft.to/sol/v1/nft/compressed/search?network=mainnet-beta&address=${wallID}&wallet=2nHUxjFzxFfwnbF1sdAXcpVwgUEZBw6uFDBUu2dNYwbG`;
+    return (
+        <div>
+            <button onClick={getAssetsByOwner1}>Get Assets By Owner</button> <br />
 
-    fetch(nftUrl, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": xKey,
-      },
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        return response.json();
-      })
-      .then((data) => {
-        console.log(data);
-        const nfts = data.result.nfts;
-        const uris = nfts.map((nft: any) => nft.image_uri);
-        setImageUris(uris);
-      })
-      .catch((error) => {
-        console.error('There was a problem with your fetch operation:', error);
-      });
-  };
-
-  return (
-    <div className='min-h-screen'>
-      <div onClick={fetchNFTs}>Fetch NFTs</div>
-      {imageUris.map((uri, index) => (
-        <Image key={index} src={uri} alt={`Image ${index}`} height={250} width={250} />
-      ))}
-    </div>
-  );
-};
-
-export default YourComponent;
+            NFT image Link: content.links.image <br />
+            NFT Name:content.metadata.name <br />
+            NFT URL: content.links.external_url <br />
+        </div>
+    )
+}

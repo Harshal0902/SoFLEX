@@ -58,7 +58,7 @@ const termsContent: TermContentType[] = [
     {
         title: '8. Limitation of Liability',
         content: [
-            'To the fullest extent permitted by law, SoFLEX shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising out of or related to your use of the SoFLEX Platform. In no event shall SoFLEXs total liability exceed the amount paid by you, if any, for accessing or using the Platform.',
+            'To the fullest extent permitted by law, SoFLEX shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising out of or related to your use of the SoFLEX Platform. In no event shall SoFLEX\'s total liability exceed the amount paid by you, if any, for accessing or using the Platform.',
         ],
     },
     {

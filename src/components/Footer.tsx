@@ -121,7 +121,7 @@ export default function Footer() {
             <footer className='bg-blue-100/80 dark:bg-gray-900 my-2.5 md:my-6 rounded backdrop-blur-0'>
                 <div className='container p-6 mx-auto'>
 
-                    <div className='grid grid-cols-1 gap-6 sm:grid-cols-3 sm:gap-y-10 lg:grid-cols-5'>
+                    <div className='grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-y-10 lg:grid-cols-4'>
                         <div className='sm:col-span-2'>
                             <h1 className='max-w-lg text-xl font-semibold tracking-wide text-gray-800 dark:text-white'>Subscribe to Our Newsletter to Get Updates:</h1>
                             <Form {...form}>
