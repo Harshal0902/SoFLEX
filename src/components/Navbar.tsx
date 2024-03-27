@@ -71,7 +71,7 @@ export default function Navbar() {
                                         <Notifications />
                                     </PopoverContent>
                                 </Popover>
-                                <Link href='/my-portfolio'>
+                                <Link href='/portfolio'>
                                     <User className='hover:text-primary' />
                                 </Link>
                                 <div className='relative'>

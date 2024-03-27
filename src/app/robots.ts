@@ -11,6 +11,6 @@ export default function robots(): MetadataRoute.Robots {
                 ],
             },
         ],
-        sitemap: 'https://www.soflex.app/sitemap.xml',
+        sitemap: 'https://www.soflex.fi/sitemap.xml',
     }
 }

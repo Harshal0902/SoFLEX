@@ -10,6 +10,12 @@ interface WaitlistUserType {
     email: string;
 }
 
+interface UserType {
+    walletAddress?: string;
+    name?: string | null;
+    email?: string | null;
+}
+
 export const addUserWaitlist = async ({ email }: WaitlistUserType) => {
     try {
         const { data, error } = await supabase
@@ -66,5 +72,45 @@ export const addNewUser = async ({ walletAddress }: { walletAddress?: string }) 
         return data;
     } catch (error) {
         return new Response('Error adding a new user', { status: 500 });
+    }
+};
+
+
+export const userPortfolioDetails = async ({ walletAddress }: { walletAddress?: string }) => {
+    try {
+        const { data, error } = await supabase
+            .from('users')
+            .select('name, email')
+            .eq('user_address', walletAddress);
+
+        if (error) {
+            return new Response('Error fetching new user profile', {
+                status: 500,
+            });
+        }
+
+        return data;
+    } catch (error) {
+        return new Response('Error fetching user profile', { status: 500 });
+    }
+};
+
+export const updateUserData = async ({ walletAddress, name, email }: UserType) => {
+    try {
+        const { data, error } = await supabase
+            .from('users')
+            .update({
+                name: name,
+                email: email
+            })
+            .eq('user_address', walletAddress);
+
+        if (error) {
+            return new Response('Error updating user data', { status: 500 });
+        }
+
+        return data;
+    } catch (error) {
+        return new Response('Error updating user data', { status: 500 });
     }
 };

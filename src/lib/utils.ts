@@ -39,7 +39,7 @@ export function constructMetadata({
       creator: '@SoFLEX'
     },
     icons,
-    metadataBase: new URL('https://www.soflex.app'),
+    metadataBase: new URL('https://www.soflex.fi'),
     ...(noIndex && {
       robots: {
         index: false,

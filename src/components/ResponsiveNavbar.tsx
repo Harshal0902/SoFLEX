@@ -193,7 +193,7 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
                                             </div>
 
                                             <div className='border-t-2 pt-2 px-2 cursor-pointer w-full'>
-                                                <Link onClick={() => closeOnCurrent('/my-portfolio')} href='/my-portfolio'>
+                                                <Link onClick={() => closeOnCurrent('/portfolio')} href='/portfolio'>
                                                     <div className='flex flex-row justify-between items-center'>
                                                         My Portfolio
                                                         <User />
