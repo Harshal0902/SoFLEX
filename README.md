@@ -45,7 +45,7 @@ SoFLEX introduces a comprehensive solution for lending and borrowing compressed 
 - *On-Chain Credit Score (OCS) Calculation*:
   - Credit Score = a * BH + b * (TH + CD) + c
   - where:
-    - BH: Borrower History Score (0-100) 
+    - BH: Borrower History Score (0-100) : This score can be calculated by analyzing a borrower's past borrowing and repayment behavior on the platform. (Higher repayment rates might indicate lower risk)
     - TH + CD (0-200)
         - Transaction History Score (0-100): This score can be derived from the borrower's overall on-chain activity like on-Chain Transaction frequency and volume.(Frequent token swaps might indicate higher risk)
         - Collateral Diversity Score (0-100): This score can assess the risk profile of the collateral the borrower intends to use for the loan like liquidity of the collateral asset. (Higher liquidity assets might indicate lower risk)
