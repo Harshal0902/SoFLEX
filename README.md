@@ -16,13 +16,21 @@ SoFLEX introduces a comprehensive solution for lending and borrowing compressed 
 
 4. Cross-Asset Borrowing: Users enjoy the flexibility to borrow SOL tokens against their compressed NFT and synthetic asset holdings and vice versa, enabling asset owners to access liquidity without liquidating their assets. This feature also provides an alternative investment avenue for SOL token holders.
 
-5. Security and Transparency: Leveraging the Solana blockchain, our platform ensures the security, transparency, and immutability of all transactions. Smart contracts govern lending and borrowing activities, offering users trustless and reliable access to financial services.
-
 ## Additional Features
 
-6. AI-Powered Credit Assessment: Our platform utilizes AI algorithms to analyze user data, transaction history, and asset characteristics, enabling accurate credit assessments and risk profiling for borrowers. By evaluating factors such as repayment history and market trends, AI enhances lending decisions and mitigates default risks.
+5. AI-Powered Credit Assessment: Our platform utilizes AI algorithms to analyze user data, transaction history, and asset characteristics, enabling accurate credit assessments and risk profiling for borrowers. By evaluating factors such as repayment history and market trends, AI enhances lending decisions and mitigates default risks.
 
-7. AI-Driven Portfolio Management: We offer AI-driven portfolio management tools to optimize asset allocation, rebalancing strategies, and risk management techniques for users' NFT and synthetic asset portfolios. By analyzing portfolio performance and market trends, AI assists users in maximizing returns while minimizing downside risks.
+6. AI-Driven Portfolio Management: We offer AI-driven portfolio management tools to optimize asset allocation, rebalancing strategies, and risk management techniques for users' NFT and synthetic asset portfolios. By analyzing portfolio performance and market trends, AI assists users in maximizing returns while minimizing downside risks.
+
+7. Stop-loss and Take-profit Orders for Loans: Borrowers can set stop-loss and take-profit orders for their loans directly on the platform. This can help them manage risk and automate their borrowing strategies.
+
+8. Fiat On-Ramps and Off-Ramps: Fiat gateways allow users to easily deposit and withdraw funds using other Solana cryptos. This can make your platform more accessible to a wider audience.
+
+9. Slashing Protection for Lenders: A portion of borrower fees goes into a pool that protects lenders from losses in case of defaults. This can incentivize participation from lenders who might otherwise be hesitant due to default risks.
+
+10. Dynamic Collateralization: The required collateral ratio adjusts based on the borrower's creditworthiness or the volatility of the collateral asset. This can provide more flexibility for borrowers while managing risk for lenders.
+
+11. Social Lending with Reputation Scores: A social layer where borrowers can build reputation scores based on past borrowing and repayment behavior. This can unlock better interest rates for trustworthy borrowers and attract more lenders.
 
 ## Build with
 
@@ -32,13 +40,31 @@ SoFLEX introduces a comprehensive solution for lending and borrowing compressed 
 - Zod
 - shadcn/ui
 
-## Benefits
+## Important Formulas
 
-- Empower compressed NFT and synthetic asset holders to monetize their assets and access liquidity without selling.
-- Provide SOL token holders with opportunities to earn passive income through compressed NFT and synthetic asset lending.
-- Enhance liquidity in the Solana ecosystem, fostering innovation and growth in the compressed NFT and synthetic asset market.
-- Promote financial inclusion by offering accessible and affordable lending solutions to users worldwide.
+- *On-Chain Credit Score (OCS) Calculation*:
+  - Credit Score = a * BH + b * (TH + CD) + c
+  - where:
+    - BH: Borrower History Score (0-100) 
+    - TH + CD (0-200)
+        - Transaction History Score (0-100): This score can be derived from the borrower's overall on-chain activity like on-Chain Transaction frequency and volume.(Frequent token swaps might indicate higher risk)
+        - Collateral Diversity Score (0-100): This score can assess the risk profile of the collateral the borrower intends to use for the loan like liquidity of the collateral asset. (Higher liquidity assets might indicate lower risk)
+    - a, b, c = Coefficients
+        - a = 0.55 (Moderate weight on BH)
+        - b = 0.35 (Moderate weight on combined TH + CD)
+        - c = 30 (Constant value to adjust score range)
+    - *Note* = A borrower can achieve the highest possible credit score of 155 by having a perfect borrower history and a perfect combined transaction & collateral score. The lowest possible score would be 30, indicating a very high risk borrower based on the scoring system.
 
-## Conclusion
+- *Interest Rate Calculation*:
+    - Interest Rate = Cost * (Base Rate + Risk Premium + Duration Adjustment)
+    - where:
+        - Cost: The loan amount requested by the borrower.
+        - Base Rate = 5% (Minimum interest rate)
+        - Risk Premium = This factor adjusts the interest rate based on the borrower's credit score (OCS) derived from your on-chain credit score system.
+            - Risk Premium = (1 - OCS/100) * Risk_Factor
+            - Risk_Factor = 2 (Constant value to adjust risk premium)
+        - Duration Adjustment = This factor adjusts the interest rate based on the loan duration.
+            - Duration Adjustment = Duration(in months) * Duration_Factor
+            - Duration_Factor = 0.5 (Constant value to adjust duration adjustment)
+        - *Note* = The interest rate is calculated based on the borrower's credit score, with higher credit scores resulting in lower interest rates. The minimum interest rate is set at 5%, ensuring that all borrowers receive fair and competitive rates based on their risk profile.
 
-Our Solana Compressed NFT and Synthetic Asset lending and borrowing platform revolutionizes the compressed NFT and synthetic asset finance landscape, offering a comprehensive suite of features and services tailored to meet the diverse needs of users. Whether you're a seasoned investor or a newcomer to the compressed NFT and synthetic asset space, our platform provides the tools and resources you need to thrive in the dynamic world of decentralized finance. Join us and experience the future of compressed NFT and synthetic asset finance on Solana.
