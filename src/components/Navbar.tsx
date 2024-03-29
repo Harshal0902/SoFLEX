@@ -48,12 +48,12 @@ export default function Navbar() {
 
                 <div className='hidden top-navbar w-full lg:inline-flex lg:flex-grow lg:w-auto'>
                     <div className='lg:inline-flex lg:flex-row lg:ml-auto lg:w-auto w-full lg:items-center items-start flex flex-col lg:h-auto lg:space-x-4'>
-                        <Button variant='ghost' className='hover:bg-primary text-md' asChild>
+                        <Button variant='ghost' className='hover:bg-primary hover:text-white text-md' asChild>
                             <Link href='/borrow' passHref>
                                 Borrow
                             </Link>
                         </Button>
-                        <Button variant='ghost' className='hover:bg-primary text-md' asChild>
+                        <Button variant='ghost' className='hover:bg-primary hover:text-white text-md' asChild>
                             <Link href='/lend' passHref>
                                 Lend
                             </Link>

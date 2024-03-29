@@ -119,7 +119,7 @@ export default function Page() {
       </div>
 
       <div className='flex items-center justify-center'>
-        <div className='p-2 bg-white rounded'>
+        <div className='p-2 border-2 border-accent bg-white rounded'>
         <Image src='/assets/home/bsl.png' height={50} width={400} quality={100} alt='BSL' />
         </div>
       </div>
