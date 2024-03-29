@@ -1,6 +1,6 @@
 "use client"
 
-import React from 'react'
+import React, { useState } from 'react'
 import { addUserWaitlist } from '@/lib/supabaseRequests'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Form, FormLabel, FormControl, FormField, FormItem, FormDescription, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import OnChainCreditScore from '@/components/OnChainCreditScore'
 
 const FormSchema = z.object({
   email: z.string({
@@ -20,6 +21,8 @@ const FormSchema = z.object({
 })
 
 export default function Page() {
+  const [checkCreditScore, setCheckCreditScore] = useState(false);
+
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -43,12 +46,23 @@ export default function Page() {
       }
     }
   }
+
+  const toggleShowCheckCreditScore = () => {
+    setCheckCreditScore(!checkCreditScore);
+  };
+
   return (
-    <div className='h-screen flex justify-center items-center'>
-      <Card className="w-[90vw] md:w-[500px]">
+    <div className='min-h-screen flex justify-center items-center py-6 flex-col space-y-8'>
+
+      <Card className='w-[90vw] md:w-[50vw]'>
         <CardHeader>
-          <CardTitle className='tracking-wider'>Join the Waitlist</CardTitle>
-          <CardDescription>Join the waitlist for early access.</CardDescription>
+          <CardTitle className='flex flex-col md:flex-row space-y-4 md:space-y-0 md:justify-between items-center'>
+            <h1 className='tracking-wider'>
+              Join the Waitlist.
+            </h1>
+            <Button variant='outline' onClick={toggleShowCheckCreditScore}>Check On-Chain Credit Score</Button>
+          </CardTitle>
+          <CardDescription>Join the waitlist for early access and dont forget to check your <span className='underline cursor-pointer' onClick={toggleShowCheckCreditScore}>On-Chain Credit Score for free</span>.</CardDescription>
         </CardHeader>
         <CardContent>
           <p className=''>What you will get:</p>
@@ -85,6 +99,10 @@ export default function Page() {
           </Form>
         </CardContent>
       </Card>
+
+      {checkCreditScore && (
+        <OnChainCreditScore />
+      )}
     </div>
   )
 }
