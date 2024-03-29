@@ -6,6 +6,26 @@ Solana Compressed NFT and Synthetic Asset Lending and Borrowing Platform
 
 SoFLEX introduces a comprehensive solution for lending and borrowing compressed NFTs and synthetic assets within the Solana ecosystem. Designed to address the increasing demand for liquidity and financial flexibility in the compressed NFT and synthetic asset space, our platform empowers users to leverage their assets efficiently. Whether you're seeking to access funds or earn passive income through lending, our platform provides a seamless and secure environment to meet your financial needs.
 
+## Problem Statement
+
+The current Solana platform for lending and borrowing have following limitations:
+
+- Limited support for compressed NFTs and synthetic assets: Existing platforms primarily focus on traditional tokens and assets, neglecting the growing demand for compressed NFTs and synthetic assets. This lack of support restricts users from leveraging their unique assets for liquidity and investment purposes.
+- High Transaction Cost and slow transaction speed: The current Solana platform has high transaction costs and slow transaction speeds, making it challenging for users to engage in lending and borrowing activities efficiently. These limitations hinder the scalability and accessibility of the platform, discouraging users from participating in financial activities.
+- Lack of credit assessment and risk management: The absence of credit assessment and risk management tools on the Solana platform poses challenges for users in evaluating borrower creditworthiness and managing default risks. Without accurate risk profiling and portfolio management tools, users face uncertainties in lending and borrowing activities, limiting their participation in the platform.
+- Low Liquidity and Yield Opportunities: The current Solana platform lacks sufficient liquidity and yield opportunities for users to maximize returns on their assets. Limited lending and borrowing options restrict users from earning attractive yields and diversifying their investment portfolios, reducing the platform's appeal to potential users.
+- Impermanent Loss and Slippage: Users face impermanent loss and slippage risks when engaging in lending and borrowing activities on the Solana platform. These risks can erode potential returns and deter users from participating in financial activities, undermining the platform's value proposition and user engagement.
+
+## Solution Overview
+
+SoFLEX addresses these challenges by:
+
+- Introducing a peer-to-peer (P2P) and peer-to-protocol compressed NFT and synthetic asset lending and borrowing platform that enables users to buy, lend, or borrow assets directly from other users. This dynamic marketplace fosters liquidity and investment opportunities for compressed NFT and synthetic assets, enhancing the platform's value proposition and user engagement.
+- By leveraging zk-Rollups scaling solutions, our platform facilitates efficient lending and borrowing activities with high throughput and minimal transaction costs. This translates to a faster, more affordable user experience with improved scalability, attracting more users to participate in seamless financial activities like loan approvals, borrowing, and asset management.
+- Implementing AI-powered credit assessment and risk management tools to evaluate borrower creditworthiness and mitigate default risks. By analyzing user data, transaction history, and asset characteristics, our platform enhances lending decisions and risk profiling, ensuring accurate credit assessments and portfolio management for users.
+- Offering competitive interest rates and flexible lending options to maximize liquidity and yield opportunities for users. Borrowers benefit from low-interest rates, while lenders earn attractive yields on compressed NFT and synthetic assets, enhancing the platform's appeal to a diverse range of users seeking financial flexibility and investment opportunities.
+- Introducing stop-loss and take-profit orders for loans, enabling borrowers to manage risk and automate borrowing strategies effectively. This feature empowers users to set predefined thresholds for loan repayments, enhancing risk management and financial planning capabilities on the platform.
+
 ## Key Features
 
 1. Peer-to-Peer (P2P) Compressed NFT and Synthetic Asset Lending and Borrowing: Users can easily buy, lend, or borrow compressed NFTs and synthetic assets directly from other users, fostering a dynamic peer-to-peer marketplace for compressed NFT and synthetic assets. Borrowers can utilize their assets as collateral to secure SOL token loans, while lenders have the flexibility to set interest rates or bid on lending amounts based on asset characteristics.
@@ -59,12 +79,11 @@ SoFLEX introduces a comprehensive solution for lending and borrowing compressed 
     - Interest Rate = Cost * (Base Rate + Risk Premium + Duration Adjustment)
     - where:
         - Cost: The loan amount requested by the borrower.
-        - Base Rate = 5% (Minimum interest rate)
+        - Base Rate = 5% or 0.05 (Minimum interest rate)
         - Risk Premium = This factor adjusts the interest rate based on the borrower's credit score (OCS) derived from your on-chain credit score system.
-            - Risk Premium = (1 - OCS/100) * Risk_Factor
+            - Risk Premium = (155 - OCS) * (Risk_Factor / (155 - 30))
             - Risk_Factor = 2 (Constant value to adjust risk premium)
         - Duration Adjustment = This factor adjusts the interest rate based on the loan duration.
             - Duration Adjustment = Duration(in months) * Duration_Factor
             - Duration_Factor = 0.5 (Constant value to adjust duration adjustment)
         - *Note* = The interest rate is calculated based on the borrower's credit score, with higher credit scores resulting in lower interest rates. The minimum interest rate is set at 5%, ensuring that all borrowers receive fair and competitive rates based on their risk profile.
-
