@@ -3,13 +3,14 @@
 import React, { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import { WalletDisconnectButton, WalletMultiButton } from '@solana/wallet-adapter-react-ui'
-import { useWallet } from '@solana/wallet-adapter-react'
+import { useWallet, useConnection } from '@solana/wallet-adapter-react'
 import { addNewUser } from '@/lib/supabaseRequests'
 import { toast } from 'sonner'
-import { Menu, X, Home, HandCoins, Gem, Bell, BellRing, User } from 'lucide-react'
+import { Menu, X, Home, HandCoins, Gem, Bell, BellRing, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
+import useUserSOLBalance from '@/store/useUserSOLBalanceStore'
 
 interface Notification {
     title: string
@@ -35,11 +36,13 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
     const [isOpen, setOpen] = useState(false);
     const [dropdownVisible, setDropdownVisible] = useState({
         notification: false,
+        profile: false
     });
 
     // @ts-ignore
     const toggleDropdown = (dropdown) => setDropdownVisible((prev) => ({ ...prev, [dropdown]: !prev[dropdown] }));
     const toggleDropdownNotification = () => toggleDropdown('notification');
+    const toggleDropdownProfile = () => toggleDropdown('profile');
 
     const toggleOpen = () => setOpen((prev) => !prev);
 
@@ -58,6 +61,8 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
 
     const { connected } = useWallet();
     const wallet = useWallet();
+    const { connection } = useConnection();
+    const { balance, getUserSOLBalance } = useUserSOLBalance();
 
     useEffect(() => {
         const addUserToDB = async () => {
@@ -76,6 +81,12 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
         addUserToDB();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [connected]);
+
+    useEffect(() => {
+        if (wallet.publicKey) {
+            getUserSOLBalance(wallet.publicKey, connection)
+        }
+    }, [wallet.publicKey, connection, getUserSOLBalance])
 
     return (
         <div className='lg:hidden'>
@@ -193,12 +204,25 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
                                             </div>
 
                                             <div className='border-t-2 pt-2 px-2 cursor-pointer w-full'>
-                                                <Link onClick={() => closeOnCurrent('/portfolio')} href='/portfolio'>
-                                                    <div className='flex flex-row justify-between items-center'>
-                                                        My Portfolio
-                                                        <User />
+                                                <div className='flex flex-row justify-between items-center' onClick={toggleDropdownProfile}>
+                                                    Profile
+                                                    <div className={`transform ${dropdownVisible.profile ? 'rotate-180 ease-in-out' : ''} transition-transform`}>
+                                                        <ChevronDown />
                                                     </div>
-                                                </Link>
+                                                </div>
+                                                <div className={`grid space-y-1 text-lg items-start pl-2 animate-fade-in-down-nav ${dropdownVisible.profile ? 'block' : 'hidden'}`}>
+                                                    <div className='flex flex-row pb-2'>
+                                                        <div>
+                                                            Balance: {balance.toLocaleString()}
+                                                        </div>
+                                                        <div className='text-slate-600 ml-2'>
+                                                            SOL
+                                                        </div>
+                                                    </div>
+                                                    <Link onClick={() => closeOnCurrent('/portfolio')} href='/portfolio' passHref>
+                                                        My Portfolio
+                                                    </Link>
+                                                </div>
                                             </div>
 
                                             <div className='border-y-2 py-2 px-2 cursor-pointer w-full'>

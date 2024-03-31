@@ -3,6 +3,8 @@
 import React from 'react'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { useTypingEffect } from '@/components/useTypingEffect'
+import { Button } from '@/components/ui/button'
+import { ExternalLink } from 'lucide-react'
 import Image from 'next/image'
 import BackgroundAnimation from '@/components/BackgroundAnimation'
 
@@ -75,7 +77,7 @@ export default function Page() {
   return (
     <MaxWidthWrapper>
 
-      <div className='flex flex-wrap-reverse items-center justify-center md:grid md:grid-cols-2 pb-8 md:px-24 px-4 z-20'>
+      <div className='flex flex-wrap-reverse items-center justify-center md:grid md:grid-cols-2 py-8 md:px-24 px-4 z-20'>
 
         <div className='md:flex md:flex-col md:justify-center'>
           <h2 className='mb-4 font-semibold tracking-wider text-3xl md:text-4xl' aria-label={selectedMyService}>
@@ -84,6 +86,13 @@ export default function Page() {
           <p className='self-center text-lg md:text-xl tracking-wide text-left md:text-justify py-2'>
             SoFLEX introduces a comprehensive solution for lending and borrowing compressed NFTs and synthetic assets within the Solana ecosystem, addressing the increasing demand for liquidity and financial flexibility while empowering users to leverage assets efficiently and securely.
           </p>
+          <div>
+            <a href='https://gitbook.soflex.fi/' target='_blank' rel='noreferrer noopener'>
+              <Button className='px-12 text-white tracking-wider'>
+                Check GitBook <ExternalLink className='ml-2 h-4 w-4' />
+              </Button>
+            </a>
+          </div>
         </div>
 
         <div className='flex justify-center w-full'>
@@ -120,7 +129,7 @@ export default function Page() {
 
       <div className='flex items-center justify-center'>
         <div className='p-2 border-2 border-accent bg-white rounded'>
-        <Image src='/assets/home/bsl.png' height={50} width={400} quality={100} alt='BSL' />
+          <Image src='/assets/home/bsl.png' height={50} width={400} quality={100} alt='BSL' />
         </div>
       </div>
 
