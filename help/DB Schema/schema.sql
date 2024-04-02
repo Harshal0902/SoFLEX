@@ -13,6 +13,7 @@ create table
     user_address text not null,
     name text null,
     created_at timestamp with time zone not null,
+    on_chain_credit_score double precision null,
     constraint users_pkey primary key (user_id, user_address),
     constraint users_user_address_key unique (user_address)
   ) tablespace pg_default;

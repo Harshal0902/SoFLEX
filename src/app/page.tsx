@@ -5,6 +5,7 @@ import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { useTypingEffect } from '@/components/useTypingEffect'
 import { Button } from '@/components/ui/button'
 import { ExternalLink } from 'lucide-react'
+import Link from 'next/link'
 import Image from 'next/image'
 import BackgroundAnimation from '@/components/BackgroundAnimation'
 
@@ -86,12 +87,19 @@ export default function Page() {
           <p className='self-center text-lg md:text-xl tracking-wide text-left md:text-justify py-2'>
             SoFLEX introduces a comprehensive solution for lending and borrowing compressed NFTs and synthetic assets within the Solana ecosystem, addressing the increasing demand for liquidity and financial flexibility while empowering users to leverage assets efficiently and securely.
           </p>
-          <div>
+          <div className='flex flex-col items-center md:flex-row space-y-2 md:space-y-0 space-x-0 md:space-x-4 justify-start'>
             <a href='https://gitbook.soflex.fi/' target='_blank' rel='noreferrer noopener'>
-              <Button className='px-12 text-white tracking-wider'>
-                Check GitBook <ExternalLink className='ml-2 h-4 w-4' />
+              <Button className='px-12 text-white tracking-wider w-full'>
+                Read GitBook <ExternalLink className='ml-2 h-4 w-4' />
               </Button>
             </a>
+
+            <Button variant='outline' className='tracking-wider' asChild>
+              <Link href='/check-credit-score'>
+                Check On-Chain Credit Score
+              </Link>
+            </Button>
+
           </div>
         </div>
 
@@ -120,10 +128,10 @@ export default function Page() {
         </div>
       </div>
 
-      <div className='mb-12 md:mb-20 text-center relative'>
+      <div className='mb-4 md:mb-12 text-center relative'>
         <h1 className='mb-4 text-4xl font-bold leading-10 sm:text-5xl sm:leading-none md:text-6xl'>Backed By</h1>
         <div className='flex justify-center mt-2'>
-          <div className='inline-flex h-1 bg-indigo-500 rounded-full w-52'></div>
+          <div className='inline-flex h-1 bg-indigo-500 rounded-full w-36 md:w-52'></div>
         </div>
       </div>
 

@@ -98,6 +98,11 @@ export default function Navbar() {
                                                 My Portfolio
                                             </div>
                                         </Link>
+                                        <Link href='/check-credit-score' passHref>
+                                            <div className='pb-[0.4rem] pr-1 hover:text-primary text-[0.95rem]' >
+                                                Check Credit Score
+                                            </div>
+                                        </Link>
                                         <div className='relative'>
                                             <div className='flex flex-row justify-between items-center text-destructive cursor-pointer'>
                                                 Disconnect Wallet

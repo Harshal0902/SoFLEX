@@ -211,7 +211,7 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
                                                     </div>
                                                 </div>
                                                 <div className={`grid space-y-1 text-lg items-start pl-2 animate-fade-in-down-nav ${dropdownVisible.profile ? 'block' : 'hidden'}`}>
-                                                    <div className='flex flex-row pb-2'>
+                                                    <div className='flex flex-row'>
                                                         <div>
                                                             Balance: {balance.toLocaleString()}
                                                         </div>
@@ -221,6 +221,9 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
                                                     </div>
                                                     <Link onClick={() => closeOnCurrent('/portfolio')} href='/portfolio' passHref>
                                                         My Portfolio
+                                                    </Link>
+                                                    <Link onClick={() => closeOnCurrent('/check-credit-score')} href='/check-credit-score' passHref>
+                                                        Check Credit Score
                                                     </Link>
                                                 </div>
                                             </div>
