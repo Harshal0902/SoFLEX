@@ -78,7 +78,7 @@ export default function Page() {
   return (
     <MaxWidthWrapper>
 
-      <div className='flex flex-wrap-reverse items-center justify-center md:grid md:grid-cols-2 py-8 md:px-24 px-4 z-20'>
+      <div className='flex flex-wrap-reverse items-center justify-center md:grid md:grid-cols-2 md:pt-4 pb-12 md:px-24 px-4 z-20'>
 
         <div className='md:flex md:flex-col md:justify-center'>
           <h2 className='mb-4 font-semibold tracking-wider text-3xl md:text-4xl' aria-label={selectedMyService}>
@@ -89,7 +89,7 @@ export default function Page() {
           </p>
           <div className='flex flex-col items-center md:flex-row space-y-2 md:space-y-0 space-x-0 md:space-x-4 justify-start'>
             <a href='https://gitbook.soflex.fi/' target='_blank' rel='noreferrer noopener'>
-              <Button className='px-12 text-white tracking-wider w-full'>
+              <Button className='px-14 text-white tracking-wider'>
                 Read GitBook <ExternalLink className='ml-2 h-4 w-4' />
               </Button>
             </a>
@@ -103,7 +103,7 @@ export default function Page() {
           </div>
         </div>
 
-        <div className='flex justify-center w-full'>
+        <div className='md:flex justify-center w-full pb-8 md:pb-0 hidden'>
           <Image src='/assets/home/hero.svg' height={400} width={400} quality={100} alt='Hero Image' priority={true} />
         </div>
 

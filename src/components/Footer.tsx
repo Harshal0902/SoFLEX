@@ -55,7 +55,7 @@ const forLegal: FooterLinkType[] = [
 
 const companySocial: SocialLinkType[] = [
     {
-        link: 'https://twitter.com/SoFLEX',
+        link: 'https://twitter.com/soflexfi',
         imageName: 'twitter.svg',
     },
     {

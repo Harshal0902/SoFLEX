@@ -1,10 +1,10 @@
 "use client"
 
 import React, { useState } from 'react'
-import { useWallet, useConnection } from '@solana/wallet-adapter-react'
+import { useWallet } from '@solana/wallet-adapter-react'
+import { updateUserCreditScore } from '@/lib/supabaseRequests'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-
 
 export default function CheckCreditScorePage({ walletAddress }: { walletAddress?: string }) {
     const [loading, setLoading] = useState(false);
@@ -13,7 +13,6 @@ export default function CheckCreditScorePage({ walletAddress }: { walletAddress?
     const [creditScore, setCreditScore] = useState(null);
 
     const wallet = useWallet();
-    const { connection } = useConnection();
 
     const shyftAPIKey = process.env.NEXT_PUBLIC_SHYFTAPI;
 
@@ -66,14 +65,18 @@ export default function CheckCreditScorePage({ walletAddress }: { walletAddress?
     };
 
     // @ts-ignore
-    const calculateCreditScore = (transactionHistoryScore) => {
+    const calculateCreditScore = async (transactionHistoryScore) => {
         const creditScoreValue = 0.55 * 80 + 0.33 * (transactionHistoryScore + 20) + 30;
         // @ts-ignore
         setCreditScore(creditScoreValue.toFixed(2));
+        await updateUserCreditScore({
+            walletAddress: walletAddress,
+            creditScore: creditScoreValue.toFixed(2),
+        });
     };
 
     return (
-        <Card className='relative my-4'>
+        <Card className='relative md:my-4'>
             <CardHeader>
                 <div className='text-2xl md:text-4xl'>My On-Chain Credit Score</div>
             </CardHeader>

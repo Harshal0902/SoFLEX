@@ -142,7 +142,7 @@ export default function Portfolio({ walletAddress }: { walletAddress?: string })
             {loading ? (
                 <Loading />
             ) : (
-                <Card className='relative my-4'>
+                <Card className='relative md:my-4'>
                     <TooltipProvider>
                         <CardHeader>
                             <div className='text-2xl md:text-4xl'>My Portfolio</div>

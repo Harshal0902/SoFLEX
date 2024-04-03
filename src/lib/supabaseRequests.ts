@@ -114,3 +114,22 @@ export const updateUserData = async ({ walletAddress, name, email }: UserType) =
         return new Response('Error updating user data', { status: 500 });
     }
 };
+
+export const updateUserCreditScore = async ({ walletAddress, creditScore }: { walletAddress?: string, creditScore: string }) => {
+    try {
+        const { data, error } = await supabase
+            .from('users')
+            .update({
+                on_chain_credit_score: creditScore,
+            })
+            .eq('user_address', walletAddress);
+
+        if (error) {
+            return new Response('Error updating user data', { status: 500 });
+        }
+
+        return data;
+    } catch (error) {
+        return new Response('Error updating user data', { status: 500 });
+    }
+};

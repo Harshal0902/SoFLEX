@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from 'react'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import P2PBorrowing from './P2PBorrowing'
-import DeFiBorrowing from './DeFiBorrowing'
+import P2PBorrowing from './P2PBorrow/P2PBorrowing'
+import DeFiBorrowing from './DeFiBorrow/DeFiBorrowing'
 
 type Tab = 'p2p' | 'defi';
 
