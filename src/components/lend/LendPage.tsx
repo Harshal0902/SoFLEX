@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from 'react'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import P2PLend from './P2PLend'
-import DeFiLend from './DeFiLend'
+import P2PLending from './P2PLend/P2PLending'
+import DeFiLending from './DeFiLend/DeFiLending'
 
 type Tab = 'p2p' | 'defi';
 
@@ -52,8 +52,8 @@ export default function BorrowPage() {
                 </div>
             </div>
 
-            {activeTab === 'p2p' && <P2PLend />}
-            {activeTab === 'defi' && <DeFiLend />}
+            {activeTab === 'p2p' && <P2PLending />}
+            {activeTab === 'defi' && <DeFiLending />}
 
         </MaxWidthWrapper>
     )

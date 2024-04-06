@@ -133,3 +133,51 @@ export const updateUserCreditScore = async ({ walletAddress, creditScore }: { wa
         return new Response('Error updating user data', { status: 500 });
     }
 };
+
+export const newAssetLendingRequest = async ({ walletAddress, requestedAssetname }: { walletAddress?: string, requestedAssetname: string }) => {
+    try {
+        const { data, error } = await supabase
+            .from('new_asset_lending_request')
+            .insert({
+                user_address: walletAddress,
+                asset_name: requestedAssetname,
+            })
+            .select();
+
+        if (error) {
+            return new Response('Error inserting user request', { status: 500 });
+        }
+
+        return data;
+    } catch (error) {
+        return new Response('Error inserting user request', { status: 500 });
+    }
+};
+
+export const newDeFiLending = async ({ walletAddress, lendingAmount, lendingToken }: { walletAddress?: string, lendingAmount: string, lendingToken: string }) => {
+    try {
+        const uuid = crypto.randomBytes(16).toString('hex');
+        const generateNewLendingId = uuid.substring(0, 8) + uuid.substring(9, 13) + uuid.substring(14, 18) + uuid.substring(19, 23) + uuid.substring(24);
+        const newLendingId = 'lend_' + generateNewLendingId;
+        const created_at = new Date();
+
+        const { data, error } = await supabase
+            .from('defi_lending')
+            .insert({
+                lending_id: newLendingId,
+                user_address: walletAddress,
+                lending_amount: lendingAmount,
+                lending_token: lendingToken,
+                lending_submitted_at: created_at
+            })
+            .select();
+
+        if (error) {
+            return new Response('Error inserting user request', { status: 500 });
+        }
+
+        return data;
+    } catch (error) {
+        return new Response('Error inserting user request', { status: 500 });
+    }
+};

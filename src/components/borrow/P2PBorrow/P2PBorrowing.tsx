@@ -4,11 +4,10 @@ import React from 'react'
 import { Input } from '@/components/ui/input'
 import { Search, X } from 'lucide-react'
 import Image from 'next/image'
-import { Button } from '@/components/ui/button'
 
-export default function P2PList() {
+export default function P2PBorrowing() {  
     return (
-        <div className='py-4'>
+        <div className='py-2'>
             <div className='flex w-full items-center'>
                 <div className='w-10 z-20 pl-1 text-center pointer-events-none flex items-center justify-center'><Search height={20} width={20} /></div>
                 <Input className='w-full md:max-w-md -mx-10 pl-10 pr-8 py-2 z-10' placeholder='Search for NFTs' />
