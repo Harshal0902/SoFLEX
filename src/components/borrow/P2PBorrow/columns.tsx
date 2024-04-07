@@ -3,6 +3,7 @@
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/components/ui/data-table-column-header-info'
 import BorrowingAssetDataType from './P2PBorrowing'
+import { useWallet } from '@solana/wallet-adapter-react'
 import { Button } from '@/components/ui/button'
 
 export type BorrowingAssetDataType = {
@@ -14,6 +15,22 @@ export type BorrowingAssetDataType = {
     nftAPY?: string;
     nftDuration: string;
 }
+
+interface CellProps {
+    row: {
+        original: BorrowingAssetDataType;
+    };
+}
+
+const Cell: React.FC<CellProps> = ({ row }) => {
+    const { connected } = useWallet();
+
+    return (
+        <Button className='text-white' disabled={!connected}>
+            {connected ? 'Borrow' : 'Connect Wallet'}
+        </Button>
+    );
+};
 
 export const borrowingAssetColumns: ColumnDef<BorrowingAssetDataType>[] = [
     {
@@ -49,12 +66,6 @@ export const borrowingAssetColumns: ColumnDef<BorrowingAssetDataType>[] = [
     {
         id: 'actions',
         header: 'Actions',
-        cell: ({ row }) => {
-            const order = row.original
-
-            return (
-                <Button className='text-white'>Borrow</Button>
-            )
-        }
+        cell: Cell
     }
 ]
