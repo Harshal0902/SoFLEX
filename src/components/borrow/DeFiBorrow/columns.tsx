@@ -2,10 +2,10 @@
 
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/components/ui/data-table-column-header-info'
-import LendingAssetDataType from './DeFiLending'
-import LendButtonCell from './LendButtonCell'
+import BorrowingAssetDataType from './DeFiBorrowing'
+import BorrowButtonCell from './BorrowButtonCell'
 
-export type LendingAssetDataType = {
+export type BorrowingAssetDataType = {
     assetName: string;
     assetSymbol: string;
     assetLogo: string;
@@ -16,7 +16,7 @@ export type LendingAssetDataType = {
     LTV: string;
 }
 
-export const lendingAssetColumns: ColumnDef<LendingAssetDataType>[] = [
+export const borrowingAssetColumns: ColumnDef<BorrowingAssetDataType>[] = [
     {
         accessorKey: 'assetName',
         header: ({ column }) => (
@@ -50,6 +50,6 @@ export const lendingAssetColumns: ColumnDef<LendingAssetDataType>[] = [
     {
         id: 'actions',
         header: 'Actions',
-        cell: LendButtonCell,
+        cell: BorrowButtonCell,
     }
 ]

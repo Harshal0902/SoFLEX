@@ -21,7 +21,7 @@ create table
 create table
   public.new_asset_lending_request (
     user_address text null,
-    asset_name text null,
+    asset_name text not null,
     constraint public_new_asset_lending_request_user_address_fkey foreign key (user_address) references users (user_address)
   ) tablespace pg_default;
   
@@ -35,4 +35,19 @@ create table
     constraint defi_lending_pkey primary key (lending_id),
     constraint defi_lending_lending_id_key unique (lending_id),
     constraint public_defi_lending_user_address_fkey foreign key (user_address) references users (user_address)
+  ) tablespace pg_default;
+
+create table
+  public.defi_borrowing (
+    borrow_id text not null,
+    user_address text not null,
+    borrowing_amount text null,
+    borrowing_submitted_at timestamp with time zone null,
+    borrowing_token text null,
+    borrowing_collateralization_assets text[] null,
+    borrowing_duration integer null,
+    borrowing_interest_rate text null,
+    constraint defi_borrowing_pkey primary key (borrow_id),
+    constraint defi_borrowing_borrow_id_key unique (borrow_id),
+    constraint public_defi_borrowing_user_address_fkey foreign key (user_address) references users (user_address)
   ) tablespace pg_default;

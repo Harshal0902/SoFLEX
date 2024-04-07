@@ -16,6 +16,21 @@ interface UserType {
     email?: string | null;
 }
 
+interface NewDeFiLendingType {
+    walletAddress?: string;
+    lendingAmount: string;
+    lendingToken: string;
+}
+
+interface NewDeFiBorrowingType {
+    walletAddress?: string;
+    borrowingAmount: string;
+    borrowingToken: string;
+    collateralizationAssets: string[];
+    borrowingDuration: string;
+    borrowingInterestRate?: string
+}
+
 export const addUserWaitlist = async ({ email }: WaitlistUserType) => {
     try {
         const { data, error } = await supabase
@@ -125,12 +140,12 @@ export const updateUserCreditScore = async ({ walletAddress, creditScore }: { wa
             .eq('user_address', walletAddress);
 
         if (error) {
-            return new Response('Error updating user data', { status: 500 });
+            return new Response('Error updating user credit score', { status: 500 });
         }
 
         return data;
     } catch (error) {
-        return new Response('Error updating user data', { status: 500 });
+        return new Response('Error updating user credit score', { status: 500 });
     }
 };
 
@@ -145,16 +160,16 @@ export const newAssetLendingRequest = async ({ walletAddress, requestedAssetname
             .select();
 
         if (error) {
-            return new Response('Error inserting user request', { status: 500 });
+            return new Response('Error inserting user request for new asset', { status: 500 });
         }
 
         return data;
     } catch (error) {
-        return new Response('Error inserting user request', { status: 500 });
+        return new Response('Error inserting user request for new asset', { status: 500 });
     }
 };
 
-export const newDeFiLending = async ({ walletAddress, lendingAmount, lendingToken }: { walletAddress?: string, lendingAmount: string, lendingToken: string }) => {
+export const newDeFiLending = async ({ walletAddress, lendingAmount, lendingToken }: NewDeFiLendingType) => {
     try {
         const uuid = crypto.randomBytes(16).toString('hex');
         const generateNewLendingId = uuid.substring(0, 8) + uuid.substring(9, 13) + uuid.substring(14, 18) + uuid.substring(19, 23) + uuid.substring(24);
@@ -173,11 +188,42 @@ export const newDeFiLending = async ({ walletAddress, lendingAmount, lendingToke
             .select();
 
         if (error) {
-            return new Response('Error inserting user request', { status: 500 });
+            return new Response('Error inserting user lenging request', { status: 500 });
         }
 
         return data;
     } catch (error) {
-        return new Response('Error inserting user request', { status: 500 });
+        return new Response('Error inserting user lenging request', { status: 500 });
+    }
+};
+
+export const newDeFiBorrowing = async ({ walletAddress, borrowingAmount, borrowingToken, collateralizationAssets, borrowingDuration, borrowingInterestRate }: NewDeFiBorrowingType) => {
+    try {
+        const uuid = crypto.randomBytes(16).toString('hex');
+        const generateNewBorrowingId = uuid.substring(0, 8) + uuid.substring(9, 13) + uuid.substring(14, 18) + uuid.substring(19, 23) + uuid.substring(24);
+        const newBorrowingId = 'borrow_' + generateNewBorrowingId;
+        const created_at = new Date();
+
+        const { data, error } = await supabase
+            .from('defi_borrowing')
+            .insert({
+                borrow_id: newBorrowingId,
+                user_address: walletAddress,
+                borrowing_amount: borrowingAmount,
+                borrowing_token: borrowingToken,
+                borrowing_collateralization_assets: collateralizationAssets,
+                borrowing_duration: borrowingDuration,
+                borrowing_interest_rate: borrowingInterestRate,
+                borrowing_submitted_at: created_at
+            })
+            .select();
+
+        if (error) {
+            return new Response('Error inserting user borrowing request', { status: 500 });
+        }
+
+        return data;
+    } catch (error) {
+        return new Response('Error inserting user borrowing request', { status: 500 });
     }
 };

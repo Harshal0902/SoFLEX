@@ -8,7 +8,7 @@ import DeFiLending from './DeFiLend/DeFiLending'
 
 type Tab = 'p2p' | 'defi';
 
-export default function BorrowPage() {
+export default function LendPage() {
     const [activeTab, setActiveTab] = useState<Tab>('p2p');
 
     const router = useRouter();
@@ -47,8 +47,8 @@ export default function BorrowPage() {
 
             <div className='grid place-items-center'>
                 <div className='flex flex-row items-center justify-center bg-accent rounded-full py-2 px-8 md:px-12 space-x-4 md:space-x-12'>
-                    <div onClick={() => handleTabClick('p2p')} className={`px-4 py-1 rounded-full cursor-pointer text-center ${activeTab === 'p2p' ? 'bg-primary text-white' : 'bg-gray-200 text-black'}`}>P2P Borrowing</div>
-                    <div onClick={() => handleTabClick('defi')} className={`px-4 py-1 rounded-full cursor-pointer text-center ${activeTab === 'defi' ? 'bg-primary text-white' : 'bg-gray-200 text-black'}`}>DeFi Borrowing</div>
+                    <div onClick={() => handleTabClick('p2p')} className={`px-4 py-1 rounded-full cursor-pointer text-center ${activeTab === 'p2p' ? 'bg-primary text-white' : 'bg-gray-200 text-black'}`}>P2P Lending</div>
+                    <div onClick={() => handleTabClick('defi')} className={`px-4 py-1 rounded-full cursor-pointer text-center ${activeTab === 'defi' ? 'bg-primary text-white' : 'bg-gray-200 text-black'}`}>DeFi Lending</div>
                 </div>
             </div>
 

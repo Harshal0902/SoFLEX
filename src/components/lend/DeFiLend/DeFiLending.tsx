@@ -11,7 +11,7 @@ import * as z from 'zod'
 import { toast } from 'sonner'
 import { Form, FormLabel, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { DataTable } from '@/components/ui/data-table-lend'
+import { DataTable } from '@/components/ui/data-table-defi'
 
 const lendingAssetData: LendingAssetDataType[] = [
   {
@@ -175,7 +175,7 @@ export default function DeFiLending() {
   }
 
   return (
-    <div className='py-2'>
+    <div className='py-2 md:py-4'>
       <Card>
         <CardHeader>
           <div className='flex flex-col md:flex-row justify-between items-start md:items-center space-y-2 md:space-y-0'>
@@ -185,7 +185,7 @@ export default function DeFiLending() {
                 <DialogTrigger asChild>
                   <Button variant='outline' className='px-4'>Request new asset for lending</Button>
                 </DialogTrigger>
-                <DialogContent className='sm:max-w-[425px] max-w-[90vw]'>
+                <DialogContent className='max-w-[90vw] md:max-w-[425px]'>
                   <DialogHeader>
                     <DialogTitle>Request for new assets</DialogTitle>
                     <DialogDescription>
