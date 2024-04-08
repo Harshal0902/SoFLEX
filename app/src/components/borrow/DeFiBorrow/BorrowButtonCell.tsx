@@ -6,6 +6,7 @@ import { updateUserCreditScore, newDeFiBorrowing } from '@/lib/supabaseRequests'
 import { toast } from 'sonner'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { Loader2, Info, ExternalLink } from 'lucide-react'
+import InfoButton from '@/components/InfoButton'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog'
@@ -23,12 +24,6 @@ export type BorrowingAssetDataType = {
     assetYield: string;
     totalBorrow: string;
     LTV: string;
-}
-
-interface CellProps {
-    row: {
-        original: BorrowingAssetDataType;
-    };
 }
 
 const borrowDuration = [
@@ -72,8 +67,6 @@ export default function BorrowButtonCell({ row }: { row: { original: BorrowingAs
     const [itemsData, setItemsData] = useState<any>([]);
     const [assetPrice, setAssetPrice] = useState<number[]>([]);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
-    const [result, setResult] = useState(null);
     const [creditScore, setCreditScore] = useState(null);
     const [interestRate, setInterestRate] = useState(undefined);
 
@@ -138,7 +131,6 @@ export default function BorrowButtonCell({ row }: { row: { original: BorrowingAs
 
     const knowTransactionHistory = async () => {
         setLoading(true);
-        setError(null);
         try {
             const myHeaders = new Headers();
             // @ts-ignore
@@ -156,7 +148,6 @@ export default function BorrowButtonCell({ row }: { row: { original: BorrowingAs
             );
 
             const data = await response.json();
-            setResult(data);
 
             let sentTransactions = 0;
             let receivedTransactions = 0;
@@ -240,7 +231,10 @@ export default function BorrowButtonCell({ row }: { row: { original: BorrowingAs
             </DialogTrigger>
             <DialogContent className='max-w-[90vw] md:max-w-[60vw]'>
                 <DialogHeader>
-                    <DialogTitle>Borrow Token</DialogTitle>
+                    <DialogTitle className='flex flex-row space-x-1 items-center'>
+                        <h1>Borrow Token</h1>
+                        <InfoButton />
+                    </DialogTitle>
                     <DialogDescription>
                         Borrow token from the lending pool.
                     </DialogDescription>

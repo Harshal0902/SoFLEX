@@ -18,7 +18,7 @@ export type LendingAssetDataType = {
 
 export const lendingAssetColumns: ColumnDef<LendingAssetDataType>[] = [
     {
-        accessorKey: 'assetName',
+        accessorKey: 'assetPrice',
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title='Asset Name' info='The name of the asset available for lending.' />
         ),

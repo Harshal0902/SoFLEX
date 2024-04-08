@@ -18,7 +18,7 @@ export type BorrowingAssetDataType = {
 
 export const borrowingAssetColumns: ColumnDef<BorrowingAssetDataType>[] = [
     {
-        accessorKey: 'assetName',
+        accessorKey: 'assetPrice',
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title='Asset Name' info='The name of the asset available for lending.' />
         ),

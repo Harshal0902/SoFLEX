@@ -110,7 +110,7 @@ export function DataTable<TData, TValue>({
                                 >
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell key={cell.id}>
-                                            {cell.column.id === 'assetName' ? (
+                                            {cell.column.id === 'assetPrice' ? (
                                                 <div className='flex flex-row items-center'>
                                                     <Image src={row.original.assetLogo} alt={row.original.assetName} width={35} height={35} className='mr-2' />
                                                     <div className='flex flex-col'>

@@ -4,6 +4,7 @@ import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/components/ui/data-table-column-header-info'
 import LendingAssetDataType from './P2PLending'
 import { useWallet } from '@solana/wallet-adapter-react'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Button } from '@/components/ui/button'
 
 export type LendingAssetDataType = {
@@ -26,9 +27,18 @@ const Cell: React.FC<CellProps> = ({ row }) => {
     const { connected } = useWallet();
 
     return (
-        <Button className='text-white' disabled={!connected}>
-            {connected ? 'Lend' : 'Connect Wallet'}
-        </Button>
+        <TooltipProvider>
+            <Tooltip delayDuration={100}>
+                <TooltipTrigger asChild>
+                    <Button className='text-white' disabled={!connected}>
+                        {connected ? 'Lend' : 'Connect Wallet'}
+                    </Button>
+                </TooltipTrigger>
+                <TooltipContent className='max-w-[18rem] text-center'>
+                    This functionality is disabled in the live beta demo version.
+                </TooltipContent>
+            </Tooltip>
+        </TooltipProvider>
     );
 };
 
