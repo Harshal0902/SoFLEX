@@ -2,6 +2,8 @@
 
 Solana Compressed NFT and Synthetic Asset Lending and Borrowing Platform
 
+> This branch is build to deploy the stable version of the project. For the latest development version, please switch to the `main` branch.
+
 ## Introduction
 
 SoFLEX introduces a comprehensive solution for lending and borrowing compressed NFTs and synthetic assets within the Solana ecosystem. Designed to address the increasing demand for liquidity and financial flexibility in the compressed NFT and synthetic asset space, our platform empowers users to leverage their assets efficiently. Whether you're seeking to access funds or earn passive income through lending, our platform provides a seamless and secure environment to meet your financial needs.
