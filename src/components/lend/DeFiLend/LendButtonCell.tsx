@@ -1,10 +1,12 @@
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
+import * as web3 from '@solana/web3.js'
+import { LAMPORTS_PER_SOL } from '@solana/web3.js'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { newDeFiLending } from '@/lib/supabaseRequests'
 import { toast } from 'sonner'
-import { useWallet } from '@solana/wallet-adapter-react'
+import { useWallet, useConnection } from '@solana/wallet-adapter-react'
 import { Loader2, Info } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Button } from '@/components/ui/button'
@@ -55,8 +57,11 @@ const FormSchema = z.object({
 export default function LendButtonCell({ row }: { row: { original: LendingAssetDataType } }) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [open, setOpen] = useState(false);
+    const [txSig, setTxSig] = useState('');
+    const { publicKey, sendTransaction } = useWallet();
 
     const order = row.original;
+    const { connection } = useConnection();
     const { connected } = useWallet();
     const wallet = useWallet();
 
@@ -66,6 +71,24 @@ export default function LendButtonCell({ row }: { row: { original: LendingAssetD
             lending_amount: ''
         },
     });
+
+    const sendSol = (event: { preventDefault: () => void; target: { recipient: { value: web3.PublicKeyInitData }; amount: { value: number } } }) => {
+        event.preventDefault()
+        if (!connection || !publicKey) { return }
+        const transaction = new web3.Transaction()
+        const recipientPubKey = new web3.PublicKey(event.target.recipient.value)
+
+        const sendSolInstruction = web3.SystemProgram.transfer({
+            fromPubkey: publicKey,
+            toPubkey: recipientPubKey,
+            lamports: LAMPORTS_PER_SOL * event.target.amount.value
+        })
+
+        transaction.add(sendSolInstruction)
+        sendTransaction(transaction, connection).then(sig => {
+            setTxSig(sig)
+        })
+    }
 
     async function onSubmit(values: z.infer<typeof FormSchema>) {
         try {
@@ -78,7 +101,7 @@ export default function LendButtonCell({ row }: { row: { original: LendingAssetD
             setIsSubmitting(true);
             if (data) {
                 setIsSubmitting(false);
-                setOpen(false);
+                // setOpen(false);
                 toast.success('Lending successful! Interest starts accruing.');
             } else {
                 toast.error('Error completing the process. Please try again!');
