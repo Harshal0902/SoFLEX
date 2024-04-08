@@ -2,6 +2,8 @@
 
 Solana Compressed NFT and Synthetic Asset Lending and Borrowing Platform
 
+> This branch is build to deploy the stable version of the project. For the latest development version, please switch to the `main` branch.
+
 ## 🔗 Quick Links
 
 - App: [soflex.fi](https://soflex.fi)
