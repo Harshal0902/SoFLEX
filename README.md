@@ -3,6 +3,7 @@
 Solana Compressed NFT and Synthetic Asset Lending and Borrowing Platform
 
 ## 🔗 Quick Links
+
 - App: [soflex.fi](https://soflex.fi)
 - GitBook: [gitbook.soflex.fi](https://gitbook.soflex.fi)
 - Pitch Deck: [pitch.com/v/soflex-b3qdhi](https://pitch.com/v/soflex-b3qdhi)
@@ -39,7 +40,7 @@ At SoFLEX, we envision a future where anyone can unlock the full potential of th
 - Borrowers can collateralize their assets to secure SOL token loans.
 - Lenders have flexibility in setting interest rates or bidding on lending amounts based on asset characteristics.
 
-2. Peer-to-Protocol Compressed NFT and Synthetic Asset Lending and Borrowing:
+2. Peer-to-Pool Compressed NFT and Synthetic Asset Lending and Borrowing:
 - Enables lending and borrowing against protocol-managed liquidity pools, enhancing liquidity and earning opportunities.
 - Users can engage in protocol-based lending and borrowing activities, augmenting liquidity in the Solana ecosystem.
 
