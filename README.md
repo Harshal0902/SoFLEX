@@ -32,6 +32,7 @@ At SoFLEX, we envision a future where anyone can unlock the full potential of th
 - Next.js
 - Solana
 - Anchor
+- Rust
 - TypeScript
 
 ## 💻 Features

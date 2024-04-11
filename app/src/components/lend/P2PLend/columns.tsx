@@ -2,12 +2,12 @@
 
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/components/ui/data-table-column-header-info'
-import LendingAssetDataType from './P2PLending'
+import LendingNFTCollectionDataType from './P2PLending'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Button } from '@/components/ui/button'
 
-export type LendingAssetDataType = {
+export type LendingNFTCollectionDataType = {
     nftName: string;
     nftLogo: string;
     nftPool: string;
@@ -19,7 +19,7 @@ export type LendingAssetDataType = {
 
 interface CellProps {
     row: {
-        original: LendingAssetDataType;
+        original: LendingNFTCollectionDataType;
     };
 }
 
@@ -42,7 +42,7 @@ const Cell: React.FC<CellProps> = ({ row }) => {
     );
 };
 
-export const lendingAssetColumns: ColumnDef<LendingAssetDataType>[] = [
+export const lendingNFTCollectionColumns: ColumnDef<LendingNFTCollectionDataType>[] = [
     {
         accessorKey: 'nftName',
         header: ({ column }) => (

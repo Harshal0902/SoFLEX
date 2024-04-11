@@ -4,6 +4,7 @@ import * as React from 'react'
 import { ColumnDef, ColumnFiltersState, SortingState, VisibilityState, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table-lend'
 import { Input } from '@/components/ui/input'
+import { DataTablePagination } from '@/components/ui/data-table-pagination-p2p'
 import { Search, X } from 'lucide-react'
 import Image from 'next/image'
 
@@ -18,10 +19,11 @@ interface LendingData {
 }
 
 interface DataTableProps<TData, TValue> {
-    columns: ColumnDef<LendingData, any>[];
+    columns: ColumnDef<LendingData>[];
     data: LendingData[];
     userSearchColumn: string;
     inputPlaceHolder: string;
+    noResultsMessage: string;
 }
 
 export function DataTable<TData, TValue>({
@@ -29,6 +31,7 @@ export function DataTable<TData, TValue>({
     data,
     userSearchColumn,
     inputPlaceHolder,
+    noResultsMessage
 }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -126,12 +129,15 @@ export function DataTable<TData, TValue>({
                         ) : (
                             <TableRow>
                                 <TableCell colSpan={columns.length} className='h-24 text-center'>
-                                    No results.
+                                    {noResultsMessage}
                                 </TableCell>
                             </TableRow>
                         )}
                     </TableBody>
                 </Table>
+                <div>
+                    <DataTablePagination table={table} />
+                </div>
             </div>
         </div>
     )

@@ -23,7 +23,7 @@ export type BorrowingAssetDataType = {
     totalSupply: string;
     assetYield: string;
     totalBorrow: string;
-    LTV: string;
+    ltv: string;
 }
 
 const borrowDuration = [
@@ -109,7 +109,7 @@ export default function BorrowButtonCell({ row }: { row: { original: BorrowingAs
                     const assetPrice = result.items?.map((item: any) => item.royalty?.percent) || [];
                     setAssetPrice(assetPrice);
                 } catch (error) {
-                    console.error('Error fetching data:', error);
+                    toast.error(`Error fetching data: ${error}`);
                 }
             }
         }
@@ -168,8 +168,7 @@ export default function BorrowButtonCell({ row }: { row: { original: BorrowingAs
             const transactionHistoryScore = ((sentPercentage - receivedPercentage) / 100).toFixed(2);
             calculateCreditScore(transactionHistoryScore);
         } catch (error) {
-            // @ts-ignore
-            setError('An error occurred while fetching data.');
+            toast.error('An error occurred while fetching data.');
         } finally {
             setLoading(false);
         }

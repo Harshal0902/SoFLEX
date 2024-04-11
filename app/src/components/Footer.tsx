@@ -59,12 +59,11 @@ const companySocial: SocialLinkType[] = [
         imageName: 'twitter.svg',
     },
     {
-        link: 'https://discord.gg/mjDAEa32XC',
+        link: 'https://discord.gg/MJgXStk2XS',
         imageName: 'discord.svg',
     },
     {
-        // link: 'https://www.youtube.com/@SoFLEX', // Channel Link
-        link: 'https://youtu.be/se0QgRyTaEg',
+        link: 'https://youtu.be/XMD9lENO4fQ',
         imageName: 'youtube.svg',
     },
     // {

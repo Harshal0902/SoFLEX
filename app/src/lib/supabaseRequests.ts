@@ -106,7 +106,7 @@ export const userPortfolioDetails = async ({ walletAddress }: { walletAddress?: 
 
         return data;
     } catch (error) {
-        return new Response('Error fetching user profile', { status: 500 });
+        return new Response('Error fetching new user profile', { status: 500 });
     }
 };
 
@@ -201,7 +201,7 @@ export const newDeFiBorrowing = async ({ walletAddress, borrowingAmount, borrowi
     try {
         const uuid = crypto.randomBytes(16).toString('hex');
         const generateNewBorrowingId = uuid.substring(0, 8) + uuid.substring(9, 13) + uuid.substring(14, 18) + uuid.substring(19, 23) + uuid.substring(24);
-        const newBorrowingId = 'borrow_' + generateNewBorrowingId;
+        const newBorrowingId = 'loan_' + generateNewBorrowingId;
         const created_at = new Date();
 
         const { data, error } = await supabase
@@ -225,5 +225,79 @@ export const newDeFiBorrowing = async ({ walletAddress, borrowingAmount, borrowi
         return data;
     } catch (error) {
         return new Response('Error inserting user borrowing request', { status: 500 });
+    }
+};
+
+export const teAssetDetails = async () => {
+    try {
+        const { data, error } = await supabase
+            .from('te_asset_details')
+            .select('*');
+
+        if (error) {
+            return new Response('Error fetching asset details', {
+                status: 500,
+            });
+        }
+
+        return data;
+    } catch (error) {
+        return new Response('Error fetching asset details', { status: 500 });
+    }
+};
+
+export const teNFTCollectionDetails = async () => {
+    try {
+        const { data, error } = await supabase
+            .from('te_nft_collection_details')
+            .select('*');
+
+        if (error) {
+            return new Response('Error fetching NFTCollection details', {
+                status: 500,
+            });
+        }
+
+        return data;
+    } catch (error) {
+        return new Response('Error fetching NFTCollection details', { status: 500 });
+    }
+};
+
+export const teUserStatsDetails = async ({ walletAddress }: { walletAddress?: string }) => {
+    try {
+        const { data, error } = await supabase
+            .from('te_user_stats')
+            .select('*')
+            .eq('user_address', walletAddress);
+
+        if (error) {
+            return new Response('Error fetching user stats', {
+                status: 500,
+            });
+        }
+
+        return data;
+    } catch (error) {
+        return new Response('Error fetching user stats', { status: 500 });
+    }
+};
+
+export const teUserLoanDetails = async ({ walletAddress }: { walletAddress?: string }) => {
+    try {
+        const { data, error } = await supabase
+            .from('te_user_loan_details')
+            .select('*')
+            .eq('user_address', walletAddress);
+
+        if (error) {
+            return new Response('Error fetching user loan details', {
+                status: 500,
+            });
+        }
+
+        return data;
+    } catch (error) {
+        return new Response('Error fetching user loan details', { status: 500 });
     }
 };

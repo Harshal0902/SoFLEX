@@ -23,7 +23,7 @@ export type LendingAssetDataType = {
     totalSupply: string;
     assetYield: string;
     totalBorrow: string;
-    LTV: string;
+    ltv: string;
 }
 
 const FormSchema = z.object({
@@ -96,7 +96,7 @@ export default function LendButtonCell({ row }: { row: { original: LendingAssetD
             setIsSubmitting(true);
             if (data) {
                 setIsSubmitting(false);
-                // setOpen(false);
+                setOpen(false);
                 toast.success('Lending successful! Interest starts accruing.');
             } else {
                 toast.error('Error completing the process. Please try again!');

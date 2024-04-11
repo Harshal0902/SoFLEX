@@ -2,25 +2,15 @@
 
 import * as React from 'react'
 import { ColumnDef, ColumnFiltersState, SortingState, VisibilityState, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table-lend'
+import { DataTableViewOptions } from '@/components/ui/data-table-view-options'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Input } from '@/components/ui/input'
+import { DataTablePagination } from '@/components/ui/data-table-pagination-portfolio'
 import { Search, X } from 'lucide-react'
-import Image from 'next/image'
-
-interface LendingData {
-    assetName: string;
-    assetSymbol: string;
-    assetLogo: string;
-    assetPrice: string;
-    totalSupply: string;
-    assetYield: string;
-    totalBorrow: string;
-    ltv: string;
-}
 
 interface DataTableProps<TData, TValue> {
-    columns: ColumnDef<LendingData>[];
-    data: LendingData[];
+    columns: ColumnDef<TData, TValue>[];
+    data: TData[];
     userSearchColumn: string;
     inputPlaceHolder: string;
     noResultsMessage: string;
@@ -82,10 +72,11 @@ export function DataTable<TData, TValue>({
                         <X />
                     </div>
                 </div>
+                <DataTableViewOptions table={table} />
             </div>
             <div className='rounded-md border'>
                 <Table>
-                    <TableHeader className='border-b'>
+                    <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => {
@@ -112,17 +103,7 @@ export function DataTable<TData, TValue>({
                                 >
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell key={cell.id}>
-                                            {cell.column.id === 'assetName' ? (
-                                                <div className='flex flex-row items-center'>
-                                                    <Image src={row.original.assetLogo} alt={row.original.assetName} width={35} height={35} className='mr-2' />
-                                                    <div className='flex flex-col'>
-                                                        <span>{row.original.assetSymbol}</span>
-                                                        <span>{row.original.assetPrice}</span>
-                                                    </div>
-                                                </div>
-                                            ) : (
-                                                flexRender(cell.column.columnDef.cell, cell.getContext())
-                                            )}
+                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </TableCell>
                                     ))}
                                 </TableRow>
@@ -136,6 +117,9 @@ export function DataTable<TData, TValue>({
                         )}
                     </TableBody>
                 </Table>
+            </div>
+            <div>
+                <DataTablePagination table={table} />
             </div>
         </div>
     )
