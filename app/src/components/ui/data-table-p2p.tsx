@@ -114,7 +114,7 @@ export function DataTable<TData, TValue>({
                                         <TableCell key={cell.id}>
                                             {cell.column.id === 'nftName' ? (
                                                 <div className='flex flex-row items-center'>
-                                                    <Image src={row.original.nftLogo} alt={row.original.nftName} width={45} height={45} className='mr-2 rounded' />
+                                                    <Image src={row.original.nftLogo} alt={row.original.nftName} width={45} height={45} priority className='mr-2 rounded' />
                                                     <div className='flex flex-col'>
                                                         <span>{row.original.nftName}</span>
                                                     </div>

@@ -114,7 +114,7 @@ export function DataTable<TData, TValue>({
                                         <TableCell key={cell.id}>
                                             {cell.column.id === 'assetName' ? (
                                                 <div className='flex flex-row items-center'>
-                                                    <Image src={row.original.assetLogo} alt={row.original.assetName} width={35} height={35} className='mr-2' />
+                                                    <Image src={row.original.assetLogo} alt={row.original.assetName} width={35} height={35} priority className='mr-2' />
                                                     <div className='flex flex-col'>
                                                         <span>{row.original.assetSymbol}</span>
                                                         <span>{row.original.assetPrice}</span>

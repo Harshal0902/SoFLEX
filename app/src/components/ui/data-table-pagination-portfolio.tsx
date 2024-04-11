@@ -18,7 +18,7 @@ export function DataTablePagination<TData>({ table }: DataTablePaginationProps<T
             {rowCount > 0 && (
                 <div className='flex flex-col md:flex-row items-center justify-between px-2 md:px-4 py-2 w-full'>
                     <div className='flex-1 text-sm text-muted-foreground'>
-                        Showing {startIndex} to {endIndex} of {rowCount} loans
+                        Showing <strong>{startIndex}-{endIndex}</strong> of <strong>{rowCount}</strong> loans
                     </div>
                     <div className='flex flex-col md:flex-row items-center space-y-2 md:space-y-0 space-x-0 md:space-x-6 lg:space-x-8'>
                         <div className='flex items-center space-x-2 py-2'>
