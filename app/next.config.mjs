@@ -3,10 +3,6 @@ const nextConfig = {
     async rewrites() {
         return [
             {
-                source: '/data-api/:slug*',
-                destination: `https://${process.env.NEXT_PUBLIC_S3_BUCKET_NAME}.s3.${process.env.NEXT_PUBLIC_S3_BUCKET_ZONE}.amazonaws.com/:slug*`,
-            },
-            {
                 source: '/email-api/:slug*',
                 destination: `/api/email/:slug*`,
             }
