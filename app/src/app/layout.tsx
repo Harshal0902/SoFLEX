@@ -14,10 +14,10 @@ export const metadata = constructMetadata();
 
 export default function RootLayout({ children, }: Readonly<{ children: React.ReactNode; }>) {
   return (
-    <html lang="en">
+    <html lang='en'>
       <body className={cn('min-h-screen bg-background antialiased font-sansSerif')}>
         <WalletConnect>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <ThemeProvider attribute='class' defaultTheme='system' enableSystem disableTransitionOnChange>
             <BetaModal />
             <Navbar />
             <main className='flex-grow flex-1 pt-20'>

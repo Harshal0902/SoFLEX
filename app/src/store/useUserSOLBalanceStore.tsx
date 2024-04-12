@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Connection, PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js'
+import { toast } from 'sonner'
 
 interface UserSOLBalance {
     balance: number;
@@ -17,7 +18,7 @@ export default function useUserSOLBalance(): UserSOLBalance {
             fetchedBalance = await connection.getBalance(publicKey, 'confirmed');
             fetchedBalance = fetchedBalance / LAMPORTS_PER_SOL;
         } catch (error) {
-            console.error('Error getting balance:', error);
+            toast.error(`Error getting balance: ${error}`);
         }
         setBalance(fetchedBalance);
     };

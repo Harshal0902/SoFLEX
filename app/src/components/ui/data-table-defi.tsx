@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import { ColumnDef, ColumnFiltersState, SortingState, VisibilityState, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table-lend'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table-borderless'
 import { Input } from '@/components/ui/input'
 import { Search, X } from 'lucide-react'
 import Image from 'next/image'
@@ -15,14 +15,15 @@ interface LendingData {
     totalSupply: string;
     assetYield: string;
     totalBorrow: string;
-    LTV: string;
+    ltv: string;
 }
 
 interface DataTableProps<TData, TValue> {
-    columns: ColumnDef<LendingData, any>[];
+    columns: ColumnDef<LendingData>[];
     data: LendingData[];
     userSearchColumn: string;
     inputPlaceHolder: string;
+    noResultsMessage: string;
 }
 
 export function DataTable<TData, TValue>({
@@ -30,6 +31,7 @@ export function DataTable<TData, TValue>({
     data,
     userSearchColumn,
     inputPlaceHolder,
+    noResultsMessage
 }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -112,10 +114,10 @@ export function DataTable<TData, TValue>({
                                         <TableCell key={cell.id}>
                                             {cell.column.id === 'assetName' ? (
                                                 <div className='flex flex-row items-center'>
-                                                    <Image src={row.original.assetLogo} alt={row.original.assetName} width={35} height={35} className='mr-2' />
+                                                    <Image src={row.original.assetLogo} alt={row.original.assetName} width={35} height={35} priority className='mr-2' />
                                                     <div className='flex flex-col'>
-                                                    <span>{row.original.assetSymbol}</span>
-                                                    <span>{row.original.assetPrice}</span>
+                                                        <span>{row.original.assetSymbol}</span>
+                                                        <span>{row.original.assetPrice}</span>
                                                     </div>
                                                 </div>
                                             ) : (
@@ -128,7 +130,7 @@ export function DataTable<TData, TValue>({
                         ) : (
                             <TableRow>
                                 <TableCell colSpan={columns.length} className='h-24 text-center'>
-                                    No results.
+                                    {noResultsMessage}
                                 </TableCell>
                             </TableRow>
                         )}

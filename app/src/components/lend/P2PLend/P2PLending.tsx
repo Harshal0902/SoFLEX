@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import { newAssetLendingRequest } from '@/lib/supabaseRequests'
+import { newAssetLendingRequest, teNFTCollectionDetails } from '@/lib/supabaseRequests'
 import { useWallet } from '@solana/wallet-adapter-react'
-import { LendingAssetDataType, lendingAssetColumns } from './columns'
+import { LendingNFTCollectionDataType, lendingNFTCollectionColumns } from './columns'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
@@ -11,90 +11,8 @@ import * as z from 'zod'
 import { toast } from 'sonner'
 import { Form, FormLabel, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import Loading from '@/components/Loading'
 import { DataTable } from '@/components/ui/data-table-p2p'
-
-const lendingAssetData: LendingAssetDataType[] = [
-    {
-        nftName: 'Cyber Frogs',
-        nftLogo: '/assets/borrow/Cyber Frogs.webp',
-        nftPool: '36 SOL',
-        neftBestOffer: '6.4 SOL',
-        nftAPY: '140 %',
-        nftDuration: '5 days',
-    },
-    {
-        nftName: 'Degods',
-        nftLogo: '/assets/borrow/Degods.webp',
-        nftPool: '12 SOL',
-        neftBestOffer: '2.6 SOL',
-        nftAPY: '335.6 %',
-        nftDuration: '15 days',
-    },
-    {
-        nftName: 'Enigma Ventures',
-        nftLogo: '/assets/borrow/Enigma_Ventures.webp',
-        nftPool: '66 SOL',
-        neftBestOffer: '5.6 SOL',
-        nftAPY: '165.22 %',
-        nftDuration: '10 days',
-    },
-    {
-        nftName: 'Gaimin Gladiators',
-        nftLogo: '/assets/borrow/Gaimin_Gladiators.webp',
-        nftPool: '12 SOL',
-        neftBestOffer: '2.44 SOL',
-        nftAPY: '146.88 %',
-        nftDuration: '5 days',
-    },
-    {
-        nftName: 'Homeowners Association (Parcl)',
-        nftLogo: '/assets/borrow/Homeowners Association (Parcl).webp',
-        nftPool: '33 SOL',
-        neftBestOffer: '7.2 SOL',
-        nftAPY: '268.33 %',
-        nftDuration: '30 days',
-    },
-    {
-        nftName: 'Kanpai Pandas',
-        nftLogo: '/assets/borrow/Kanpai_Pandas.webp',
-        nftPool: '25 SOL',
-        neftBestOffer: '1.22 SOL',
-        nftAPY: '156.39 %',
-        nftDuration: '25 days',
-    },
-    {
-        nftName: 'Photo Finish PFP Collection',
-        nftLogo: '/assets/borrow/Photo_Finish_PFP_Collection.webp',
-        nftPool: '26 SOL',
-        neftBestOffer: '8.21 SOL',
-        nftAPY: '136 %',
-        nftDuration: '15 days',
-    },
-    {
-        nftName: 'Quekz',
-        nftLogo: '/assets/borrow/Quekz.webp',
-        nftPool: '42.56 SOL',
-        neftBestOffer: '3.22 SOL',
-        nftAPY: '126.87 %',
-        nftDuration: '10 days',
-    },
-    {
-        nftName: 'SMB Gen2',
-        nftLogo: '/assets/borrow/SMB_Gen2.webp',
-        nftPool: '150 SOL',
-        neftBestOffer: '32.22 SOL',
-        nftAPY: '185.66 %',
-        nftDuration: '10 days',
-    },
-    {
-        nftName: 'Taiyo Robotics',
-        nftLogo: '/assets/borrow/Taiyo_Robotics.webp',
-        nftPool: '109.55 SOL',
-        neftBestOffer: '10.22 SOL',
-        nftAPY: '123.3 %',
-        nftDuration: '15 days',
-    },
-]
 
 const FormSchema = z.object({
     assetName: z.string({
@@ -105,8 +23,25 @@ const FormSchema = z.object({
 })
 
 export default function P2PLending() {
+    const [loadingData, setLoadingData] = useState<boolean>(true);
+    const [lendingNFTCollectionData, setLendingNFTCollectionData] = useState<LendingNFTCollectionDataType[]>([]);
+
     const { connected } = useWallet();
     const wallet = useWallet();
+
+    useEffect(() => {
+        const fetchNFTCollectionData = async () => {
+            const result = await teNFTCollectionDetails();
+            if (Array.isArray(result)) {
+                setLendingNFTCollectionData(result);
+            } else {
+                toast.error('Unexpected result format.');
+            }
+            setLoadingData(false);
+        };
+
+        fetchNFTCollectionData();
+    }, []);
 
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
@@ -177,14 +112,19 @@ export default function P2PLending() {
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <DataTable
-                        columns={lendingAssetColumns}
-                        data={lendingAssetData.map(asset => ({
-                            ...asset,
-                        }))}
-                        userSearchColumn='nftName'
-                        inputPlaceHolder='Search for NFT Collection'
-                    />
+                    {loadingData ? (
+                        <Loading />
+                    ) : (
+                        <DataTable
+                            columns={lendingNFTCollectionColumns}
+                            data={lendingNFTCollectionData.map(nftCollection => ({
+                                ...nftCollection,
+                            }))}
+                            userSearchColumn='nftName'
+                            inputPlaceHolder='Search for NFT Collection'
+                            noResultsMessage='No NFT Collection found'
+                        />
+                    )}
                 </CardContent>
             </Card>
         </div>

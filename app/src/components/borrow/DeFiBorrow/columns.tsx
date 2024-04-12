@@ -13,7 +13,7 @@ export type BorrowingAssetDataType = {
     totalSupply: string;
     assetYield: string;
     totalBorrow: string;
-    LTV: string;
+    ltv: string;
 }
 
 export const borrowingAssetColumns: ColumnDef<BorrowingAssetDataType>[] = [
@@ -42,7 +42,7 @@ export const borrowingAssetColumns: ColumnDef<BorrowingAssetDataType>[] = [
         ),
     },
     {
-        accessorKey: 'LTV',
+        accessorKey: 'ltv',
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title='LTV' info='The Borrowed amount vs. collateral value indicates loan risk.' />
         ),

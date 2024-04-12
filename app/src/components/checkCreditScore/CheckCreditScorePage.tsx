@@ -8,8 +8,6 @@ import { Button } from '@/components/ui/button'
 
 export default function CheckCreditScorePage({ walletAddress }: { walletAddress?: string }) {
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
-    const [result, setResult] = useState(null);
     const [creditScore, setCreditScore] = useState(null);
 
     const wallet = useWallet();
@@ -18,7 +16,6 @@ export default function CheckCreditScorePage({ walletAddress }: { walletAddress?
 
     const knowTransactionHistory = async () => {
         setLoading(true);
-        setError(null);
         try {
             const myHeaders = new Headers();
             // @ts-ignore
@@ -36,7 +33,6 @@ export default function CheckCreditScorePage({ walletAddress }: { walletAddress?
             );
 
             const data = await response.json();
-            setResult(data);
 
             let sentTransactions = 0;
             let receivedTransactions = 0;

@@ -23,7 +23,7 @@ const features: FeatureType[] = [
   },
   {
     logo: 'peer-to-protocol',
-    title: 'Peer-to-Protocol Lending and Borrowing',
+    title: 'Peer-to-Pool Lending and Borrowing',
     description: 'Engage in lending and borrowing activities against protocol-managed liquidity pools, enhancing liquidity and earning opportunities in the Solana ecosystem.',
   },
   {

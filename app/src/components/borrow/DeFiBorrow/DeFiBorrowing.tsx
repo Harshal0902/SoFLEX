@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { newAssetLendingRequest } from '@/lib/supabaseRequests'
+import { newAssetLendingRequest, teAssetDetails } from '@/lib/supabaseRequests'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { BorrowingAssetDataType, borrowingAssetColumns } from './columns'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
@@ -11,110 +11,8 @@ import * as z from 'zod'
 import { toast } from 'sonner'
 import { Form, FormLabel, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import Loading from '@/components/Loading'
 import { DataTable } from '@/components/ui/data-table-defi'
-
-const borrowingAssetData: BorrowingAssetDataType[] = [
-  {
-    assetName: 'solana',
-    assetSymbol: 'SOL',
-    assetLogo: '/assets/lend/sol.svg',
-    assetPrice: '$ 176.24',
-    totalSupply: '1,250 SOL',
-    assetYield: '42 %',
-    totalBorrow: '32 SOL',
-    LTV: '80 %',
-  },
-  {
-    assetName: 'usd-coin',
-    assetSymbol: 'USDC',
-    assetLogo: '/assets/lend/usdc.svg',
-    assetPrice: '$ 1.00',
-    totalSupply: '125,669 USDC',
-    assetYield: '52.2 %',
-    totalBorrow: '68,55 USDC',
-    LTV: '64 %',
-  },
-  {
-    assetName: 'tether',
-    assetSymbol: 'USDT',
-    assetLogo: '/assets/lend/usdt.svg',
-    assetPrice: '$ 1.00',
-    totalSupply: '100,556 USDT',
-    assetYield: '36.88 %',
-    totalBorrow: '62,55 USDT',
-    LTV: '82 %',
-  },
-  {
-    assetName: 'jupiter-ag',
-    assetSymbol: 'JUP',
-    assetLogo: '/assets/lend/jup.svg',
-    assetPrice: '$ 1.38',
-    totalSupply: '156,89 JUP',
-    assetYield: '43.22 %',
-    totalBorrow: '22.63 JUP',
-    LTV: '72.66 %',
-  },
-  {
-    assetName: 'pyth-network', // not available
-    assetSymbol: 'PYTH',
-    assetLogo: '/assets/lend/pyth.svg',
-    assetPrice: '$ 0.8235',
-    totalSupply: '26,551 PYTH',
-    assetYield: '23 %',
-    totalBorrow: '227.56 PYTH',
-    LTV: '68 %',
-  },
-  {
-    assetName: 'jito',
-    assetSymbol: 'JTO',
-    assetLogo: '/assets/lend/jto.png',
-    assetPrice: '$ 3.90',
-    totalSupply: '3,562 JTO',
-    assetYield: '35 %',
-    totalBorrow: '136 JTO',
-    LTV: '64.24 %',
-  },
-  {
-    assetName: 'raydium',
-    assetSymbol: 'RAY',
-    assetLogo: '/assets/lend/ray.svg',
-    assetPrice: '$ 2.04',
-    totalSupply: '125,559 RAY',
-    assetYield: '46.22 %',
-    totalBorrow: '22,789 RAY',
-    LTV: '86.78 %',
-  },
-  {
-    assetName: 'Blze', // not available
-    assetSymbol: 'BLZE',
-    assetLogo: '/assets/lend/blze.png',
-    assetPrice: '$ 117,556.21',
-    totalSupply: '255,556 BLZE',
-    assetYield: '51.36 %',
-    totalBorrow: '222.7 BLZE',
-    LTV: '68.55 %',
-  },
-  {
-    assetName: 'tbtc-token',
-    assetSymbol: 'tBTC',
-    assetLogo: '/assets/lend/tbtc.webp',
-    assetPrice: '$ 67,963.90',
-    totalSupply: '2 tBTC',
-    assetYield: '54.36 %',
-    totalBorrow: '0.55 tBTC',
-    LTV: '86.71 %',
-  },
-  {
-    assetName: 'marinade',
-    assetSymbol: 'mSOL',
-    assetLogo: '/assets/lend/msol.png',
-    assetPrice: '$ 207.58',
-    totalSupply: '45,855 mSOL',
-    assetYield: '46.87 %',
-    totalBorrow: '21,73.45 mSOL',
-    LTV: '88.64 %',
-  },
-]
 
 const FormSchema = z.object({
   assetName: z.string({
@@ -126,9 +24,25 @@ const FormSchema = z.object({
 
 export default function DeFiBorrowing() {
   const [assetPrices, setAssetPrices] = useState<{ [key: string]: string }>({});
+  const [loadingData, setLoadingData] = useState<boolean>(true);
+  const [borrowingAssetData, setBorrowingAssetData] = useState<BorrowingAssetDataType[]>([]);
 
   const { connected } = useWallet();
   const wallet = useWallet();
+
+  useEffect(() => {
+    const fetchAssetData = async () => {
+      const result = await teAssetDetails();
+      if (Array.isArray(result)) {
+        setBorrowingAssetData(result);
+      } else {
+        toast.error('Unexpected result format.');
+      }
+      setLoadingData(false);
+    };
+
+    fetchAssetData();
+  }, []);
 
   useEffect(() => {
     const tokens = ['SOL', 'USDC', 'USDT', 'JLP', 'JTO', 'RAY', 'tBTC', 'MSOL'];
@@ -142,7 +56,7 @@ export default function DeFiBorrowing() {
             [token]: data.data.amount
           }));
         } catch (error) {
-          console.error(`Error fetching price for ${token}:`, error);
+          toast.error(`Error fetching price for ${token}: ${error}`);
         }
       }
     };
@@ -173,6 +87,15 @@ export default function DeFiBorrowing() {
       }
     }
   }
+
+  const formatPrice = (price: number | string): string => {
+    const numericPrice = typeof price === 'string' ? parseFloat(price) : price;
+    if (!isNaN(numericPrice)) {
+      return `$ ${numericPrice.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+    } else {
+      return price.toString();
+    }
+  };
 
   return (
     <div className='py-2 md:py-4'>
@@ -219,15 +142,20 @@ export default function DeFiBorrowing() {
           </div>
         </CardHeader>
         <CardContent>
-          <DataTable
-            columns={borrowingAssetColumns}
-            data={borrowingAssetData.map(asset => ({
-              ...asset,
-              assetPrice: assetPrices[asset.assetSymbol] ? `$ ${assetPrices[asset.assetSymbol]}` : asset.assetPrice
-            }))}
-            userSearchColumn='assetName'
-            inputPlaceHolder='Search for assets'
-          />
+          {loadingData ? (
+            <Loading />
+          ) : (
+            <DataTable
+              columns={borrowingAssetColumns}
+              data={borrowingAssetData.map(asset => ({
+                ...asset,
+                assetPrice: assetPrices[asset.assetSymbol] ? formatPrice(assetPrices[asset.assetSymbol]) : asset.assetPrice
+              }))}
+              userSearchColumn='assetName'
+              inputPlaceHolder='Search for assets'
+              noResultsMessage='No assets found'
+            />
+          )}
         </CardContent>
       </Card>
     </div>

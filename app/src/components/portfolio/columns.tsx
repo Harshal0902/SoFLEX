@@ -1,17 +1,16 @@
 "use client"
 
 import { ColumnDef } from '@tanstack/react-table'
-import { Checkbox } from '@/components/ui/checkbox'
 import { DataTableColumnHeader } from '@/components/ui/data-table-column-header'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 import { MoreHorizontal } from 'lucide-react'
 
 export type LoanDataType = {
-    loanID: string;
+    loanId: string;
     assetName: string;
-    assetType: 'NFT' | 'Synthetic Asset';
-    amount: number;
+    assetType: 'NFT' | 'cNFT' | 'Synthetic Asset';
+    amount: string;
     interestRate: number;
     duration: number;
     status: 'Active' | 'Repaid' | 'Defaulted' | 'Pending' | 'Cancelled' | 'Expired' | 'Closed';
@@ -27,31 +26,7 @@ export type LoanDataType = {
 
 export const loanColumns: ColumnDef<LoanDataType>[] = [
     {
-        id: 'select',
-        header: ({ table }) => (
-            <Checkbox
-                checked={
-                    table.getIsAllPageRowsSelected() ||
-                    (table.getIsSomePageRowsSelected() && 'indeterminate')
-                }
-                onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-                aria-label='Select all'
-            />
-        ),
-        cell: ({ row }) => (
-            <div className='h-4'>
-                <Checkbox
-                    checked={row.getIsSelected()}
-                    onCheckedChange={(value) => row.toggleSelected(!!value)}
-                    aria-label='Select row'
-                />
-            </div>
-        ),
-        enableSorting: false,
-        enableHiding: false,
-    },
-    {
-        accessorKey: 'loanID',
+        accessorKey: 'loanId',
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title='Loan ID' />
         ),
@@ -71,7 +46,7 @@ export const loanColumns: ColumnDef<LoanDataType>[] = [
     {
         accessorKey: 'amount',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title='Amount (in SOL)' />
+            <DataTableColumnHeader column={column} title='Amount' />
         ),
     },
     {
@@ -108,7 +83,7 @@ export const loanColumns: ColumnDef<LoanDataType>[] = [
                     <DropdownMenuContent align='end'>
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuItem
-                            onClick={() => navigator.clipboard.writeText(payment.loanID)}
+                            onClick={() => navigator.clipboard.writeText(payment.loanId)}
                             className='cursor-pointer'
                         >
                             Copy Loan ID

@@ -16,7 +16,7 @@ const termsContent: TermContentType[] = [
     {
         title: '2. Description of Service',
         content: [
-            'SoFLEX provides a comprehensive solution for lending and borrowing compressed NFTs and synthetic assets within the Solana ecosystem. Our Platform enables users to leverage their assets efficiently, whether for accessing funds or earning passive income through lending. We facilitate both peer-to-peer and peer-to-protocol transactions in a seamless and secure environment.',
+            'SoFLEX provides a comprehensive solution for lending and borrowing compressed NFTs and synthetic assets within the Solana ecosystem. Our Platform enables users to leverage their assets efficiently, whether for accessing funds or earning passive income through lending. We facilitate both peer-to-peer and peer-to-pool transactions in a seamless and secure environment.',
         ],
     },
     {

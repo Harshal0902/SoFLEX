@@ -17,7 +17,7 @@ const faqItems = [
     },
     {
         question: 'How does SoFLEX work?',
-        answer: 'SoFLEX operates on a peer-to-peer (P2P) and peer-to-protocol model. Users can lend, borrow, or buy compressed NFTs and synthetic assets directly from other users or participate in protocol-managed lending and borrowing against liquidity pools.',
+        answer: 'SoFLEX operates on a peer-to-peer (P2P) and peer-to-pool model. Users can lend, borrow, or buy compressed NFTs and synthetic assets directly from other users or participate in pool-managed lending and borrowing against liquidity pools.',
     },
     {
         question: 'What assets can I lend or borrow on SoFLEX?',

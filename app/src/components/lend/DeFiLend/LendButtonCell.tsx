@@ -8,6 +8,7 @@ import { newDeFiLending } from '@/lib/supabaseRequests'
 import { toast } from 'sonner'
 import { useWallet, useConnection } from '@solana/wallet-adapter-react'
 import { Loader2, Info } from 'lucide-react'
+import InfoButton from '@/components/InfoButton'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog'
@@ -22,13 +23,7 @@ export type LendingAssetDataType = {
     totalSupply: string;
     assetYield: string;
     totalBorrow: string;
-    LTV: string;
-}
-
-interface CellProps {
-    row: {
-        original: LendingAssetDataType;
-    };
+    ltv: string;
 }
 
 const FormSchema = z.object({
@@ -101,7 +96,7 @@ export default function LendButtonCell({ row }: { row: { original: LendingAssetD
             setIsSubmitting(true);
             if (data) {
                 setIsSubmitting(false);
-                // setOpen(false);
+                setOpen(false);
                 toast.success('Lending successful! Interest starts accruing.');
             } else {
                 toast.error('Error completing the process. Please try again!');
@@ -120,7 +115,10 @@ export default function LendButtonCell({ row }: { row: { original: LendingAssetD
             </DialogTrigger>
             <DialogContent className='max-w-[90vw] md:max-w-[425px]'>
                 <DialogHeader>
-                    <DialogTitle>Lend Token</DialogTitle>
+                    <DialogTitle className='flex flex-row space-x-1 items-center'>
+                        <h1>Lend Token</h1>
+                        <InfoButton />
+                    </DialogTitle>
                     <DialogDescription>
                         Lend your token to earn interest.
                     </DialogDescription>
