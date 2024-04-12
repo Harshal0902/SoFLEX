@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import { ColumnDef, ColumnFiltersState, SortingState, VisibilityState, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table-lend'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table-borderless'
 import { Input } from '@/components/ui/input'
 import { DataTablePagination } from '@/components/ui/data-table-pagination-p2p'
 import { Search, X } from 'lucide-react'

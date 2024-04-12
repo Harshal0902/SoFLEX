@@ -5,11 +5,6 @@ import { ChevronsUp } from 'lucide-react'
 
 export default function ScrollToTopBtn() {
     const [showButton, setShowButton] = useState(false);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        setTimeout(() => setLoading(false), 2500)
-    }, [])
 
     useEffect(() => {
         window.addEventListener('scroll', () => {
