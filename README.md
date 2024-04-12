@@ -30,49 +30,60 @@ At SoFLEX, we envision a future where anyone can unlock the full potential of th
 - Next.js
 - Solana
 - Anchor
+- Rust
 - TypeScript
 
 ## 💻 Features
 
+**1. Peer-to-Peer (P2P) Compressed NFT and Synthetic Asset Lending and Borrowing:**
 
-1. Peer-to-Peer (P2P) Compressed NFT and Synthetic Asset Lending and Borrowing:
 - Facilitates direct transactions between users for buying, lending, or borrowing compressed NFTs and synthetic assets.
 - Borrowers can collateralize their assets to secure SOL token loans.
 - Lenders have flexibility in setting interest rates or bidding on lending amounts based on asset characteristics.
 
-2. Peer-to-Pool Compressed NFT and Synthetic Asset Lending and Borrowing:
+**2. Peer-to-Pool Compressed NFT and Synthetic Asset Lending and Borrowing:**
+
 - Enables lending and borrowing against protocol-managed liquidity pools, enhancing liquidity and earning opportunities.
 - Users can engage in protocol-based lending and borrowing activities, augmenting liquidity in the Solana ecosystem.
 
-3. Flexible Interest Rates:
+**3. Flexible Interest Rates:**
+
 - Offers competitive interest rates tailored to borrower and lender preferences.
 - Borrowers benefit from low-interest rates, ensuring accessible liquidity.
 - Lenders can earn attractive yields (30% to 70%) on compressed NFT and synthetic assets.
 
-4. Cross-Asset Borrowing:
+**4. Cross-Asset Borrowing:**
+
 - Allows users to borrow SOL tokens against their compressed NFT and synthetic asset holdings, and vice versa.
 - Provides liquidity without the need to liquidate assets, offering an alternative investment avenue for SOL token holders.
 
-5. AI-Powered Credit Assessment:
+**5. AI-Powered Credit Assessment:**
+
 - Utilizes AI algorithms to analyze user data, transaction history, and asset characteristics for accurate credit assessments.
 - Enhances lending decisions and mitigates default risks by evaluating repayment history and market trends.
 
-6. AI-Driven Portfolio Management:
+**6. AI-Driven Portfolio Management:**
+
 - Offers AI-driven tools to optimize asset allocation, rebalancing strategies, and risk management for NFT and synthetic asset portfolios.
 - Assists users in maximizing returns while minimizing downside risks by analyzing portfolio performance and market trends.
 
-7. Stop-loss and Take-profit Orders for Loans:
+**7. Stop-loss and Take-profit Orders for Loans:**
+
 - Enables borrowers to set stop-loss and take-profit orders for loans, facilitating risk management and automation of borrowing strategies.
 
-8. Fiat On-Ramps and Off-Ramps:
+**8. Fiat On-Ramps and Off-Ramps:**
+
 - Integrates fiat gateways for easy deposit and withdrawal of funds using other Solana cryptos, enhancing accessibility for users.
 
-9. Slashing Protection for Lenders:
+**9. Slashing Protection for Lenders:**
+
 - Allocates a portion of borrower fees to a protection pool that shields lenders from losses in case of defaults, incentivizing lender participation.
 
-10. Dynamic Collateralization:
+**10. Dynamic Collateralization:**
+
 - Adjusts required collateral ratio based on borrower creditworthiness or collateral asset volatility, providing flexibility for borrowers and risk management for lenders.
 
-11. Social Lending with Reputation Scores:
+**11. Social Lending with Reputation Scores:**
+
 - Implements a social layer where borrowers build reputation scores based on past borrowing and repayment behavior.
 - Unlocks better interest rates for trustworthy borrowers and attracts more lenders to the platform.
