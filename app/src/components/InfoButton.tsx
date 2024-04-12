@@ -7,7 +7,7 @@ export default function DummyDataInfoButton() {
         <TooltipProvider>
             <Tooltip delayDuration={100}>
                 <TooltipTrigger asChild>
-                    <BadgeInfo className='h-4 w-4 text-primary cursor-pointer' />
+                    <BadgeInfo className='h-5 w-5 text-primary cursor-pointer' />
                 </TooltipTrigger>
                 <TooltipContent className='max-w-[18rem] text-center tracking-wide'>
                     Submit functionality is disabled in the live beta demo version.
