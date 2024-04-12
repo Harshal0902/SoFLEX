@@ -3,53 +3,34 @@ use anchor_lang::prelude::*;
 declare_id!("HZ3ddGHQP2zbYm6bWBbE21DHbSD8tAYr3MPN9PTbUR69");
 
 #[program]
-mod cnft_vesting {
-    use anchor_lang::prelude::*;
+mod borrow_program {
+    use super::*;
 
     #[state]
-    pub struct Vesting {
-        pub beneficiary: Pubkey,
-        pub total_amount: u64,
-        pub start_date: i64,
-        pub duration: i64,
-        pub withdrawn_amount: u64,
+    pub struct Borrowing {
+        pub total_borrowed: u64,
+        pub total_lent: u64,
     }
 
-    impl Vesting {
-        pub fn new(ctx: Context<Auth>, total_amount: u64, duration: i64) -> ProgramResult {
-            if duration <= 0 {
-                return Err(ErrorCode::InvalidDuration.into());
-            }
-            
-            let vesting = &mut ctx.accounts.vesting;
-            vesting.beneficiary = *ctx.accounts.beneficiary.key;
-            vesting.total_amount = total_amount;
-            vesting.start_date = Clock::get()?.unix_timestamp;
-            vesting.duration = duration;
-            vesting.withdrawn_amount = 0;
+    impl Borrowing {
+        pub fn initialize(ctx: Context<Initialize>) -> ProgramResult {
+            let borrowing = &mut ctx.accounts.borrowing;
+            borrowing.total_borrowed = 0;
+            borrowing.total_lent = 0;
 
             Ok(())
         }
 
-        pub fn withdraw(ctx: Context<Withdraw>, amount: u64) -> ProgramResult {
-            let vesting = &mut ctx.accounts.vesting;
-            let current_time = Clock::get()?.unix_timestamp;
+        pub fn borrow(ctx: Context<Borrow>, amount: u64) -> ProgramResult {
+            let borrowing = &mut ctx.accounts.borrowing;
+            borrowing.total_borrowed += amount;
 
-            if current_time < vesting.start_date + vesting.duration {
-                return Err(ErrorCode::VestingNotStarted.into());
-            }
+            Ok(())
+        }
 
-            let elapsed_time = current_time - vesting.start_date;
-            let vested_amount = (vesting.total_amount * elapsed_time as u64) / vesting.duration as u64;
-            let available_amount = vested_amount - vesting.withdrawn_amount;
-
-            if amount > available_amount {
-                return Err(ErrorCode::InsufficientFunds.into());
-            }
-
-            ctx.accounts.token_vault.transfer(ctx.accounts.beneficiary, amount)?;
-
-            vesting.withdrawn_amount += amount;
+        pub fn lend(ctx: Context<Lend>, amount: u64) -> ProgramResult {
+            let borrowing = &mut ctx.accounts.borrowing;
+            borrowing.total_lent += amount;
 
             Ok(())
         }
@@ -57,29 +38,29 @@ mod cnft_vesting {
 
     #[error]
     pub enum ErrorCode {
-        #[msg("Vesting has not started yet")]
-        VestingNotStarted,
-        #[msg("Insufficient funds available for withdrawal")]
-        InsufficientFunds,
-        #[msg("Invalid vesting duration")]
-        InvalidDuration,
+        #[msg("Borrowing amount exceeds available balance")]
+        InsufficientBalance,
     }
 }
 
 #[derive(Accounts)]
-pub struct Auth<'info> {
-    #[account(init)]
-    pub vesting: ProgramAccount<'info, Vesting>,
-    pub beneficiary: AccountInfo<'info>,
-    pub rent: Sysvar<'info, Rent>,
+pub struct Initialize<'info> {
+    #[account(init, payer = user, space = 8)]
+    pub borrowing: ProgramAccount<'info, Borrowing>,
+    pub user: AccountInfo<'info>,
+    pub system_program: Program<'info, System>,
 }
 
 #[derive(Accounts)]
-pub struct Withdraw<'info> {
+pub struct Borrow<'info> {
     #[account(mut)]
-    pub vesting: ProgramAccount<'info, Vesting>,
-    pub beneficiary: AccountInfo<'info>,
+    pub borrowing: ProgramAccount<'info, Borrowing>,
+    pub user: Signer<'info>,
+}
+
+#[derive(Accounts)]
+pub struct Lend<'info> {
     #[account(mut)]
-    pub token_vault: AccountInfo<'info>,
-    pub clock: Sysvar<'info, Clock>,
+    pub borrowing: ProgramAccount<'info, Borrowing>,
+    pub user: Signer<'info>,
 }
