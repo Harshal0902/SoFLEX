@@ -12,6 +12,8 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormDescription, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import Loading from '@/components/Loading'
 import Image from 'next/image'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
@@ -24,6 +26,14 @@ export type BorrowingAssetDataType = {
     assetYield: string;
     totalBorrow: string;
     ltv: string;
+}
+
+interface NFTType {
+    image_uri?: string;
+    name?: string;
+    royalty?: number;
+    external_url?: string;
+    mint?: string;
 }
 
 const borrowDuration = [
@@ -64,8 +74,10 @@ const FormSchema = z.object({
 export default function BorrowButtonCell({ row }: { row: { original: BorrowingAssetDataType } }) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [open, setOpen] = useState(false);
-    const [itemsData, setItemsData] = useState<any>([]);
-    const [assetPrice, setAssetPrice] = useState<number[]>([]);
+    const [cNFTResult, setcNFTResult] = useState<NFTType[]>([]);
+    const [cNFTLoading, setcNFTLoading] = useState<boolean>(false);
+    const [NFTResult, setNFTResult] = useState<NFTType[]>([]);
+    const [NFTLoading, setNFTLoading] = useState<boolean>(false);
     const [loading, setLoading] = useState(false);
     const [creditScore, setCreditScore] = useState(null);
     const [interestRate, setInterestRate] = useState(undefined);
@@ -79,37 +91,78 @@ export default function BorrowButtonCell({ row }: { row: { original: BorrowingAs
     useEffect(() => {
         async function fetchData() {
             if (open) {
-                const url = `https://rpc.shyft.to/?api_key=${shyft_api_key}`;
+                setcNFTLoading(true);
+
+                var myHeaders = new Headers();
+                // @ts-ignore
+                myHeaders.append('x-api-key', shyft_api_key);
+
+                var requestOptions: RequestInit = {
+                    method: 'GET',
+                    headers: myHeaders,
+                    redirect: 'follow'
+                };
+
                 try {
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            jsonrpc: '2.0',
-                            id: 'rpc-id',
-                            method: 'getAssetsByOwner',
-                            params: {
-                                ownerAddress: wallet.publicKey?.toString(),
-                                page: 1,
-                                limit: 1000
-                            },
-                        }),
-                    });
-                    const { result } = await response.json();
-
-                    const itemsData = await Promise.all(result.items.map(async (item: any) => {
-                        const jsonUriResponse = await fetch(item.content.json_uri);
-                        return jsonUriResponse.json();
-                    }));
-
-                    setItemsData(itemsData);
-
-                    const assetPrice = result.items?.map((item: any) => item.royalty?.percent) || [];
-                    setAssetPrice(assetPrice);
+                    const response = await fetch(`https://api.shyft.to/sol/v1/nft/compressed/read_all?network=mainnet-beta&wallet_address=${wallet.publicKey?.toString()}`, requestOptions);
+                    const result = await response.json();
+                    if (result && result.success && result.result && result.result.nfts) {
+                        const formattedResult = result.result.nfts.map((nft: any) => ({
+                            image_uri: nft.image_uri,
+                            name: nft.name,
+                            external_url: nft.external_url,
+                            mint: nft.mint,
+                            royalty: nft.royalty
+                        }));
+                        setcNFTResult(formattedResult);
+                    } else {
+                        toast.error('No cNFT(s) found for the wallet.');
+                    }
                 } catch (error) {
-                    toast.error(`Error fetching data: ${error}`);
+                    toast.error(`Got error: ${error}`);
+                } finally {
+                    setcNFTLoading(false);
+                }
+            }
+        }
+
+        fetchData();
+    }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    useEffect(() => {
+        async function fetchData() {
+            if (open) {
+                setNFTLoading(true);
+
+                var myHeaders = new Headers();
+                // @ts-ignore
+                myHeaders.append('x-api-key', shyft_api_key);
+
+                var requestOptions: RequestInit = {
+                    method: 'GET',
+                    headers: myHeaders,
+                    redirect: 'follow'
+                };
+
+                try {
+                    const response = await fetch(`https://api.shyft.to/sol/v1/nft/read_all?network=mainnet-beta&address=${wallet.publicKey?.toString()}`, requestOptions);
+                    const result = await response.json();
+                    if (result && result.success && result.result) {
+                        const formattedResult = result.result.map((nft: any) => ({
+                            image_uri: nft.image_uri,
+                            name: nft.name,
+                            external_url: nft.external_url,
+                            mint: nft.mint,
+                            royalty: nft.royalty
+                        }));
+                        setNFTResult(formattedResult);
+                    } else {
+                        toast.error('No NFT(s) found for the wallet.');
+                    }
+                } catch (error) {
+                    toast.error(`Got error: ${error}`);
+                } finally {
+                    setNFTLoading(false);
                 }
             }
         }
@@ -152,8 +205,7 @@ export default function BorrowButtonCell({ row }: { row: { original: BorrowingAs
             let sentTransactions = 0;
             let receivedTransactions = 0;
 
-            // @ts-ignore
-            data.result.forEach(transaction => {
+            data.result.forEach((transaction: { actions: string | any[] }) => {
                 if (transaction.actions.length > 0 && transaction.actions[0].info.sender === wallet.publicKey?.toString()) {
                     sentTransactions++;
                 } else {
@@ -277,29 +329,93 @@ export default function BorrowButtonCell({ row }: { row: { original: BorrowingAs
                             </div>
 
                             <div>
-                                <h1 className='font-semibold text-lg tracking-wide'>Select NFT(s) or Synthetic Assets for Collateral</h1>
-                                <div className='flex flex-row space-x-2 flex-wrap justify-evenly'>
-                                    {itemsData.length > 0 ? (
-                                        itemsData.map((itemData: { name: string; image: string; external_url: string }, index: React.Key | null | undefined) => (
-                                            <div className='border rounded mt-4 p-2 flex flex-col space-y-2' key={index}>
-                                                <div className='flex items-center justify-center'>
-                                                    <Image src={itemData.image} width={180} height={40} alt={itemData.name} />
+                                <Accordion type='multiple' defaultValue={['cNFT', 'NFT']}>
+                                    <AccordionItem value='cNFT'>
+                                        <AccordionTrigger className='hover:no-underline text-left text-xl font-semibold tracking-wide'>Select cNFT(s) or Synthetic Asset(s) for Collateral</AccordionTrigger>
+                                        <AccordionContent>
+                                            {cNFTLoading ? <Loading /> : (
+                                                <div className='flex flex-row space-x-2 flex-wrap justify-evenly'>
+                                                    {cNFTResult.length ? (
+                                                        cNFTResult.map((nft, index) => (
+                                                            <>
+                                                                {nft.image_uri && nft.image_uri.startsWith('http') && (
+                                                                    <div className='border rounded mt-4 p-2 flex flex-col space-y-2' key={index}>
+                                                                        <div className='flex items-center justify-center'>
+                                                                            <Image src={nft.image_uri} width={180} height={40} alt={nft.image_uri} />
+                                                                        </div>
+                                                                        <p className='text-center'>{nft.name}</p>
+                                                                        {
+                                                                            nft.external_url !== undefined && nft.external_url !== null && nft.external_url !== '' && (
+                                                                                <div className='flex flex-row items-center justify-center space-x-2'>
+                                                                                    <a href={nft.external_url} target='_blank' className='text-primary'>View collection</a>
+                                                                                    <ExternalLink className='h-4 w-4' />
+                                                                                </div>
+                                                                            )
+                                                                        }
+                                                                        <div className='flex flex-row items-center justify-center space-x-2'>
+                                                                            <a href={`https://solscan.io/token/${nft.mint}`} target='_blank' className='text-primary'>View on Solscan</a>
+                                                                            <ExternalLink className='h-4 w-4' />
+                                                                        </div>
+                                                                        {nft.royalty && nft.royalty > 0 ? (
+                                                                            <p className='text-center'>cNFT Price: {formatAssetPrice(nft.royalty)} SOL</p>
+                                                                        ) : (
+                                                                            <p className='text-center'>cNFT Price: 0 SOL</p>
+                                                                        )}
+                                                                    </div>
+                                                                )}
+                                                            </>
+                                                        ))
+                                                    ) : (
+                                                        <p>No cNFT(s) or Synthetic Asset(s) found for you wallet.</p>
+                                                    )}
                                                 </div>
-                                                <p className='text-center'>{itemData.name}</p>
-                                                <div className='flex flex-row items-center justify-center space-x-2'>
-                                                    <a href={itemData.external_url} target='_blank' className='text-primary'>View collection</a>
-                                                    <ExternalLink className='h-4 w-4' />
+                                            )}
+                                        </AccordionContent>
+                                    </AccordionItem>
+
+                                    <AccordionItem value='NFT'>
+                                        <AccordionTrigger className='hover:no-underline text-left text-xl font-semibold tracking-wide'>Select NFT(s) for Collateral</AccordionTrigger>
+                                        <AccordionContent>
+                                            {NFTLoading ? <Loading /> : (
+                                                <div className='flex flex-row space-x-2 flex-wrap justify-evenly'>
+                                                    {NFTResult.length ? (
+                                                        NFTResult.map((nft, index) => (
+                                                            <>
+                                                                {nft.image_uri && nft.image_uri.startsWith('http') && (
+                                                                    <div className='border rounded mt-4 p-2 flex flex-col space-y-2' key={index}>
+                                                                        <div className='flex items-center justify-center'>
+                                                                            <Image src={nft.image_uri} width={180} height={40} alt={nft.image_uri} />
+                                                                        </div>
+                                                                        <p className='text-center'>{nft.name}</p>
+                                                                        {
+                                                                            nft.external_url !== undefined && nft.external_url !== null && nft.external_url !== '' && (
+                                                                                <div className='flex flex-row items-center justify-center space-x-2'>
+                                                                                    <a href={nft.external_url} target='_blank' className='text-primary'>View collection</a>
+                                                                                    <ExternalLink className='h-4 w-4' />
+                                                                                </div>
+                                                                            )
+                                                                        }
+                                                                        <div className='flex flex-row items-center justify-center space-x-2'>
+                                                                            <a href={`https://solscan.io/token/${nft.mint}`} target='_blank' className='text-primary'>View on Solscan</a>
+                                                                            <ExternalLink className='h-4 w-4' />
+                                                                        </div>
+                                                                        {nft.royalty && nft.royalty > 0 ? (
+                                                                            <p className='text-center'>NFT Price: {formatAssetPrice(nft.royalty)} SOL</p>
+                                                                        ) : (
+                                                                            <p className='text-center'>NFT Price: 0 SOL</p>
+                                                                        )}
+                                                                    </div>
+                                                                )}
+                                                            </>
+                                                        ))
+                                                    ) : (
+                                                        <p>No NFT(s) found for you wallet.</p>
+                                                    )}
                                                 </div>
-                                                {assetPrice.length > 0 && (
-                                                    // @ts-ignore
-                                                    <p className='text-center'>NFT Price: {formatAssetPrice(assetPrice[index])} {order.assetSymbol}</p>
-                                                )}
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <p>No assets found</p>
-                                    )}
-                                </div>
+                                            )}
+                                        </AccordionContent>
+                                    </AccordionItem>
+                                </Accordion>
                             </div>
 
                             <FormField
@@ -397,13 +513,17 @@ export default function BorrowButtonCell({ row }: { row: { original: BorrowingAs
                         </form>
                     </Form>
 
-                    {!creditScore && (
+                    {!creditScore ? (
                         <Button className='text-white w-full mt-4' onClick={knowTransactionHistory} disabled={loading} >
                             {loading ? 'Calculating...' : 'Calculate Intrest Rate'}
+                        </Button>
+                    ) : (
+                        <Button variant='outline' className='text-white w-full mt-4' onClick={knowTransactionHistory} disabled={loading} >
+                            {loading ? 'Calculating...' : 'Re-Calculate Intrest Rate'}
                         </Button>
                     )}
                 </div>
             </DialogContent>
         </Dialog>
-    );
-};
+    )
+}

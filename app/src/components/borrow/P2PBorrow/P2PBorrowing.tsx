@@ -76,7 +76,7 @@ export default function P2PBorrowing() {
                         {connected && (
                             <Dialog>
                                 <DialogTrigger asChild>
-                                    <Button variant='outline' className='px-4'>Request new NFT Collection for borrowing</Button>
+                                    <Button variant='outline' className='px-4'>Request new NFT Collection to borrow</Button>
                                 </DialogTrigger>
                                 <DialogContent className='max-w-[90vw] md:max-w-[425px]'>
                                     <DialogHeader>
