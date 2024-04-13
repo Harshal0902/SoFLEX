@@ -1,7 +1,7 @@
 "use client"
 
 import { ColumnDef } from '@tanstack/react-table'
-import { DataTableColumnHeader } from '@/components/ui/data-table-column-header-info'
+import { DataTableColumnHeader } from '@/components/ui/data-table-column-header'
 import BorrowingNFTCollectionDataType from './P2PBorrowing'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
@@ -46,7 +46,7 @@ export const borrowingNFTCollectionColumns: ColumnDef<BorrowingNFTCollectionData
     {
         accessorKey: 'nftName',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title='NFT Collection Name' info='The name of the NFT Collection available for borrowing.' />
+            <DataTableColumnHeader column={column} title='NFT Collection Name'/>
         ),
     },
     {

@@ -1,7 +1,7 @@
 "use client"
 
 import { ColumnDef } from '@tanstack/react-table'
-import { DataTableColumnHeader } from '@/components/ui/data-table-column-header-info'
+import { DataTableColumnHeader } from '@/components/ui/data-table-column-header'
 import BorrowingAssetDataType from './DeFiBorrowing'
 import BorrowButtonCell from './BorrowButtonCell'
 
@@ -20,7 +20,7 @@ export const borrowingAssetColumns: ColumnDef<BorrowingAssetDataType>[] = [
     {
         accessorKey: 'assetName',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title='Asset Name' info='The name of the asset available for lending.' />
+            <DataTableColumnHeader column={column} title='Asset Name' />
         ),
     },
     {
