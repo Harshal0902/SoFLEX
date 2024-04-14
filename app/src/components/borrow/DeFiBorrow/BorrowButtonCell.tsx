@@ -31,7 +31,7 @@ export type BorrowingAssetDataType = {
 interface NFTType {
     image_uri?: string;
     name?: string;
-    royalty?: number;
+    floorprice?: number;
     external_url?: string;
     mint?: string;
 }
@@ -112,7 +112,7 @@ export default function BorrowButtonCell({ row }: { row: { original: BorrowingAs
                             name: nft.name,
                             external_url: nft.external_url,
                             mint: nft.mint,
-                            royalty: nft.royalty
+                            floorprice: nft.royalty
                         }));
                         setcNFTResult(formattedResult);
                     } else {
@@ -153,7 +153,7 @@ export default function BorrowButtonCell({ row }: { row: { original: BorrowingAs
                             name: nft.name,
                             external_url: nft.external_url,
                             mint: nft.mint,
-                            royalty: nft.royalty
+                            floorprice: nft.royalty
                         }));
                         setNFTResult(formattedResult);
                     } else {
@@ -331,7 +331,7 @@ export default function BorrowButtonCell({ row }: { row: { original: BorrowingAs
                             <div>
                                 <Accordion type='multiple' defaultValue={['cNFT', 'NFT']}>
                                     <AccordionItem value='cNFT'>
-                                        <AccordionTrigger className='hover:no-underline text-left text-xl font-semibold tracking-wide'>Select cNFT(s) or Synthetic Asset(s) for Collateral</AccordionTrigger>
+                                        <AccordionTrigger className='hover:no-underline text-left md:text-xl font-semibold tracking-wide'>Select cNFT(s) or Synthetic Asset(s) for Collateral</AccordionTrigger>
                                         <AccordionContent>
                                             {cNFTLoading ? <Loading /> : (
                                                 <div className='flex flex-row space-x-2 flex-wrap justify-evenly'>
@@ -356,8 +356,8 @@ export default function BorrowButtonCell({ row }: { row: { original: BorrowingAs
                                                                             <a href={`https://solscan.io/token/${nft.mint}`} target='_blank' className='text-primary'>View on Solscan</a>
                                                                             <ExternalLink className='h-4 w-4' />
                                                                         </div>
-                                                                        {nft.royalty && nft.royalty > 0 ? (
-                                                                            <p className='text-center'>cNFT Price: {formatAssetPrice(nft.royalty)} SOL</p>
+                                                                        {nft.floorprice && nft.floorprice > 0 ? (
+                                                                            <p className='text-center'>cNFT Price: {formatAssetPrice(nft.floorprice)} SOL</p>
                                                                         ) : (
                                                                             <p className='text-center'>cNFT Price: 0 SOL</p>
                                                                         )}
@@ -374,7 +374,7 @@ export default function BorrowButtonCell({ row }: { row: { original: BorrowingAs
                                     </AccordionItem>
 
                                     <AccordionItem value='NFT'>
-                                        <AccordionTrigger className='hover:no-underline text-left text-xl font-semibold tracking-wide'>Select NFT(s) for Collateral</AccordionTrigger>
+                                        <AccordionTrigger className='hover:no-underline text-left md:text-xl font-semibold tracking-wide'>Select NFT(s) for Collateral</AccordionTrigger>
                                         <AccordionContent>
                                             {NFTLoading ? <Loading /> : (
                                                 <div className='flex flex-row space-x-2 flex-wrap justify-evenly'>
@@ -399,8 +399,8 @@ export default function BorrowButtonCell({ row }: { row: { original: BorrowingAs
                                                                             <a href={`https://solscan.io/token/${nft.mint}`} target='_blank' className='text-primary'>View on Solscan</a>
                                                                             <ExternalLink className='h-4 w-4' />
                                                                         </div>
-                                                                        {nft.royalty && nft.royalty > 0 ? (
-                                                                            <p className='text-center'>NFT Price: {formatAssetPrice(nft.royalty)} SOL</p>
+                                                                        {nft.floorprice && nft.floorprice > 0 ? (
+                                                                            <p className='text-center'>NFT Price: {formatAssetPrice(nft.floorprice)} SOL</p>
                                                                         ) : (
                                                                             <p className='text-center'>NFT Price: 0 SOL</p>
                                                                         )}
