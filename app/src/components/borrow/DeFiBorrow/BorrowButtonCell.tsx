@@ -86,7 +86,7 @@ export default function BorrowButtonCell({ row }: { row: { original: BorrowingAs
     const { connected } = useWallet();
     const wallet = useWallet();
 
-    const shyft_api_key = process.env.NEXT_PUBLIC_SHYFTAPI;
+    const shyft_api_key = process.env.NEXT_PUBLIC_SHYFTAPI!;
 
     useEffect(() => {
         async function fetchData() {
@@ -94,7 +94,6 @@ export default function BorrowButtonCell({ row }: { row: { original: BorrowingAs
                 setcNFTLoading(true);
 
                 var myHeaders = new Headers();
-                // @ts-ignore
                 myHeaders.append('x-api-key', shyft_api_key);
 
                 var requestOptions: RequestInit = {
@@ -135,7 +134,6 @@ export default function BorrowButtonCell({ row }: { row: { original: BorrowingAs
                 setNFTLoading(true);
 
                 var myHeaders = new Headers();
-                // @ts-ignore
                 myHeaders.append('x-api-key', shyft_api_key);
 
                 var requestOptions: RequestInit = {
@@ -186,7 +184,6 @@ export default function BorrowButtonCell({ row }: { row: { original: BorrowingAs
         setLoading(true);
         try {
             const myHeaders = new Headers();
-            // @ts-ignore
             myHeaders.append('x-api-key', shyft_api_key);
 
             const requestOptions = {
@@ -518,7 +515,7 @@ export default function BorrowButtonCell({ row }: { row: { original: BorrowingAs
                             {loading ? 'Calculating...' : 'Calculate Intrest Rate'}
                         </Button>
                     ) : (
-                        <Button variant='outline' className='text-white w-full mt-4' onClick={knowTransactionHistory} disabled={loading} >
+                        <Button variant='outline' className='w-full mt-4' onClick={knowTransactionHistory} disabled={loading} >
                             {loading ? 'Calculating...' : 'Re-Calculate Intrest Rate'}
                         </Button>
                     )}
