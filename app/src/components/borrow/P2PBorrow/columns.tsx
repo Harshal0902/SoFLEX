@@ -1,11 +1,9 @@
 "use client"
 
 import { ColumnDef } from '@tanstack/react-table'
-import { DataTableColumnHeader } from '@/components/ui/data-table-column-header-info'
+import { DataTableColumnHeader } from '@/components/ui/data-table-column-header'
 import BorrowingNFTCollectionDataType from './P2PBorrowing'
-import { useWallet } from '@solana/wallet-adapter-react'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { Button } from '@/components/ui/button'
+import P2PBorrowButtonCell from './P2PBorrowButtonCell'
 
 export type BorrowingNFTCollectionDataType = {
     nftName: string;
@@ -17,36 +15,11 @@ export type BorrowingNFTCollectionDataType = {
     nftDuration: string;
 }
 
-interface CellProps {
-    row: {
-        original: BorrowingNFTCollectionDataType;
-    };
-}
-
-const Cell: React.FC<CellProps> = ({ row }) => {
-    const { connected } = useWallet();
-
-    return (
-        <TooltipProvider>
-            <Tooltip delayDuration={100}>
-                <TooltipTrigger asChild>
-                    <Button className='text-white' disabled={!connected}>
-                        {connected ? 'Borrow' : 'Connect Wallet'}
-                    </Button>
-                </TooltipTrigger>
-                <TooltipContent className='max-w-[18rem] text-center'>
-                    This functionality is disabled in the live beta demo version.
-                </TooltipContent>
-            </Tooltip>
-        </TooltipProvider>
-    );
-};
-
 export const borrowingNFTCollectionColumns: ColumnDef<BorrowingNFTCollectionDataType>[] = [
     {
         accessorKey: 'nftName',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title='NFT Collection Name' info='The name of the NFT Collection available for borrowing.' />
+            <DataTableColumnHeader column={column} title='NFT Collection Name'/>
         ),
     },
     {
@@ -76,6 +49,6 @@ export const borrowingNFTCollectionColumns: ColumnDef<BorrowingNFTCollectionData
     {
         id: 'actions',
         header: 'Actions',
-        cell: Cell
+        cell: P2PBorrowButtonCell
     }
 ]

@@ -12,13 +12,12 @@ export default function CheckCreditScorePage({ walletAddress }: { walletAddress?
 
     const wallet = useWallet();
 
-    const shyftAPIKey = process.env.NEXT_PUBLIC_SHYFTAPI;
+    const shyftAPIKey = process.env.NEXT_PUBLIC_SHYFTAPI!;
 
     const knowTransactionHistory = async () => {
         setLoading(true);
         try {
             const myHeaders = new Headers();
-            // @ts-ignore
             myHeaders.append('x-api-key', shyftAPIKey);
 
             const requestOptions = {
