@@ -63,7 +63,7 @@ export default function P2PBorrowButtonCell({ row }: { row: { original: Borrowin
                 };
 
                 try {
-                    const response = await fetch(`https://api.shyft.to/sol/v1/wallet/collections?network=mainnet-beta&wallet_address=3rb87yJUQmTbaffYW86yCY3hXNmJdPB1sGjSsHPHjaQj`, requestOptions);
+                    const response = await fetch(`https://api.shyft.to/sol/v1/wallet/collections?network=mainnet-beta&wallet_address=${wallet.publicKey?.toString()}`, requestOptions);
                     const data = await response.json();
                     const collections: CollectionType[] = data.result.collections;
                     let filteredCollections;
