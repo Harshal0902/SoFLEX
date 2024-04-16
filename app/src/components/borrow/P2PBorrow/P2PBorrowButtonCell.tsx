@@ -132,7 +132,7 @@ export default function P2PBorrowButtonCell({ row }: { row: { original: Borrowin
                 <div className='max-h-[45vh] md:max-h-[60vh] overflow-y-auto px-2'>
                     <div className='flex flex-row space-x-2 mt-2'>
                         <div className='relative h-20 w-16 md:h-24 md:w-36'>
-                            <Image src={order.nftLogo} alt={order.nftName} objectFit='cover' fill className='rounded' />
+                            <Image src={order.nftLogo} alt={order.nftName} className='rounded object-cover' fill priority />
                         </div>
                         <div className='flex flex-col items-start w-full mt-1'>
                             <div className='text-xl tracking-wide break-words'>{order.nftName}</div>
@@ -155,7 +155,7 @@ export default function P2PBorrowButtonCell({ row }: { row: { original: Borrowin
 
                     <Accordion type='multiple' defaultValue={['NFT']}>
                         <AccordionItem value='NFT'>
-                            <AccordionTrigger className='hover:no-underline text-left md:text-xl font-semibold tracking-wide'>Select NFT(s) for Collateral</AccordionTrigger>
+                            <AccordionTrigger className='hover:no-underline text-left font-semibold tracking-wide'>Select NFT(s) for Collateral</AccordionTrigger>
                             <AccordionContent>
                                 {NFTLoading ? <Loading /> : (
                                     <div className='flex flex-row space-x-2 flex-wrap justify-evenly'>

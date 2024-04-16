@@ -3,9 +3,7 @@
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/components/ui/data-table-column-header'
 import LendingNFTCollectionDataType from './P2PLending'
-import { useWallet } from '@solana/wallet-adapter-react'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { Button } from '@/components/ui/button'
+import P2PLendingButton from './P2PLendingButton'
 
 export type LendingNFTCollectionDataType = {
     nftName: string;
@@ -15,32 +13,8 @@ export type LendingNFTCollectionDataType = {
     nftIntrest?: string;
     nftAPY?: string;
     nftDuration: string;
+    nftFloorPrice?: string;
 }
-
-interface CellProps {
-    row: {
-        original: LendingNFTCollectionDataType;
-    };
-}
-
-const Cell: React.FC<CellProps> = ({ row }) => {
-    const { connected } = useWallet();
-
-    return (
-        <TooltipProvider>
-            <Tooltip delayDuration={100}>
-                <TooltipTrigger asChild>
-                    <Button className='text-white' disabled={!connected}>
-                        {connected ? 'Lend' : 'Connect Wallet'}
-                    </Button>
-                </TooltipTrigger>
-                <TooltipContent className='max-w-[18rem] text-center'>
-                    This functionality is disabled in the live beta demo version.
-                </TooltipContent>
-            </Tooltip>
-        </TooltipProvider>
-    );
-};
 
 export const lendingNFTCollectionColumns: ColumnDef<LendingNFTCollectionDataType>[] = [
     {
@@ -76,6 +50,6 @@ export const lendingNFTCollectionColumns: ColumnDef<LendingNFTCollectionDataType
     {
         id: 'actions',
         header: 'Actions',
-        cell: Cell
+        cell: P2PLendingButton
     }
 ]

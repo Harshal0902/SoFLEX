@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react'
 import Link from 'next/link'
-import { WalletDisconnectButton, WalletMultiButton } from '@solana/wallet-adapter-react-ui'
+import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
 import { useWallet, useConnection } from '@solana/wallet-adapter-react'
 import { addNewUser } from '@/lib/supabaseRequests'
 import useUserSOLBalance from '@/store/useUserSOLBalanceStore'
@@ -16,7 +16,7 @@ import Notifications from './Notifications'
 import ModeToggle from './ModeToggle'
 
 export default function Navbar() {
-    const { connected } = useWallet();
+    const { connected, disconnect } = useWallet();
     const wallet = useWallet();
     const { connection } = useConnection();
     const { balance, getUserSOLBalance } = useUserSOLBalance();
@@ -44,6 +44,10 @@ export default function Navbar() {
             getUserSOLBalance(wallet.publicKey, connection)
         }
     }, [wallet.publicKey, connection, getUserSOLBalance])
+
+    const handleDisconnect = async () => {
+        disconnect();
+    };
 
     return (
         <div className='backdrop-blur-3xl fixed z-50 w-full'>
@@ -103,15 +107,10 @@ export default function Navbar() {
                                                 Check Credit Score
                                             </div>
                                         </Link>
-                                        <div className='relative'>
-                                            <div className='flex flex-row justify-between items-center text-destructive cursor-pointer'>
-                                                Disconnect Wallet
-                                                <div>
-                                                    <LogOut size={16} />
-                                                </div>
-                                            </div>
-                                            <div className='absolute top-0 left-0 opacity-0'>
-                                                <WalletDisconnectButton />
+                                        <div className='flex flex-row justify-between items-center text-destructive cursor-pointer' onClick={handleDisconnect}>
+                                            Disconnect Wallet
+                                            <div>
+                                                <LogOut size={16} />
                                             </div>
                                         </div>
                                     </PopoverContent>
