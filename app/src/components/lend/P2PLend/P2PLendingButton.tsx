@@ -87,7 +87,7 @@ export default function P2PLendingButton({ row }: { row: { original: LendingNFTC
                             <Image src={order.nftLogo} alt={order.nftName} className='rounded object-cover' fill priority />
                         </div>
                         <div className='flex flex-col items-start w-full mt-1'>
-                            <div className='text-xl tracking-wide break-words'>{order.nftName} llll</div>
+                            <div className='text-xl tracking-wide break-words'>{order.nftName}</div>
                             <div className='grid grid-flow-col justify-between items-center col-span-3 w-full pt-1.5'>
                                 <div className='border rounded p-2 flex flex-col items-center justify-center px-[3vw] md:px-10'>
                                     <h1 className='text-[0.6rem] md:text-sm tracking-wider break-words'>Floor</h1>
