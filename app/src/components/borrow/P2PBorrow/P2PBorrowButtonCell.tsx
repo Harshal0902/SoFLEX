@@ -207,7 +207,8 @@ export default function P2PBorrowButtonCell({ row }: { row: { original: Borrowin
                             </AccordionContent>
                         </AccordionItem>
                     </Accordion>
-                    <Button type='submit' className='text-white w-full mt-4' disabled={isSubmitting || filteredCollections.length === 0}>
+                    {/* <Button type='submit' className='text-white w-full mt-4' disabled={isSubmitting || filteredCollections.length === 0}> */}
+                    <Button type='submit' className='text-white w-full mt-4' disabled>
                         {isSubmitting && <Loader2 className='animate-spin mr-2' size={15} />}
                         {isSubmitting ? 'Borrowing...' : 'Borrow'}
                     </Button>
