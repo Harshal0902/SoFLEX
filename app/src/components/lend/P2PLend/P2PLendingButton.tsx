@@ -47,7 +47,7 @@ export default function P2PLendingButton({ row }: { row: { original: LendingNFTC
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
-            lending_amount: order.nftFloorPrice ? parseFloat(order.nftFloorPrice) : 0,
+            lending_amount: order.neftBestOffer ? parseFloat(order.neftBestOffer) : 0,
         },
     });
 
@@ -136,14 +136,22 @@ export default function P2PLendingButton({ row }: { row: { original: LendingNFTC
                                 </div>
                             </div>
 
-                            <div className='grid grid-cols-5 gap-2 items-center justify-center'>
-                                <div className='col-span-1 border rounded p-2 grid place-items-center cursor-pointer' onClick={handleDecrease}>
-                                    <Minus className='h-5 w-5 md:h-6 md:w-6' />
+                            <div>
+                                <h1 className='text-sm font-medium leading-none py-2'>Number of Offers</h1>
+                                <div className='grid grid-cols-5 gap-2 items-center justify-center'>
+                                    <div className='col-span-1 border rounded p-2 grid place-items-center cursor-pointer' onClick={handleDecrease}>
+                                        <Minus className='h-5 w-5 md:h-6 md:w-6' />
+                                    </div>
+                                    <div className='col-span-3 border rounded p-2 md:p-1.5 grid place-items-center text-sm md:text-lg'>{offerCount}</div>
+                                    <div className='col-span-1 border rounded p-2 grid place-items-center cursor-pointer' onClick={handleIncrease}>
+                                        <Plus className='h-5 w-5 md:h-6 md:w-6' />
+                                    </div>
                                 </div>
-                                <div className='col-span-3 border rounded p-2 md:p-1.5 grid place-items-center text-sm md:text-lg'>{offerCount}</div>
-                                <div className='col-span-1 border rounded p-2 grid place-items-center cursor-pointer' onClick={handleIncrease}>
-                                    <Plus className='h-5 w-5 md:h-6 md:w-6' />
-                                </div>
+                            </div>
+
+                            <div className='py-2'>
+                                {/* @ts-ignore */}
+                                <p className='text-lg'>Your total is {parseFloat(form.watch('lending_amount') * offerCount).toFixed(4)} SOL</p>
                             </div>
 
                             {/* <Button type='submit' className='text-white w-full mt-4' disabled={isSubmitting}> */}
