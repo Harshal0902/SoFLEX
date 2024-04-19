@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
-import { WalletDisconnectButton, WalletMultiButton } from '@solana/wallet-adapter-react-ui'
+import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
 import { useWallet, useConnection } from '@solana/wallet-adapter-react'
 import { addNewUser } from '@/lib/supabaseRequests'
 import { toast } from 'sonner'
@@ -59,7 +59,7 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
         }
     }
 
-    const { connected } = useWallet();
+    const { connected, disconnect } = useWallet();
     const wallet = useWallet();
     const { connection } = useConnection();
     const { balance, getUserSOLBalance } = useUserSOLBalance();
@@ -87,6 +87,10 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
             getUserSOLBalance(wallet.publicKey, connection)
         }
     }, [wallet.publicKey, connection, getUserSOLBalance])
+
+    const handleDisconnect = async () => {
+        disconnect();
+    };
 
     return (
         <div className='lg:hidden'>
@@ -229,14 +233,9 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
                                             </div>
 
                                             <div className='border-y-2 py-2 px-2 cursor-pointer w-full'>
-                                                <div className='relative'>
-                                                    <Button variant='destructive' className='text-md w-full'>
-                                                        Disconnect Wallet
-                                                    </Button>
-                                                    <div className='absolute top-0 right-0 w-[133px] h-[40px] opacity-0'>
-                                                        <WalletDisconnectButton />
-                                                    </div>
-                                                </div>
+                                                <Button variant='destructive' className='text-md w-full' onClick={handleDisconnect}>
+                                                    Disconnect Wallet
+                                                </Button>
                                             </div>
                                         </>
                                     )}

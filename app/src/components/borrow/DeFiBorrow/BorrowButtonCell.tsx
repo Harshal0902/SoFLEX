@@ -328,7 +328,7 @@ export default function BorrowButtonCell({ row }: { row: { original: BorrowingAs
                             <div>
                                 <Accordion type='multiple' defaultValue={['cNFT', 'NFT']}>
                                     <AccordionItem value='cNFT'>
-                                        <AccordionTrigger className='hover:no-underline text-left md:text-xl font-semibold tracking-wide'>Select cNFT(s) or Synthetic Asset(s) for Collateral</AccordionTrigger>
+                                        <AccordionTrigger className='hover:no-underline text-left font-semibold tracking-wide'>Select cNFT(s) or Synthetic Asset(s) for Collateral</AccordionTrigger>
                                         <AccordionContent>
                                             {cNFTLoading ? <Loading /> : (
                                                 <div className='flex flex-row space-x-2 flex-wrap justify-evenly'>
@@ -371,7 +371,7 @@ export default function BorrowButtonCell({ row }: { row: { original: BorrowingAs
                                     </AccordionItem>
 
                                     <AccordionItem value='NFT'>
-                                        <AccordionTrigger className='hover:no-underline text-left md:text-xl font-semibold tracking-wide'>Select NFT(s) for Collateral</AccordionTrigger>
+                                        <AccordionTrigger className='hover:no-underline text-left font-semibold tracking-wide'>Select NFT(s) for Collateral</AccordionTrigger>
                                         <AccordionContent>
                                             {NFTLoading ? <Loading /> : (
                                                 <div className='flex flex-row space-x-2 flex-wrap justify-evenly'>
