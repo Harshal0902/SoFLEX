@@ -20,6 +20,7 @@ interface NewDeFiLendingType {
     walletAddress?: string;
     lendingAmount: string;
     lendingToken: string;
+    transactionSignature: string;
 }
 
 interface NewDeFiBorrowingType {
@@ -169,7 +170,7 @@ export const newAssetLendingRequest = async ({ walletAddress, requestedAssetname
     }
 };
 
-export const newDeFiLending = async ({ walletAddress, lendingAmount, lendingToken }: NewDeFiLendingType) => {
+export const newDeFiLending = async ({ walletAddress, lendingAmount, lendingToken, transactionSignature }: NewDeFiLendingType) => {
     try {
         const uuid = crypto.randomBytes(16).toString('hex');
         const generateNewLendingId = uuid.substring(0, 8) + uuid.substring(9, 13) + uuid.substring(14, 18) + uuid.substring(19, 23) + uuid.substring(24);
@@ -183,6 +184,7 @@ export const newDeFiLending = async ({ walletAddress, lendingAmount, lendingToke
                 user_address: walletAddress,
                 lending_amount: lendingAmount,
                 lending_token: lendingToken,
+                transaction_signature: transactionSignature,
                 lending_submitted_at: created_at
             })
             .select();

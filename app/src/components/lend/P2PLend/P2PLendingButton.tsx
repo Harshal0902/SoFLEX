@@ -51,6 +51,12 @@ export default function P2PLendingButton({ row }: { row: { original: LendingNFTC
         },
     });
 
+    // @ts-ignore
+    const lendingAmount = parseFloat(form.watch('lending_amount'));
+    // @ts-ignore
+    const nftFloorPrice = parseFloat(order.nftFloorPrice);
+    const threshold = nftFloorPrice * 0.9;
+
     const handleIncrease = () => {
         if (offerCount < 9) {
             setOfferCount(offerCount + 1);
@@ -117,12 +123,15 @@ export default function P2PLendingButton({ row }: { row: { original: LendingNFTC
                                         <FormItem className='w-full'>
                                             <FormLabel>Offer Amount (in SOL)</FormLabel>
                                             <FormControl>
-                                                <Input type='number' placeholder='Offer Amount' {...field} />
+                                                {/* @ts-ignore */}
+                                                <Input type='number' max={parseFloat(order.nftFloorPrice)} placeholder='Offer Amount' {...field} />
                                             </FormControl>
                                             <FormDescription>
                                                 Enter the amount you want to lend
                                             </FormDescription>
-                                            {/* <p className='text-sm text-destructive'>This offer amount is more than the current floor price!</p> */}
+                                            {lendingAmount >= threshold && (
+                                                <p className='text-sm text-destructive'>This offer amount is close to the current floor price!</p>
+                                            )}
                                             <FormMessage />
                                         </FormItem>
                                     )}

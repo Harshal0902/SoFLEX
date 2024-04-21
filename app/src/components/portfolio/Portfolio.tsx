@@ -134,6 +134,13 @@ export default function Portfolio({ walletAddress }: { walletAddress?: string })
 
     const cardData: CardData[] = [
         {
+            title: 'Active Lending Value',
+            tooltipContent: 'See the SOL value of your active lending portfolio.',
+            icon: Activity,
+            currentData: userStats[0]?.activelendingvalue,
+            lastMonthData: userStats[0]?.activelendingvaluelastmonth
+        },
+        {
             title: 'Interest Earned',
             tooltipContent: 'Track your net SOL interest earned from completed loans.',
             icon: DollarSign,
@@ -161,13 +168,6 @@ export default function Portfolio({ walletAddress }: { walletAddress?: string })
             currentData: userStats[0]?.activeborrowingsvalue,
             lastMonthData: userStats[0]?.activeborrowingsvaluelastmonth
         },
-        {
-            title: 'Active Lending Value',
-            tooltipContent: 'See the SOL value of your active lending portfolio',
-            icon: Activity,
-            currentData: userStats[0]?.activelendingvalue,
-            lastMonthData: userStats[0]?.activelendingvaluelastmonth
-        }
     ];
 
     return (

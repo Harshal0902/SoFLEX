@@ -32,8 +32,10 @@ create table
     lending_submitted_at timestamp with time zone null,
     lending_id text not null,
     lending_token text not null,
+    transaction_signature text not null,
     constraint defi_lending_pkey primary key (lending_id),
     constraint defi_lending_lending_id_key unique (lending_id),
+    constraint defi_lending_transaction_signature_key unique (transaction_signature),
     constraint public_defi_lending_user_address_fkey foreign key (user_address) references users (user_address)
   ) tablespace pg_default;
 
