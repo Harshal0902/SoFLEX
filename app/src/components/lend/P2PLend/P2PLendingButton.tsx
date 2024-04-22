@@ -13,14 +13,14 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormDescription, For
 import { Input } from '@/components/ui/input'
 
 export type LendingNFTCollectionDataType = {
-    nftName: string;
-    nftLogo: string;
-    nftPool: string;
-    neftBestOffer?: string;
-    nftIntrest?: string;
-    nftAPY?: string;
-    nftDuration: string;
-    nftFloorPrice?: string;
+    nft_name: string;
+    nft_logo: string;
+    nft_pool: string;
+    nft_best_offer?: string;
+    nft_intrest?: string;
+    nft_apy?: string;
+    nft_duration: string;
+    nft_floor_price?: string;
 }
 
 const FormSchema = z.object({
@@ -47,15 +47,15 @@ export default function P2PLendingButton({ row }: { row: { original: LendingNFTC
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
-            lending_amount: order.neftBestOffer ? parseFloat(order.neftBestOffer) : 0,
+            lending_amount: order.nft_best_offer ? parseFloat(order.nft_best_offer) : 0,
         },
     });
 
     // @ts-ignore
     const lendingAmount = parseFloat(form.watch('lending_amount'));
     // @ts-ignore
-    const nftFloorPrice = parseFloat(order.nftFloorPrice);
-    const threshold = nftFloorPrice * 0.9;
+    const nft_floor_price = parseFloat(order.nft_floor_price);
+    const threshold = nft_floor_price * 0.9;
 
     const handleIncrease = () => {
         if (offerCount < 9) {
@@ -90,22 +90,22 @@ export default function P2PLendingButton({ row }: { row: { original: LendingNFTC
                 <div className='max-h-[45vh] md:max-h-[60vh] overflow-y-auto px-2'>
                     <div className='flex flex-row space-x-2 mt-2'>
                         <div className='relative h-20 w-16 md:h-24 md:w-36'>
-                            <Image src={order.nftLogo} alt={order.nftName} className='rounded object-cover' fill priority />
+                            <Image src={order.nft_logo} alt={order.nft_name} className='rounded object-cover' fill priority />
                         </div>
                         <div className='flex flex-col items-start w-full mt-1'>
-                            <div className='text-xl tracking-wide break-words'>{order.nftName}</div>
+                            <div className='text-xl tracking-wide break-words'>{order.nft_name}</div>
                             <div className='grid grid-flow-col justify-between items-center col-span-3 w-full pt-1.5'>
                                 <div className='border rounded p-2 flex flex-col items-center justify-center px-[3vw] md:px-10'>
                                     <h1 className='text-[0.6rem] md:text-sm tracking-wider break-words'>Floor</h1>
-                                    <p className='text-[0.5rem] md:text-sm'>{order.nftFloorPrice} SOL</p>
+                                    <p className='text-[0.5rem] md:text-sm'>{order.nft_floor_price} SOL</p>
                                 </div>
                                 <div className='border rounded p-2 flex flex-col items-center justify-center px-[3vw] md:px-10'>
                                     <h1 className='text-[0.6rem] md:text-sm tracking-wider break-words'>APY</h1>
-                                    <p className='text-[0.5rem] md:text-sm'>{order.nftAPY}</p>
+                                    <p className='text-[0.5rem] md:text-sm'>{order.nft_apy}</p>
                                 </div>
                                 <div className='border rounded p-2 flex flex-col items-center justify-center px-[3vw] md:px-10'>
                                     <h1 className='text-[0.6rem] md:text-sm tracking-wider break-words'>Duration</h1>
-                                    <p className='text-[0.5rem] md:text-sm'>{order.nftDuration}</p>
+                                    <p className='text-[0.5rem] md:text-sm'>{order.nft_duration}</p>
                                 </div>
                             </div>
                         </div>
@@ -124,7 +124,7 @@ export default function P2PLendingButton({ row }: { row: { original: LendingNFTC
                                             <FormLabel>Offer Amount (in SOL)</FormLabel>
                                             <FormControl>
                                                 {/* @ts-ignore */}
-                                                <Input type='number' max={parseFloat(order.nftFloorPrice)} placeholder='Offer Amount' {...field} />
+                                                <Input type='number' max={parseFloat(order.nft_floor_price)} placeholder='Offer Amount' {...field} />
                                             </FormControl>
                                             <FormDescription>
                                                 Enter the amount you want to lend
@@ -140,8 +140,8 @@ export default function P2PLendingButton({ row }: { row: { original: LendingNFTC
                                 <div className='w-full'>
                                     <h1 className='text-sm font-medium leading-none md:pt-2'>Total Intrest (in SOL)</h1>
                                     {/* @ts-ignore */}
-                                    <h1 className='text-lg md:text-2xl py-1 md:py-3'>{(parseFloat(order.nftIntrest) / 100) * parseFloat(form.watch('lending_amount') * offerCount).toFixed(4)} SOL</h1>
-                                    <p className='text-sm text-muted-foreground'>{order.nftIntrest} x {offerCount}</p>
+                                    <h1 className='text-lg md:text-2xl py-1 md:py-3'>{(parseFloat(order.nft_intrest) / 100) * parseFloat(form.watch('lending_amount') * offerCount).toFixed(4)} SOL</h1>
+                                    <p className='text-sm text-muted-foreground'>{order.nft_intrest} x {offerCount}</p>
                                 </div>
                             </div>
 

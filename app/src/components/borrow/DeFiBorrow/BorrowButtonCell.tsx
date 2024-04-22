@@ -18,13 +18,13 @@ import Image from 'next/image'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 export type BorrowingAssetDataType = {
-    assetName: string;
-    assetSymbol: string;
-    assetLogo: string;
-    assetPrice: string;
-    totalSupply: string;
-    assetYield: string;
-    totalBorrow: string;
+    asset_name: string;
+    asset_symbol: string;
+    asset_logo: string;
+    asset_price: string;
+    total_supply: string;
+    asset_yield: string;
+    total_borrow: string;
     ltv: string;
 }
 
@@ -168,7 +168,7 @@ export default function BorrowButtonCell({ row }: { row: { original: BorrowingAs
         fetchData();
     }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    function formatAssetPrice(value: number): string {
+    function formatAsset_price(value: number): string {
         return (value / 100).toFixed(5);
     }
 
@@ -251,10 +251,11 @@ export default function BorrowButtonCell({ row }: { row: { original: BorrowingAs
             const data = await newDeFiBorrowing({
                 walletAddress: wallet.publicKey?.toString(),
                 borrowingAmount: values.borrowing_amount,
-                borrowingToken: order.assetSymbol,
+                borrowingToken: order.asset_symbol,
                 collateralizationAssets: ['none'],
                 borrowingDuration: values.borrowing_duration,
                 borrowingInterestRate: interestRate,
+                borrowingCollateralType: 'NFT',
             });
 
             setIsSubmitting(true);
@@ -296,7 +297,7 @@ export default function BorrowButtonCell({ row }: { row: { original: BorrowingAs
                                 name='borrowing_amount'
                                 render={({ field }) => (
                                     <FormItem className='w-full'>
-                                        <FormLabel>Borrowing amount (in {order.assetSymbol})</FormLabel>
+                                        <FormLabel>Borrowing amount (in {order.asset_symbol})</FormLabel>
                                         <FormControl>
                                             <Input {...field} />
                                         </FormControl>
@@ -322,7 +323,7 @@ export default function BorrowButtonCell({ row }: { row: { original: BorrowingAs
                                         </Tooltip>
                                     </TooltipProvider>
                                 </div>
-                                <div>{order.assetPrice}</div>
+                                <div>{order.asset_price}</div>
                             </div>
 
                             <div>
@@ -354,7 +355,7 @@ export default function BorrowButtonCell({ row }: { row: { original: BorrowingAs
                                                                             <ExternalLink className='h-4 w-4' />
                                                                         </div>
                                                                         {nft.floorprice && nft.floorprice > 0 ? (
-                                                                            <p className='text-center'>cNFT Price: {formatAssetPrice(nft.floorprice)} SOL</p>
+                                                                            <p className='text-center'>cNFT Price: {formatAsset_price(nft.floorprice)} SOL</p>
                                                                         ) : (
                                                                             <p className='text-center'>cNFT Price: 0 SOL</p>
                                                                         )}
@@ -397,7 +398,7 @@ export default function BorrowButtonCell({ row }: { row: { original: BorrowingAs
                                                                             <ExternalLink className='h-4 w-4' />
                                                                         </div>
                                                                         {nft.floorprice && nft.floorprice > 0 ? (
-                                                                            <p className='text-center'>NFT Price: {formatAssetPrice(nft.floorprice)} SOL</p>
+                                                                            <p className='text-center'>NFT Price: {formatAsset_price(nft.floorprice)} SOL</p>
                                                                         ) : (
                                                                             <p className='text-center'>NFT Price: 0 SOL</p>
                                                                         )}

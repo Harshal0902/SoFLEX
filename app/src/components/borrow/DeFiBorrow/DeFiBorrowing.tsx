@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { newAssetLendingRequest, teAssetDetails } from '@/lib/supabaseRequests'
+import { newAssetLendingRequest, assetDetails } from '@/lib/supabaseRequests'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { BorrowingAssetDataType, borrowingAssetColumns } from './columns'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
@@ -32,7 +32,7 @@ export default function DeFiBorrowing() {
 
   useEffect(() => {
     const fetchAssetData = async () => {
-      const result = await teAssetDetails();
+      const result = await assetDetails();
       if (Array.isArray(result)) {
         setBorrowingAssetData(result);
       } else {
@@ -149,9 +149,9 @@ export default function DeFiBorrowing() {
               columns={borrowingAssetColumns}
               data={borrowingAssetData.map(asset => ({
                 ...asset,
-                assetPrice: assetPrices[asset.assetSymbol] ? formatPrice(assetPrices[asset.assetSymbol]) : asset.assetPrice
+                assetPrice: assetPrices[asset.asset_symbol] ? formatPrice(assetPrices[asset.asset_symbol]) : asset.asset_price
               }))}
-              userSearchColumn='assetName'
+              userSearchColumn='asset_name'
               inputPlaceHolder='Search for assets'
               noResultsMessage='No assets found'
             />

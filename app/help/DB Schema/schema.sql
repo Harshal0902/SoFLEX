@@ -47,9 +47,36 @@ create table
     borrowing_submitted_at timestamp with time zone null,
     borrowing_token text null,
     borrowing_collateralization_assets text[] null,
-    borrowing_duration integer null,
+    borrowing_duration text null,
     borrowing_interest_rate text null,
+    borrowing_collateral_type text not null,
     constraint defi_borrowing_pkey primary key (borrow_id),
     constraint defi_borrowing_borrow_id_key unique (borrow_id),
     constraint public_defi_borrowing_user_address_fkey foreign key (user_address) references users (user_address)
+  ) tablespace pg_default;
+
+create table
+  public.asset_details (
+    asset_name text not null,
+    asset_symbol text null,
+    asset_logo text null,
+    asset_price text null,
+    total_supply text null,
+    asset_yield text null,
+    total_borrow text null,
+    ltv text null,
+    constraint asset_details_pkey primary key (asset_name)
+  ) tablespace pg_default;
+
+create table
+  public.nft_collection_details (
+    nft_name text not null,
+    nft_logo text null,
+    nft_pool text null,
+    nft_best_offer text null,
+    nft_intrest text null,
+    nft_duration text null,
+    nft_apy text null,
+    nft_floor_price text null,
+    constraint nft_collection_details_pkey primary key (nft_name)
   ) tablespace pg_default;

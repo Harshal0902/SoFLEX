@@ -29,7 +29,8 @@ interface NewDeFiBorrowingType {
     borrowingToken: string;
     collateralizationAssets: string[];
     borrowingDuration: string;
-    borrowingInterestRate?: string
+    borrowingInterestRate?: string;
+    borrowingCollateralType: string;
 }
 
 export const addUserWaitlist = async ({ email }: WaitlistUserType) => {
@@ -199,7 +200,7 @@ export const newDeFiLending = async ({ walletAddress, lendingAmount, lendingToke
     }
 };
 
-export const newDeFiBorrowing = async ({ walletAddress, borrowingAmount, borrowingToken, collateralizationAssets, borrowingDuration, borrowingInterestRate }: NewDeFiBorrowingType) => {
+export const newDeFiBorrowing = async ({ walletAddress, borrowingAmount, borrowingToken, collateralizationAssets, borrowingDuration, borrowingInterestRate, borrowingCollateralType }: NewDeFiBorrowingType) => {
     try {
         const uuid = crypto.randomBytes(16).toString('hex');
         const generateNewBorrowingId = uuid.substring(0, 8) + uuid.substring(9, 13) + uuid.substring(14, 18) + uuid.substring(19, 23) + uuid.substring(24);
@@ -216,6 +217,7 @@ export const newDeFiBorrowing = async ({ walletAddress, borrowingAmount, borrowi
                 borrowing_collateralization_assets: collateralizationAssets,
                 borrowing_duration: borrowingDuration,
                 borrowing_interest_rate: borrowingInterestRate,
+                borrowing_collateral_type: borrowingCollateralType,
                 borrowing_submitted_at: created_at
             })
             .select();
@@ -230,10 +232,10 @@ export const newDeFiBorrowing = async ({ walletAddress, borrowingAmount, borrowi
     }
 };
 
-export const teAssetDetails = async () => {
+export const assetDetails = async () => {
     try {
         const { data, error } = await supabase
-            .from('te_asset_details')
+            .from('asset_details')
             .select('*');
 
         if (error) {
@@ -248,10 +250,10 @@ export const teAssetDetails = async () => {
     }
 };
 
-export const teNFTCollectionDetails = async () => {
+export const nftCollectionDetails = async () => {
     try {
         const { data, error } = await supabase
-            .from('te_nft_collection_details')
+            .from('nft_collection_details')
             .select('*');
 
         if (error) {

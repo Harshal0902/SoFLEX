@@ -16,13 +16,13 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormDescription, For
 import { Input } from '@/components/ui/input'
 
 export type LendingAssetDataType = {
-    assetName: string;
-    assetSymbol: string;
-    assetLogo: string;
-    assetPrice: string;
-    totalSupply: string;
-    assetYield: string;
-    totalBorrow: string;
+    asset_name: string;
+    asset_symbol: string;
+    asset_logo: string;
+    asset_price: string;
+    total_supply: string;
+    asset_yield: string;
+    total_borrow: string;
     ltv: string;
 }
 
@@ -80,7 +80,7 @@ export default function LendButtonCell({ row }: { row: { original: LendingAssetD
             let amount;
             let tokenAddress;
 
-            if (order.assetSymbol === 'SOL') {
+            if (order.asset_symbol === 'SOL') {
                 amount = LAMPORTS_PER_SOL * parseFloat(values.lending_amount);
                 const transaction = new web3.Transaction();
                 const sendSolInstruction = web3.SystemProgram.transfer({
@@ -92,23 +92,23 @@ export default function LendButtonCell({ row }: { row: { original: LendingAssetD
                 sig = await sendTransaction(transaction, connection);
             } else {
                 amount = parseFloat(values.lending_amount);
-                if (order.assetSymbol === 'USDC') {
+                if (order.asset_symbol === 'USDC') {
                     tokenAddress = new web3.PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
-                } else if (order.assetSymbol === 'USDT') {
+                } else if (order.asset_symbol === 'USDT') {
                     tokenAddress = new web3.PublicKey('Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB');
-                } else if (order.assetSymbol === 'JUP') {
+                } else if (order.asset_symbol === 'JUP') {
                     tokenAddress = new web3.PublicKey('JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN');
-                } else if (order.assetSymbol === 'PYTH') {
+                } else if (order.asset_symbol === 'PYTH') {
                     tokenAddress = new web3.PublicKey('HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3RKwX8eACQBCt3');
-                } else if (order.assetSymbol === 'JTO') {
+                } else if (order.asset_symbol === 'JTO') {
                     tokenAddress = new web3.PublicKey('jtojtomepa8beP8AuQc6eXt5FriJwfFMwQx2v2f9mCL');
-                } else if (order.assetSymbol === 'RAY') {
+                } else if (order.asset_symbol === 'RAY') {
                     tokenAddress = new web3.PublicKey('4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R');
-                } else if (order.assetSymbol === 'BLZE') {
+                } else if (order.asset_symbol === 'BLZE') {
                     tokenAddress = new web3.PublicKey('BLZEEuZUBVqFhj8adcCFPJvPVCiCyVmh3hkJMrU8KuJA');
-                } else if (order.assetSymbol === 'tBTC') {
+                } else if (order.asset_symbol === 'tBTC') {
                     tokenAddress = new web3.PublicKey('6DNSN2BJsaPFdFFc1zP37kkeNe4Usc1Sqkzr9C9vPWcU');
-                } else if (order.assetSymbol === 'mSOL') {
+                } else if (order.asset_symbol === 'mSOL') {
                     tokenAddress = new web3.PublicKey('mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So');
                 }
 
@@ -132,7 +132,7 @@ export default function LendButtonCell({ row }: { row: { original: LendingAssetD
                 const data = await newDeFiLending({
                     walletAddress: wallet.publicKey?.toString(),
                     lendingAmount: values.lending_amount,
-                    lendingToken: order.assetSymbol,
+                    lendingToken: order.asset_symbol,
                     transactionSignature: sig
                 });
 
@@ -175,9 +175,9 @@ export default function LendButtonCell({ row }: { row: { original: LendingAssetD
                                 name='lending_amount'
                                 render={({ field }) => (
                                     <FormItem className='w-full'>
-                                        <FormLabel>Lending amount (in {order.assetSymbol})</FormLabel>
+                                        <FormLabel>Lending amount (in {order.asset_symbol})</FormLabel>
                                         <FormControl>
-                                            <Input {...field} placeholder={`Enter the ${order.assetSymbol} you want to lend `} />
+                                            <Input {...field} placeholder={`Enter the ${order.asset_symbol} you want to lend `} />
                                         </FormControl>
                                         <FormDescription>
                                             Enter the amount you want to lend.
@@ -202,7 +202,7 @@ export default function LendButtonCell({ row }: { row: { original: LendingAssetD
                                             </Tooltip>
                                         </TooltipProvider>
                                     </div>
-                                    <div>{order.assetPrice}</div>
+                                    <div>{order.asset_price}</div>
                                 </div>
                                 <div className='flex flex-row items-center justify-between'>
                                     <div className='flex flex-row items-center space-x-1'>
@@ -218,7 +218,7 @@ export default function LendButtonCell({ row }: { row: { original: LendingAssetD
                                             </Tooltip>
                                         </TooltipProvider>
                                     </div>
-                                    <div>{order.assetYield}</div>
+                                    <div>{order.asset_yield}</div>
                                 </div>
                             </div>
 

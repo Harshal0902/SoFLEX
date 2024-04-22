@@ -8,19 +8,19 @@ import { DataTablePagination } from '@/components/ui/data-table-pagination-p2p'
 import { Search, X } from 'lucide-react'
 import Image from 'next/image'
 
-interface LendingData {
-    nftName: string;
-    nftLogo: string;
-    nftPool: string;
-    neftBestOffer?: string;
-    nftIntrest?: string;
-    nftAPY?: string;
-    nftDuration: string;
+interface NFTCOllectionDataType {
+    nft_name: string;
+    nft_logo: string;
+    nft_pool: string;
+    nft_best_offer?: string;
+    nft_intrest?: string;
+    nft_apy?: string;
+    nft_duration: string;
 }
 
 interface DataTableProps<TData, TValue> {
-    columns: ColumnDef<LendingData>[];
-    data: LendingData[];
+    columns: ColumnDef<NFTCOllectionDataType>[];
+    data: NFTCOllectionDataType[];
     userSearchColumn: string;
     inputPlaceHolder: string;
     noResultsMessage: string;
@@ -112,11 +112,11 @@ export function DataTable<TData, TValue>({
                                 >
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell key={cell.id}>
-                                            {cell.column.id === 'nftName' ? (
+                                            {cell.column.id === 'nft_name' ? (
                                                 <div className='flex flex-row items-center'>
-                                                    <Image src={row.original.nftLogo} alt={row.original.nftName} width={45} height={45} priority className='mr-2 rounded' />
+                                                    <Image src={row.original.nft_logo} alt={row.original.nft_name} width={45} height={45} priority className='mr-2 rounded' />
                                                     <div className='flex flex-col'>
-                                                        <span>{row.original.nftName}</span>
+                                                        <span>{row.original.nft_name}</span>
                                                     </div>
                                                 </div>
                                             ) : (

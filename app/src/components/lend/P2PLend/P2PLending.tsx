@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { newAssetLendingRequest, teNFTCollectionDetails } from '@/lib/supabaseRequests'
+import { newAssetLendingRequest, nftCollectionDetails } from '@/lib/supabaseRequests'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { LendingNFTCollectionDataType, lendingNFTCollectionColumns } from './columns'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
@@ -31,7 +31,7 @@ export default function P2PLending() {
 
     useEffect(() => {
         const fetchNFTCollectionData = async () => {
-            const result = await teNFTCollectionDetails();
+            const result = await nftCollectionDetails();
             if (Array.isArray(result)) {
                 setLendingNFTCollectionData(result);
             } else {
@@ -120,7 +120,7 @@ export default function P2PLending() {
                             data={lendingNFTCollectionData.map(nftCollection => ({
                                 ...nftCollection,
                             }))}
-                            userSearchColumn='nftName'
+                            userSearchColumn='nft_name'
                             inputPlaceHolder='Search for NFT Collection'
                             noResultsMessage='No NFT Collection found'
                         />

@@ -10,13 +10,13 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import Loading from '@/components/Loading'
 
 export type BorrowingNFTCollectionDataType = {
-    nftName: string;
-    nftLogo: string;
-    nftPool: string;
-    neftBestOffer?: string;
-    nftIntrest?: string;
-    nftAPY?: string;
-    nftDuration: string;
+    nft_name: string;
+    nft_logo: string;
+    nft_pool: string;
+    nft_best_offer?: string;
+    nft_intrest?: string;
+    nft_apy?: string;
+    nft_duration: string;
 }
 
 type CollectionType = {
@@ -48,6 +48,32 @@ export default function P2PBorrowButtonCell({ row }: { row: { original: Borrowin
         }
     };
 
+    const addOrdinalSuffix = (day: number) => {
+        if (day >= 11 && day <= 13) {
+            return `${day}th`;
+        }
+        switch (day % 10) {
+            case 1: return `${day}st`;
+            case 2: return `${day}nd`;
+            case 3: return `${day}rd`;
+            default: return `${day}th`;
+        }
+    }
+
+    const today = new Date();
+
+    const futureDate = new Date(today);
+    futureDate.setDate(futureDate.getDate() + parseInt(order.nft_duration));
+
+    const dueByDate = `${addOrdinalSuffix(futureDate.getDate())} ${futureDate.toLocaleString('en-US', {
+        month: 'long',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+    })}`;
+
+    console.log(dueByDate);
+
     useEffect(() => {
         async function fetchData() {
             if (open) {
@@ -67,27 +93,27 @@ export default function P2PBorrowButtonCell({ row }: { row: { original: Borrowin
                     const data = await response.json();
                     const collections: CollectionType[] = data.result.collections;
                     let filteredCollections;
-                    if (order.nftName === 'Degods') {
+                    if (order.nft_name === 'Degods') {
                         filteredCollections = collections.filter(collection => collection.nfts.some(nft => nft.name.includes('DeGod')));
-                    } else if (order.nftName === 'Taiyo Robotics') {
+                    } else if (order.nft_name === 'Taiyo Robotics') {
                         filteredCollections = collections.filter(collection => collection.nfts.some(nft => nft.name.includes('Taiyo')));
-                    } else if (order.nftName === 'Cyber Frogs') {
+                    } else if (order.nft_name === 'Cyber Frogs') {
                         filteredCollections = collections.filter(collection => collection.nfts.some(nft => nft.name.includes('Cyber Frogs')));
-                    } else if (order.nftName === 'The Lowlifes [0.G]') {
+                    } else if (order.nft_name === 'The Lowlifes [0.G]') {
                         filteredCollections = collections.filter(collection => collection.nfts.some(nft => nft.name.includes('The Lowlifes')));
-                    } else if (order.nftName === 'SMB Gen2') {
+                    } else if (order.nft_name === 'SMB Gen2') {
                         filteredCollections = collections.filter(collection => collection.nfts.some(nft => nft.name.includes('SMB')));
-                    } else if (order.nftName === 'Quekz') {
+                    } else if (order.nft_name === 'Quekz') {
                         filteredCollections = collections.filter(collection => collection.nfts.some(nft => nft.name.includes('Quekz')));
-                    } else if (order.nftName === 'Photo Finish PFP Collection') {
+                    } else if (order.nft_name === 'Photo Finish PFP Collection') {
                         filteredCollections = collections.filter(collection => collection.nfts.some(nft => nft.name.includes('PFL')));
-                    } else if (order.nftName === 'Kanpai Pandas') {
+                    } else if (order.nft_name === 'Kanpai Pandas') {
                         filteredCollections = collections.filter(collection => collection.nfts.some(nft => nft.name.includes('Kanpai')));
-                    } else if (order.nftName === 'Homeowners Association (Parcl)') {
+                    } else if (order.nft_name === 'Homeowners Association (Parcl)') {
                         filteredCollections = collections.filter(collection => collection.nfts.some(nft => nft.name.includes('Homeowners')));
-                    } else if (order.nftName === 'Enigma Ventures') {
+                    } else if (order.nft_name === 'Enigma Ventures') {
                         filteredCollections = collections.filter(collection => collection.nfts.some(nft => nft.name.includes('Enigma')));
-                    } else if (order.nftName === 'Gaimin Gladiators') {
+                    } else if (order.nft_name === 'Gaimin Gladiators') {
                         filteredCollections = collections.filter(collection => collection.nfts.some(nft => nft.name.includes('Gladiators')));
                     } else {
                         filteredCollections = collections.filter(collection => collection.nfts.some(nft => nft.name));
@@ -132,22 +158,22 @@ export default function P2PBorrowButtonCell({ row }: { row: { original: Borrowin
                 <div className='max-h-[45vh] md:max-h-[60vh] overflow-y-auto px-2'>
                     <div className='flex flex-row space-x-2 mt-2'>
                         <div className='relative h-20 w-16 md:h-24 md:w-36'>
-                            <Image src={order.nftLogo} alt={order.nftName} className='rounded object-cover' fill priority />
+                            <Image src={order.nft_logo} alt={order.nft_name} className='rounded object-cover' fill priority />
                         </div>
                         <div className='flex flex-col items-start w-full mt-1'>
-                            <div className='text-xl tracking-wide break-words'>{order.nftName}</div>
+                            <div className='text-xl tracking-wide break-words'>{order.nft_name}</div>
                             <div className='grid grid-flow-col justify-between items-center col-span-3 w-full pt-1.5'>
                                 <div className='border rounded p-2 flex flex-col items-center justify-center px-[3vw] md:px-10'>
                                     <h1 className='text-[0.6rem] md:text-sm tracking-wider break-words'>Offer</h1>
-                                    <p className='text-[0.5rem] md:text-sm'>{order.neftBestOffer}</p>
+                                    <p className='text-[0.5rem] md:text-sm'>{order.nft_best_offer}</p>
                                 </div>
                                 <div className='border rounded p-2 flex flex-col items-center justify-center px-[3vw] md:px-10'>
                                     <h1 className='text-[0.6rem] md:text-sm tracking-wider break-words'>Rate</h1>
-                                    <p className='text-[0.5rem] md:text-sm'>{order.nftIntrest}</p>
+                                    <p className='text-[0.5rem] md:text-sm'>{order.nft_intrest}</p>
                                 </div>
                                 <div className='border rounded p-2 flex flex-col items-center justify-center px-[3vw] md:px-10'>
                                     <h1 className='text-[0.6rem] md:text-sm tracking-wider break-words'>Duration</h1>
-                                    <p className='text-[0.5rem] md:text-sm'>{order.nftDuration}</p>
+                                    <p className='text-[0.5rem] md:text-sm'>{order.nft_duration}</p>
                                 </div>
                             </div>
                         </div>
@@ -188,21 +214,21 @@ export default function P2PBorrowButtonCell({ row }: { row: { original: Borrowin
                         <AccordionItem value='Return'>
                             <AccordionTrigger className='hover:no-underline text-left font-semibold tracking-wide'>
                                 {/* @ts-ignore */}
-                                Repay {(parseFloat(order.neftBestOffer) + ((parseFloat(order.nftIntrest) / 100) * parseFloat(order.neftBestOffer))).toFixed(4)} SOL within {order.nftDuration}
+                                Repay {(parseFloat(order.nft_best_offer) + ((parseFloat(order.nft_intrest) / 100) * parseFloat(order.nft_best_offer))).toFixed(4)} SOL within {(order.nft_duration)}
                             </AccordionTrigger>
                             <AccordionContent>
                                 <div className='flex flex-row items-center justify-between text-sm md:text-lg'>
                                     <h1>Loan amount</h1>
-                                    <h1>{order.neftBestOffer}</h1>
+                                    <h1>{order.nft_best_offer}</h1>
                                 </div>
                                 <div className='flex flex-row items-center justify-between text-sm md:text-lg'>
                                     <h1>Interest</h1>
                                     {/* @ts-ignore */}
-                                    <h1>{order.nftIntrest} ~ {((parseFloat(order.nftIntrest) / 100) * parseFloat(order.neftBestOffer)).toFixed(4)} SOL</h1>
+                                    <h1>{order.nft_intrest} ~ {((parseFloat(order.nft_intrest) / 100) * parseFloat(order.nft_best_offer)).toFixed(4)} SOL</h1>
                                 </div>
                                 <div className='flex flex-row items-center justify-between text-sm md:text-lg'>
                                     <h1>Due by</h1>
-                                    <h1>{order.nftDuration}</h1>
+                                    <h1>{dueByDate}</h1>
                                 </div>
                             </AccordionContent>
                         </AccordionItem>
