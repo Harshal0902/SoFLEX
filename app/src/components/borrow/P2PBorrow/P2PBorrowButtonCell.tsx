@@ -72,8 +72,6 @@ export default function P2PBorrowButtonCell({ row }: { row: { original: Borrowin
         minute: '2-digit',
     })}`;
 
-    console.log(dueByDate);
-
     useEffect(() => {
         async function fetchData() {
             if (open) {
