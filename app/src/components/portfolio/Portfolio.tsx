@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form'
 import * as z from 'zod'
 import { toast } from 'sonner'
 import Loading from '@/components/Loading'
-import { Loader2, HelpCircle, DollarSign, Landmark, BriefcaseBusiness, Banknote, Activity } from 'lucide-react'
+import { Loader2, DollarSign, Landmark, BriefcaseBusiness, Banknote, Activity } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormDescription, FormMessage } from '@/components/ui/form'
@@ -226,32 +226,32 @@ export default function Portfolio({ walletAddress }: { walletAddress?: string })
                         <CardContent>
                             {userStats && (
                                 <div className='grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-5'>
-                                    {cardData.map((card: CardData, index: number) => (<Card key={index}>
-                                        <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-                                            <CardTitle className='text-sm font-medium flex flex-1 flex-row items-center space-x-1'>
-                                                <p>{card.title}</p>
-                                                <Tooltip delayDuration={300}>
-                                                    <TooltipTrigger>
-                                                        <HelpCircle className='h-4 w-4 text-zinc-500 cursor-pointer' />
-                                                    </TooltipTrigger>
-                                                    <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
-                                                        {card.tooltipContent}
-                                                    </TooltipContent>
-                                                </Tooltip>
-                                            </CardTitle>
-                                            {renderIcon(card.icon)}
-                                        </CardHeader>
-                                        <CardContent>
-                                            <p className='text-2xl font-bold'>
-                                                {card.currentData !== undefined ? card.currentData : 'No data available'}
-                                            </p>
-                                            {card.lastMonthData !== undefined &&
-                                                <p className='text-muted-foreground'>
-                                                    {card.lastMonthData} from last month
-                                                </p>
-                                            }
-                                        </CardContent>
-                                    </Card>
+                                    {cardData.map((card: CardData, index: number) => (
+                                        <Tooltip delayDuration={300} key={index}>
+                                            <TooltipTrigger>
+                                                <Card>
+                                                    <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+                                                        <CardTitle className='text-sm font-medium flex flex-1 flex-row items-center space-x-1 text-start'>
+                                                            <p>{card.title}</p>
+                                                        </CardTitle>
+                                                        {renderIcon(card.icon)}
+                                                    </CardHeader>
+                                                    <CardContent className='text-start'>
+                                                        <p className='text-2xl font-bold'>
+                                                            {card.currentData !== undefined ? card.currentData : 'No data available'}
+                                                        </p>
+                                                        {card.lastMonthData !== undefined &&
+                                                            <p className='text-muted-foreground'>
+                                                                {card.lastMonthData} from last month
+                                                            </p>
+                                                        }
+                                                    </CardContent>
+                                                </Card>
+                                            </TooltipTrigger>
+                                            <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
+                                                {card.tooltipContent}
+                                            </TooltipContent>
+                                        </Tooltip>
                                     ))}
                                 </div>
                             )}
