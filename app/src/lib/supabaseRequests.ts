@@ -16,6 +16,12 @@ interface UserType {
     email?: string | null;
 }
 
+interface AssetOrCollectionType {
+    walletAddress?: string;
+    requestedAssetOrCollectionName: string;
+    assetOrCollection: string;
+}
+
 interface NewDeFiLendingType {
     walletAddress?: string;
     lendingAmount: string;
@@ -151,13 +157,14 @@ export const updateUserCreditScore = async ({ walletAddress, creditScore }: { wa
     }
 };
 
-export const newAssetLendingRequest = async ({ walletAddress, requestedAssetname }: { walletAddress?: string, requestedAssetname: string }) => {
+export const newAssetOrCollectionRequest = async ({ walletAddress, requestedAssetOrCollectionName, assetOrCollection }: AssetOrCollectionType) => {
     try {
         const { data, error } = await supabase
-            .from('new_asset_lending_request')
+            .from('new_asset_or_collection_request')
             .insert({
                 user_address: walletAddress,
-                asset_name: requestedAssetname,
+                asset_or_collection_name: requestedAssetOrCollectionName,
+                asset_or_collection: assetOrCollection
             })
             .select();
 

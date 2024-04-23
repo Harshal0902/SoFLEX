@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { newAssetLendingRequest, nftCollectionDetails } from '@/lib/supabaseRequests'
+import { newAssetOrCollectionRequest, nftCollectionDetails } from '@/lib/supabaseRequests'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { BorrowingNFTCollectionDataType, borrowingNFTCollectionColumns } from './columns'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
@@ -15,7 +15,7 @@ import Loading from '@/components/Loading'
 import { DataTable } from '@/components/ui/data-table-p2p'
 
 const FormSchema = z.object({
-    assetName: z.string({
+    nftCollectionName: z.string({
         required_error: 'Name is required',
     }).min(3, {
         message: 'Name must be at least 3 characters long',
@@ -23,6 +23,7 @@ const FormSchema = z.object({
 })
 
 export default function P2PBorrowing() {
+    const [open, setOpen] = useState(false);
     const [loadingData, setLoadingData] = useState<boolean>(true);
     const [borrowingNFTCollectionData, setBorrowingNFTCollectionData] = useState<BorrowingNFTCollectionDataType[]>([]);
 
@@ -46,21 +47,22 @@ export default function P2PBorrowing() {
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
-            assetName: '',
+            nftCollectionName: '',
         }
     })
 
     async function onSubmit(data: z.infer<typeof FormSchema>) {
-        const assetName = data.assetName;
+        const nftCollectionName = data.nftCollectionName;
 
-        if (assetName) {
-            const result = await newAssetLendingRequest({ walletAddress: wallet.publicKey?.toString(), requestedAssetname: assetName });
+        if (nftCollectionName) {
+            const result = await newAssetOrCollectionRequest({ walletAddress: wallet.publicKey?.toString(), requestedAssetOrCollectionName: nftCollectionName, assetOrCollection: 'NFT Collectiion' });
 
             if (result) {
                 if (result instanceof Response && result.status === 409) {
                     toast.info('Request sent successfully!');
                 } else {
                     toast.success('Request sent successfully!');
+                    setOpen(false);
                     form.reset();
                 }
             }
@@ -74,7 +76,7 @@ export default function P2PBorrowing() {
                     <div className='flex flex-col md:flex-row justify-between items-start md:items-center space-y-2 md:space-y-0'>
                         <div className='text-2xl md:text-4xl'>All NFT Collection</div>
                         {connected && (
-                            <Dialog>
+                            <Dialog open={open} onOpenChange={setOpen}>
                                 <DialogTrigger asChild>
                                     <Button variant='outline' className='px-4'>Request new NFT Collection to borrow</Button>
                                 </DialogTrigger>
@@ -89,7 +91,7 @@ export default function P2PBorrowing() {
                                         <form onSubmit={form.handleSubmit(onSubmit)} autoComplete='off' className='flex flex-col space-y-4 pt-2'>
                                             <FormField
                                                 control={form.control}
-                                                name='assetName'
+                                                name='nftCollectionName'
                                                 render={({ field }) => (
                                                     <FormItem>
                                                         <FormLabel>NFT Collection Name</FormLabel>

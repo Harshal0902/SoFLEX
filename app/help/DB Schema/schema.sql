@@ -19,10 +19,13 @@ create table
   ) tablespace pg_default;
   
 create table
-  public.new_asset_lending_request (
+  public.new_asset_or_collection_request (
+    request_id serial,
     user_address text null,
-    asset_name text not null,
-    constraint public_new_asset_lending_request_user_address_fkey foreign key (user_address) references users (user_address)
+    asset_or_collection_name text not null,
+    asset_or_collection text not null,
+    constraint new_asset_or_collection_request_pkey primary key (request_id),
+    constraint public_new_asset_or_collection_request_user_address_fkey foreign key (user_address) references users (user_address)
   ) tablespace pg_default;
   
 create table
@@ -61,10 +64,10 @@ create table
     asset_symbol text null,
     asset_logo text null,
     asset_price text null,
-    total_supply text null,
+    asset_total_supply text null,
     asset_yield text null,
-    total_borrow text null,
-    ltv text null,
+    asset_total_borrow text null,
+    asset_ltv text null,
     constraint asset_details_pkey primary key (asset_name)
   ) tablespace pg_default;
 

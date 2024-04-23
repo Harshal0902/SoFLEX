@@ -20,10 +20,10 @@ export type LendingAssetDataType = {
     asset_symbol: string;
     asset_logo: string;
     asset_price: string;
-    total_supply: string;
+    asset_total_supply: string;
     asset_yield: string;
-    total_borrow: string;
-    ltv: string;
+    asset_total_borrow: string;
+    asset_ltv: string;
 }
 
 const FormSchema = z.object({
