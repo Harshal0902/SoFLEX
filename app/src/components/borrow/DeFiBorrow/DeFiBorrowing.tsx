@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { newAssetLendingRequest, teAssetDetails } from '@/lib/supabaseRequests'
+import { newAssetOrCollectionRequest, assetDetails } from '@/lib/supabaseRequests'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { BorrowingAssetDataType, borrowingAssetColumns } from './columns'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
@@ -23,6 +23,7 @@ const FormSchema = z.object({
 })
 
 export default function DeFiBorrowing() {
+  const [open, setOpen] = useState(false);
   const [assetPrices, setAssetPrices] = useState<{ [key: string]: string }>({});
   const [loadingData, setLoadingData] = useState<boolean>(true);
   const [borrowingAssetData, setBorrowingAssetData] = useState<BorrowingAssetDataType[]>([]);
@@ -32,7 +33,7 @@ export default function DeFiBorrowing() {
 
   useEffect(() => {
     const fetchAssetData = async () => {
-      const result = await teAssetDetails();
+      const result = await assetDetails();
       if (Array.isArray(result)) {
         setBorrowingAssetData(result);
       } else {
@@ -75,13 +76,14 @@ export default function DeFiBorrowing() {
     const assetName = data.assetName;
 
     if (assetName) {
-      const result = await newAssetLendingRequest({ walletAddress: wallet.publicKey?.toString(), requestedAssetname: assetName });
+      const result = await newAssetOrCollectionRequest({ walletAddress: wallet.publicKey?.toString(), requestedAssetOrCollectionName: assetName, assetOrCollection: 'Asset' });
 
       if (result) {
         if (result instanceof Response && result.status === 409) {
           toast.info('Request sent successfully!');
         } else {
           toast.success('Request sent successfully!');
+          setOpen(false);
           form.reset();
         }
       }
@@ -104,9 +106,9 @@ export default function DeFiBorrowing() {
           <div className='flex flex-col md:flex-row justify-between items-start md:items-center space-y-2 md:space-y-0'>
             <div className='text-2xl md:text-4xl'>All Assets</div>
             {connected && (
-              <Dialog>
+              <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
-                  <Button variant='outline' className='px-4'>Request new asset for borrowing</Button>
+                  <Button variant='outline' className='px-4'>Request new Asset for borrowing</Button>
                 </DialogTrigger>
                 <DialogContent className='max-w-[90vw] md:max-w-[425px]'>
                   <DialogHeader>
@@ -149,9 +151,9 @@ export default function DeFiBorrowing() {
               columns={borrowingAssetColumns}
               data={borrowingAssetData.map(asset => ({
                 ...asset,
-                assetPrice: assetPrices[asset.assetSymbol] ? formatPrice(assetPrices[asset.assetSymbol]) : asset.assetPrice
+                assetPrice: assetPrices[asset.asset_symbol] ? formatPrice(assetPrices[asset.asset_symbol]) : asset.asset_price
               }))}
-              userSearchColumn='assetName'
+              userSearchColumn='asset_name'
               inputPlaceHolder='Search for assets'
               noResultsMessage='No assets found'
             />

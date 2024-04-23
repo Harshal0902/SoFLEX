@@ -7,20 +7,20 @@ import { Input } from '@/components/ui/input'
 import { Search, X } from 'lucide-react'
 import Image from 'next/image'
 
-interface LendingData {
-    assetName: string;
-    assetSymbol: string;
-    assetLogo: string;
-    assetPrice: string;
-    totalSupply: string;
-    assetYield: string;
-    totalBorrow: string;
-    ltv: string;
+interface AssetDataType {
+    asset_name: string;
+    asset_symbol: string;
+    asset_logo: string;
+    asset_price: string;
+    asset_total_supply: string;
+    asset_yield: string;
+    asset_total_borrow: string;
+    asset_ltv: string;
 }
 
 interface DataTableProps<TData, TValue> {
-    columns: ColumnDef<LendingData>[];
-    data: LendingData[];
+    columns: ColumnDef<AssetDataType>[];
+    data: AssetDataType[];
     userSearchColumn: string;
     inputPlaceHolder: string;
     noResultsMessage: string;
@@ -112,12 +112,12 @@ export function DataTable<TData, TValue>({
                                 >
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell key={cell.id}>
-                                            {cell.column.id === 'assetName' ? (
+                                            {cell.column.id === 'asset_name' ? (
                                                 <div className='flex flex-row items-center'>
-                                                    <Image src={row.original.assetLogo} alt={row.original.assetName} width={35} height={35} priority className='mr-2' />
+                                                    <Image src={row.original.asset_logo} alt={row.original.asset_name} width={35} height={35} priority className='mr-2' />
                                                     <div className='flex flex-col'>
-                                                        <span>{row.original.assetSymbol}</span>
-                                                        <span>{row.original.assetPrice}</span>
+                                                        <span>{row.original.asset_symbol}</span>
+                                                        <span>{row.original.asset_price}</span>
                                                     </div>
                                                 </div>
                                             ) : (

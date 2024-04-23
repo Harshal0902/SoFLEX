@@ -2,17 +2,15 @@
 
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/components/ui/data-table-column-header'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { Button } from '@/components/ui/button'
-import { MoreHorizontal } from 'lucide-react'
+import LoanRepay from './LoanRepay'
 
 export type LoanDataType = {
     loanId: string;
     assetName: string;
-    assetType: 'NFT' | 'cNFT' | 'Synthetic Asset';
     amount: string;
     interestRate: number;
     duration: number;
+    due_by: Date;
     status: 'Active' | 'Repaid' | 'Defaulted' | 'Pending' | 'Cancelled' | 'Expired' | 'Closed';
 }
 
@@ -34,19 +32,13 @@ export const loanColumns: ColumnDef<LoanDataType>[] = [
     {
         accessorKey: 'assetName',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title='Asset Name' />
-        ),
-    },
-    {
-        accessorKey: 'assetType',
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title='Asset Type' />
+            <DataTableColumnHeader column={column} title='Asset Name(s)' />
         ),
     },
     {
         accessorKey: 'amount',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title='Amount' />
+            <DataTableColumnHeader column={column} title='Amount Borrowed' />
         ),
     },
     {
@@ -62,6 +54,12 @@ export const loanColumns: ColumnDef<LoanDataType>[] = [
         ),
     },
     {
+        accessorKey: 'due_by',
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title='Due By' />
+        ),
+    },
+    {
         accessorKey: 'status',
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title='Status' />
@@ -69,28 +67,6 @@ export const loanColumns: ColumnDef<LoanDataType>[] = [
     },
     {
         id: 'actions',
-        header: 'Actions',
-        cell: ({ row }) => {
-            const payment = row.original
-
-            return (
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant='ghost' className='h-8 w-8 p-0'>
-                            <MoreHorizontal className='h-4 w-4' />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align='end'>
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem
-                            onClick={() => navigator.clipboard.writeText(payment.loanId)}
-                            className='cursor-pointer'
-                        >
-                            Copy Loan ID
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            )
-        },
+        cell: LoanRepay
     }
 ]

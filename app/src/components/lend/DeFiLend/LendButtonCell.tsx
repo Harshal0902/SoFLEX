@@ -2,13 +2,13 @@ import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import * as web3 from '@solana/web3.js'
 import { LAMPORTS_PER_SOL } from '@solana/web3.js'
+import { Token, TOKEN_PROGRAM_ID } from '@solana/spl-token'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { newDeFiLending } from '@/lib/supabaseRequests'
 import { toast } from 'sonner'
 import { useWallet, useConnection } from '@solana/wallet-adapter-react'
 import { Loader2, Info } from 'lucide-react'
-import InfoButton from '@/components/InfoButton'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog'
@@ -16,14 +16,14 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormDescription, For
 import { Input } from '@/components/ui/input'
 
 export type LendingAssetDataType = {
-    assetName: string;
-    assetSymbol: string;
-    assetLogo: string;
-    assetPrice: string;
-    totalSupply: string;
-    assetYield: string;
-    totalBorrow: string;
-    ltv: string;
+    asset_name: string;
+    asset_symbol: string;
+    asset_logo: string;
+    asset_price: string;
+    asset_total_supply: string;
+    asset_yield: string;
+    asset_total_borrow: string;
+    asset_ltv: string;
 }
 
 const FormSchema = z.object({
@@ -52,7 +52,6 @@ const FormSchema = z.object({
 export default function LendButtonCell({ row }: { row: { original: LendingAssetDataType } }) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [open, setOpen] = useState(false);
-    const [txSig, setTxSig] = useState('');
     const { publicKey, sendTransaction } = useWallet();
 
     const order = row.original;
@@ -67,42 +66,87 @@ export default function LendButtonCell({ row }: { row: { original: LendingAssetD
         },
     });
 
-    const sendSol = (event: { preventDefault: () => void; target: { recipient: { value: web3.PublicKeyInitData }; amount: { value: number } } }) => {
-        event.preventDefault()
-        if (!connection || !publicKey) { return }
-        const transaction = new web3.Transaction()
-        const recipientPubKey = new web3.PublicKey(event.target.recipient.value)
-
-        const sendSolInstruction = web3.SystemProgram.transfer({
-            fromPubkey: publicKey,
-            toPubkey: recipientPubKey,
-            lamports: LAMPORTS_PER_SOL * event.target.amount.value
-        })
-
-        transaction.add(sendSolInstruction)
-        sendTransaction(transaction, connection).then(sig => {
-            setTxSig(sig)
-        })
-    }
-
     async function onSubmit(values: z.infer<typeof FormSchema>) {
         try {
-            const data = await newDeFiLending({
-                walletAddress: wallet.publicKey?.toString(),
-                lendingAmount: values.lending_amount,
-                lendingToken: order.assetSymbol
-            });
+            if (!connection || !publicKey) {
+                return;
+            }
 
             setIsSubmitting(true);
-            if (data) {
-                setIsSubmitting(false);
-                setOpen(false);
-                toast.success('Lending successful! Interest starts accruing.');
+
+            let sig;
+
+            const recipientPubKey = new web3.PublicKey('Cq6JPmEspG6oNcUC47WHuEJWU1K4knsLzHYHSfvpnDHk');
+            let amount;
+            let tokenAddress;
+
+            if (order.asset_symbol === 'SOL') {
+                amount = LAMPORTS_PER_SOL * parseFloat(values.lending_amount);
+                const transaction = new web3.Transaction();
+                const sendSolInstruction = web3.SystemProgram.transfer({
+                    fromPubkey: publicKey,
+                    toPubkey: recipientPubKey,
+                    lamports: amount
+                });
+                transaction.add(sendSolInstruction);
+                sig = await sendTransaction(transaction, connection);
             } else {
-                toast.error('Error completing the process. Please try again!');
+                amount = parseFloat(values.lending_amount);
+                if (order.asset_symbol === 'USDC') {
+                    tokenAddress = new web3.PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
+                } else if (order.asset_symbol === 'USDT') {
+                    tokenAddress = new web3.PublicKey('Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB');
+                } else if (order.asset_symbol === 'JUP') {
+                    tokenAddress = new web3.PublicKey('JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN');
+                } else if (order.asset_symbol === 'PYTH') {
+                    tokenAddress = new web3.PublicKey('HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3RKwX8eACQBCt3');
+                } else if (order.asset_symbol === 'JTO') {
+                    tokenAddress = new web3.PublicKey('jtojtomepa8beP8AuQc6eXt5FriJwfFMwQx2v2f9mCL');
+                } else if (order.asset_symbol === 'RAY') {
+                    tokenAddress = new web3.PublicKey('4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R');
+                } else if (order.asset_symbol === 'BLZE') {
+                    tokenAddress = new web3.PublicKey('BLZEEuZUBVqFhj8adcCFPJvPVCiCyVmh3hkJMrU8KuJA');
+                } else if (order.asset_symbol === 'tBTC') {
+                    tokenAddress = new web3.PublicKey('6DNSN2BJsaPFdFFc1zP37kkeNe4Usc1Sqkzr9C9vPWcU');
+                } else if (order.asset_symbol === 'mSOL') {
+                    tokenAddress = new web3.PublicKey('mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So');
+                }
+
+                if (tokenAddress) {
+                    const transaction = new web3.Transaction();
+                    const transferInstruction = Token.createTransferInstruction(
+                        TOKEN_PROGRAM_ID,
+                        tokenAddress,
+                        recipientPubKey,
+                        publicKey,
+                        [],
+                        amount
+                    );
+
+                    transaction.add(transferInstruction);
+                    sig = await sendTransaction(transaction, connection);
+                }
+            }
+
+            if (sig) {
+                const data = await newDeFiLending({
+                    walletAddress: wallet.publicKey?.toString(),
+                    lendingAmount: values.lending_amount,
+                    lendingToken: order.asset_symbol,
+                    transactionSignature: sig
+                });
+
+                if (data) {
+                    setOpen(false);
+                    toast.success('Lending successful! Interest starts accruing.');
+                } else {
+                    toast.error('Error completing the process. Please try again!');
+                }
             }
         } catch (error) {
             toast.error('Error completing the process. Please try again!');
+        } finally {
+            setIsSubmitting(false);
         }
     }
 
@@ -117,7 +161,6 @@ export default function LendButtonCell({ row }: { row: { original: LendingAssetD
                 <DialogHeader>
                     <DialogTitle className='flex flex-row space-x-1 items-center'>
                         <h1>Lend Token</h1>
-                        <InfoButton />
                     </DialogTitle>
                     <DialogDescription>
                         Lend your token to earn interest.
@@ -132,9 +175,9 @@ export default function LendButtonCell({ row }: { row: { original: LendingAssetD
                                 name='lending_amount'
                                 render={({ field }) => (
                                     <FormItem className='w-full'>
-                                        <FormLabel>Lending amount (in {order.assetSymbol})</FormLabel>
+                                        <FormLabel>Lending amount (in {order.asset_symbol})</FormLabel>
                                         <FormControl>
-                                            <Input {...field} placeholder={`Enter the ${order.assetSymbol} you want to lend `} />
+                                            <Input {...field} placeholder={`Enter the ${order.asset_symbol} you want to lend `} />
                                         </FormControl>
                                         <FormDescription>
                                             Enter the amount you want to lend.
@@ -159,7 +202,7 @@ export default function LendButtonCell({ row }: { row: { original: LendingAssetD
                                             </Tooltip>
                                         </TooltipProvider>
                                     </div>
-                                    <div>{order.assetPrice}</div>
+                                    <div>{order.asset_price}</div>
                                 </div>
                                 <div className='flex flex-row items-center justify-between'>
                                     <div className='flex flex-row items-center space-x-1'>
@@ -175,7 +218,7 @@ export default function LendButtonCell({ row }: { row: { original: LendingAssetD
                                             </Tooltip>
                                         </TooltipProvider>
                                     </div>
-                                    <div>{order.assetYield}</div>
+                                    <div>{order.asset_yield}</div>
                                 </div>
                             </div>
 

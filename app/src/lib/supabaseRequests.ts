@@ -16,10 +16,17 @@ interface UserType {
     email?: string | null;
 }
 
+interface AssetOrCollectionType {
+    walletAddress?: string;
+    requestedAssetOrCollectionName: string;
+    assetOrCollection: string;
+}
+
 interface NewDeFiLendingType {
     walletAddress?: string;
     lendingAmount: string;
     lendingToken: string;
+    transactionSignature: string;
 }
 
 interface NewDeFiBorrowingType {
@@ -28,7 +35,8 @@ interface NewDeFiBorrowingType {
     borrowingToken: string;
     collateralizationAssets: string[];
     borrowingDuration: string;
-    borrowingInterestRate?: string
+    borrowingInterestRate?: string;
+    borrowingCollateralType: string;
 }
 
 export const addUserWaitlist = async ({ email }: WaitlistUserType) => {
@@ -149,13 +157,14 @@ export const updateUserCreditScore = async ({ walletAddress, creditScore }: { wa
     }
 };
 
-export const newAssetLendingRequest = async ({ walletAddress, requestedAssetname }: { walletAddress?: string, requestedAssetname: string }) => {
+export const newAssetOrCollectionRequest = async ({ walletAddress, requestedAssetOrCollectionName, assetOrCollection }: AssetOrCollectionType) => {
     try {
         const { data, error } = await supabase
-            .from('new_asset_lending_request')
+            .from('new_asset_or_collection_request')
             .insert({
                 user_address: walletAddress,
-                asset_name: requestedAssetname,
+                asset_or_collection_name: requestedAssetOrCollectionName,
+                asset_or_collection: assetOrCollection
             })
             .select();
 
@@ -169,7 +178,7 @@ export const newAssetLendingRequest = async ({ walletAddress, requestedAssetname
     }
 };
 
-export const newDeFiLending = async ({ walletAddress, lendingAmount, lendingToken }: NewDeFiLendingType) => {
+export const newDeFiLending = async ({ walletAddress, lendingAmount, lendingToken, transactionSignature }: NewDeFiLendingType) => {
     try {
         const uuid = crypto.randomBytes(16).toString('hex');
         const generateNewLendingId = uuid.substring(0, 8) + uuid.substring(9, 13) + uuid.substring(14, 18) + uuid.substring(19, 23) + uuid.substring(24);
@@ -183,6 +192,7 @@ export const newDeFiLending = async ({ walletAddress, lendingAmount, lendingToke
                 user_address: walletAddress,
                 lending_amount: lendingAmount,
                 lending_token: lendingToken,
+                transaction_signature: transactionSignature,
                 lending_submitted_at: created_at
             })
             .select();
@@ -197,7 +207,7 @@ export const newDeFiLending = async ({ walletAddress, lendingAmount, lendingToke
     }
 };
 
-export const newDeFiBorrowing = async ({ walletAddress, borrowingAmount, borrowingToken, collateralizationAssets, borrowingDuration, borrowingInterestRate }: NewDeFiBorrowingType) => {
+export const newDeFiBorrowing = async ({ walletAddress, borrowingAmount, borrowingToken, collateralizationAssets, borrowingDuration, borrowingInterestRate, borrowingCollateralType }: NewDeFiBorrowingType) => {
     try {
         const uuid = crypto.randomBytes(16).toString('hex');
         const generateNewBorrowingId = uuid.substring(0, 8) + uuid.substring(9, 13) + uuid.substring(14, 18) + uuid.substring(19, 23) + uuid.substring(24);
@@ -214,6 +224,7 @@ export const newDeFiBorrowing = async ({ walletAddress, borrowingAmount, borrowi
                 borrowing_collateralization_assets: collateralizationAssets,
                 borrowing_duration: borrowingDuration,
                 borrowing_interest_rate: borrowingInterestRate,
+                borrowing_collateral_type: borrowingCollateralType,
                 borrowing_submitted_at: created_at
             })
             .select();
@@ -228,10 +239,10 @@ export const newDeFiBorrowing = async ({ walletAddress, borrowingAmount, borrowi
     }
 };
 
-export const teAssetDetails = async () => {
+export const assetDetails = async () => {
     try {
         const { data, error } = await supabase
-            .from('te_asset_details')
+            .from('asset_details')
             .select('*');
 
         if (error) {
@@ -246,10 +257,10 @@ export const teAssetDetails = async () => {
     }
 };
 
-export const teNFTCollectionDetails = async () => {
+export const nftCollectionDetails = async () => {
     try {
         const { data, error } = await supabase
-            .from('te_nft_collection_details')
+            .from('nft_collection_details')
             .select('*');
 
         if (error) {

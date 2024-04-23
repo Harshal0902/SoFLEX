@@ -70,10 +70,10 @@ const companySocial: SocialLinkType[] = [
     //     link: '#',
     //     imageName: 'linkedin.svg',
     // },
-    {
-        link: 'https://github.com/Harshal0902/SoFLEX',
-        imageName: 'github.svg',
-    },
+    // {
+    //     link: 'https://github.com/Harshal0902/SoFLEX',
+    //     imageName: 'github.svg',
+    // },
     // {
     //     link: '#',
     //     imageName: 'reddit.svg',
