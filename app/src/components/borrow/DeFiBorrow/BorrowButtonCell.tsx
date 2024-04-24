@@ -246,6 +246,30 @@ export default function BorrowButtonCell({ row }: { row: { original: BorrowingAs
         setInterestRate(interestRate.toFixed(2));
     };
 
+    const addOrdinalSuffix = (day: number) => {
+        if (day >= 11 && day <= 13) {
+            return `${day}th`;
+        }
+        switch (day % 10) {
+            case 1: return `${day}st`;
+            case 2: return `${day}nd`;
+            case 3: return `${day}rd`;
+            default: return `${day}th`;
+        }
+    }
+
+    const today = new Date();
+
+    const futureDate = new Date(today);
+    futureDate.setDate(futureDate.getDate() + parseInt(form.watch('borrowing_duration')));
+
+    const dueByDate = `${addOrdinalSuffix(futureDate.getDate())} ${futureDate.toLocaleString('en-US', {
+        month: 'long',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+    })}`;
+
     async function onSubmit(values: z.infer<typeof FormSchema>) {
         try {
             const data = await newDeFiBorrowing({
@@ -498,6 +522,13 @@ export default function BorrowButtonCell({ row }: { row: { original: BorrowingAs
                                             </TooltipProvider>
                                         </div>
                                         <div>{interestRate} %</div>
+                                    </div>
+
+                                    <div className='flex flex-row items-center justify-between'>
+                                        <div className='flex flex-row items-center space-x-1'>
+                                            <h1 className='font-semibold tracking-wide'>Due By</h1>
+                                        </div>
+                                        <div>{dueByDate}</div>
                                     </div>
 
                                 </>
