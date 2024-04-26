@@ -24,7 +24,7 @@ type CollectionType = {
     nfts: { name: string; metadata_uri: string; mint: string }[];
 };
 
-export default function P2PBorrowButtonCell({ row }: { row: { original: BorrowingNFTCollectionDataType } }) {
+export default function P2PBorrowingButton({ row }: { row: { original: BorrowingNFTCollectionDataType } }) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [open, setOpen] = useState(false);
     const [filteredCollections, setFilteredCollections] = useState<CollectionType[]>([]);

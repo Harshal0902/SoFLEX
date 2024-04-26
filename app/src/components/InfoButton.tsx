@@ -2,7 +2,7 @@ import React from 'react'
 import { BadgeInfo } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
-export default function DummyDataInfoButton() {
+export default function InfoButton() {
     return (
         <TooltipProvider>
             <Tooltip delayDuration={100}>

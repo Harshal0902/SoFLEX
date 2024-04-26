@@ -49,7 +49,7 @@ const FormSchema = z.object({
         }),
 });
 
-export default function LendButtonCell({ row }: { row: { original: LendingAssetDataType } }) {
+export default function DeFiLendingButton({ row }: { row: { original: LendingAssetDataType } }) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [open, setOpen] = useState(false);
     const { publicKey, sendTransaction } = useWallet();

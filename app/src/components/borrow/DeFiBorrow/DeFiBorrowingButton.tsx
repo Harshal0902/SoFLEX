@@ -71,7 +71,7 @@ const FormSchema = z.object({
     }),
 });
 
-export default function BorrowButtonCell({ row }: { row: { original: BorrowingAssetDataType } }) {
+export default function DeFiBorrowingButton({ row }: { row: { original: BorrowingAssetDataType } }) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [open, setOpen] = useState(false);
     const [cNFTResult, setcNFTResult] = useState<NFTType[]>([]);
