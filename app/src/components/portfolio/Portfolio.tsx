@@ -225,12 +225,12 @@ export default function Portfolio({ walletAddress }: { walletAddress?: string })
                         </CardHeader>
                         <CardContent>
                             {userStats && (
-                                <div className='grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-5'>
+                                <div className='grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-5 lg:grid-flow-row lg:grid-rows-auto lg:align-content-start'>
                                     {cardData.map((card: CardData, index: number) => (
                                         <Tooltip delayDuration={300} key={index}>
                                             <TooltipTrigger>
-                                                <Card>
-                                                    <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+                                                <Card className='flex flex-col h-full'>
+                                                    <CardHeader className='flex flex-row items-center justify-between pb-2'>
                                                         <CardTitle className='text-sm font-medium flex flex-1 flex-row items-center space-x-1 text-start'>
                                                             <p>{card.title}</p>
                                                         </CardTitle>

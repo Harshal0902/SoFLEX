@@ -7,8 +7,6 @@ import { CoinbaseWalletAdapter, LedgerWalletAdapter, PhantomWalletAdapter, Solfl
 import { clusterApiUrl } from '@solana/web3.js'
 import React, { useMemo } from 'react'
 
-require('@solana/wallet-adapter-react-ui/styles.css');
-
 export const WalletConnect = ({ children }: { children: React.ReactNode }) => {
     // Update this for the network you want to connect to
     const network = WalletAdapterNetwork.Devnet;

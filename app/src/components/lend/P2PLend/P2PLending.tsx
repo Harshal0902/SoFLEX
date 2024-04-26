@@ -27,7 +27,7 @@ export default function P2PLending() {
     const [loadingData, setLoadingData] = useState<boolean>(true);
     const [lendingNFTCollectionData, setLendingNFTCollectionData] = useState<LendingNFTCollectionDataType[]>([]);
 
-    const { connected } = useWallet();
+    const { publicKey } = useWallet();
     const wallet = useWallet();
 
     useEffect(() => {
@@ -75,7 +75,7 @@ export default function P2PLending() {
                 <CardHeader>
                     <div className='flex flex-col md:flex-row justify-between items-start md:items-center space-y-2 md:space-y-0'>
                         <div className='text-2xl md:text-4xl'>All NFT Collection</div>
-                        {connected && (
+                        {publicKey && (
                             <Dialog open={open} onOpenChange={setOpen}>
                                 <DialogTrigger asChild>
                                     <Button variant='outline' className='px-4'>Request new NFT Collection for lending</Button>

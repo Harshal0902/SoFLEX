@@ -83,7 +83,7 @@ export default function BorrowButtonCell({ row }: { row: { original: BorrowingAs
     const [interestRate, setInterestRate] = useState(undefined);
 
     const order = row.original;
-    const { connected } = useWallet();
+    const { publicKey } = useWallet();
     const wallet = useWallet();
 
     const shyft_api_key = process.env.NEXT_PUBLIC_SHYFTAPI!;
@@ -298,8 +298,8 @@ export default function BorrowButtonCell({ row }: { row: { original: BorrowingAs
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button className='text-white' disabled={!connected}>
-                    {connected ? 'Borrow' : 'Connect Wallet'}
+                <Button className='text-white' disabled={!publicKey}>
+                    {publicKey ? 'Borrow' : 'Connect Wallet'}
                 </Button>
             </DialogTrigger>
             <DialogContent className='max-w-[90vw] md:max-w-[60vw]'>

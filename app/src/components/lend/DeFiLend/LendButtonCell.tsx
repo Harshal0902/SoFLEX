@@ -56,7 +56,6 @@ export default function LendButtonCell({ row }: { row: { original: LendingAssetD
 
     const order = row.original;
     const { connection } = useConnection();
-    const { connected } = useWallet();
     const wallet = useWallet();
 
     const form = useForm<z.infer<typeof FormSchema>>({
@@ -153,8 +152,8 @@ export default function LendButtonCell({ row }: { row: { original: LendingAssetD
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button className='text-white' disabled={!connected}>
-                    {connected ? 'Lend' : 'Connect Wallet'}
+                <Button className='text-white' disabled={!publicKey}>
+                    {publicKey ? 'Lend' : 'Connect Wallet'}
                 </Button>
             </DialogTrigger>
             <DialogContent className='max-w-[90vw] md:max-w-[425px]'>

@@ -28,7 +28,7 @@ export default function DeFiBorrowing() {
   const [loadingData, setLoadingData] = useState<boolean>(true);
   const [borrowingAssetData, setBorrowingAssetData] = useState<BorrowingAssetDataType[]>([]);
 
-  const { connected } = useWallet();
+  const { publicKey } = useWallet();
   const wallet = useWallet();
 
   useEffect(() => {
@@ -105,7 +105,7 @@ export default function DeFiBorrowing() {
         <CardHeader>
           <div className='flex flex-col md:flex-row justify-between items-start md:items-center space-y-2 md:space-y-0'>
             <div className='text-2xl md:text-4xl'>All Assets</div>
-            {connected && (
+            {publicKey && (
               <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
                   <Button variant='outline' className='px-4'>Request new Asset for borrowing</Button>

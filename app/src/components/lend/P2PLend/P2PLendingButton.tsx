@@ -42,7 +42,7 @@ export default function P2PLendingButton({ row }: { row: { original: LendingNFTC
     const [offerCount, setOfferCount] = useState<number>(1);
 
     const order = row.original;
-    const { connected } = useWallet();
+    const { publicKey } = useWallet();
 
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
@@ -76,8 +76,8 @@ export default function P2PLendingButton({ row }: { row: { original: LendingNFTC
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button className='text-white' disabled={!connected}>
-                    {connected ? 'Lend' : 'Connect Wallet'}
+                <Button className='text-white' disabled={!publicKey}>
+                    {publicKey ? 'Lend' : 'Connect Wallet'}
                 </Button>
             </DialogTrigger>
             <DialogContent className='max-w-[90vw] md:max-w-[40vw]'>
