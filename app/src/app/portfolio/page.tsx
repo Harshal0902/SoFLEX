@@ -8,12 +8,12 @@ import Portfolio from '@/components/portfolio/Portfolio'
 import InformationCard from '@/components/InformationCard'
 
 export default function Page() {
-    const { connected } = useWallet();
+    const { publicKey } = useWallet();
     const wallet = useWallet();
 
     return (
         <MaxWidthWrapper>
-            {connected ? (
+            {publicKey ? (
                 <Suspense fallback={<Loading />}>
                     <Portfolio walletAddress={wallet.publicKey?.toString()} />
                 </Suspense>

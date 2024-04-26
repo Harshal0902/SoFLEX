@@ -1,4 +1,6 @@
 import React from 'react'
+import { Suspense } from 'react'
+import Preloader from '@/components/Preloader'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import Link from 'next/link'
@@ -63,24 +65,26 @@ const FAQsCard: React.FC<FAQType> = ({ value, question, answer }) => (
 
 export default function Page() {
     return (
-        <MaxWidthWrapper>
-            <div className='flex items-center pb-4 justify-center'>
-                <h1 className='text-3xl md:text-4xl font-semibold tracking-wide text-center'>Frequently Asked Questions</h1>
-            </div>
+        <Suspense fallback={<Preloader />}>
+            <MaxWidthWrapper>
+                <div className='flex items-center pb-4 justify-center'>
+                    <h1 className='text-3xl md:text-4xl font-semibold tracking-wide text-center'>Frequently Asked Questions</h1>
+                </div>
 
-            <div>
-                <Accordion type='multiple' className='w-full px-4 md:px-[10vw]'>
-                    {faqItems.map((item, index) => (
-                        <FAQsCard key={index} value={index}  {...item} />
-                    ))}
-                    <AccordionItem value={`item-${faqItems.length + 1}`}>
-                        <AccordionTrigger className='hover:no-underline text-left text-xl font-semibold tracking-wide'>How can I contact SoFLEX support?</AccordionTrigger>
-                        <AccordionContent className='text-lg'>
-                            For any inquiries or support, you can reach out to SoFLEX&apos;s customer support team through the provided contact details on the platform. Additionally, you can contact us by submitting the form on the <Link href='/contact-us' passHref className='text-primary underline'>Contact page</Link>, or feel free to send us an email at <a href='mailto:harshalraikwar07@gmail.com' className='text-primary underline'>harshalraikwar07@gmail.com</a>. Our team is ready to assist you with any questions or concerns.
-                        </AccordionContent>
-                    </AccordionItem>
-                </Accordion>
-            </div>
-        </MaxWidthWrapper>
+                <div>
+                    <Accordion type='multiple' className='w-full px-4 md:px-[10vw]'>
+                        {faqItems.map((item, index) => (
+                            <FAQsCard key={index} value={index}  {...item} />
+                        ))}
+                        <AccordionItem value={`item-${faqItems.length + 1}`}>
+                            <AccordionTrigger className='hover:no-underline text-left text-xl font-semibold tracking-wide'>How can I contact SoFLEX support?</AccordionTrigger>
+                            <AccordionContent className='text-lg'>
+                                For any inquiries or support, you can reach out to SoFLEX&apos;s customer support team through the provided contact details on the platform. Additionally, you can contact us by submitting the form on the <Link href='/contact-us' passHref className='text-primary underline'>Contact page</Link>, or feel free to send us an email at <a href='mailto:harshalraikwar07@gmail.com' className='text-primary underline'>harshalraikwar07@gmail.com</a>. Our team is ready to assist you with any questions or concerns.
+                            </AccordionContent>
+                        </AccordionItem>
+                    </Accordion>
+                </div>
+            </MaxWidthWrapper>
+        </Suspense>
     )
 }

@@ -1,4 +1,6 @@
 import React from 'react'
+import { Suspense } from 'react'
+import Preloader from '@/components/Preloader'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 
 interface PrivacyContentType {
@@ -73,38 +75,40 @@ const PrivacySection: React.FC<PrivacyContentType> = ({ title, content }) => (
 
 export default function Page() {
     return (
-        <MaxWidthWrapper>
-            <div className='flex items-center pb-4 justify-center'>
-                <h1 className='text-3xl md:text-4xl font-semibold tracking-wide'>Privacy Policy</h1>
-            </div>
-
-            <div className='py-4 w-full'>
-                <h1 className='font-semibold text-xl tracking-wide'>Last Updated: 26 March, 2024</h1>
-
-                <div className='flex items-center justify-center py-2'>
-                    <p className='text-lg md:text-xl text-center max-w-5xl'>Thank you for choosing SoFLEX. This Privacy Policy describes how SoFLEX (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) collects, uses, and shares your information when you use our platform. By accessing or using SoFLEX, you agree to the terms of this Privacy Policy.</p>
+        <Suspense fallback={<Preloader />}>
+            <MaxWidthWrapper>
+                <div className='flex items-center pb-4 justify-center'>
+                    <h1 className='text-3xl md:text-4xl font-semibold tracking-wide'>Privacy Policy</h1>
                 </div>
 
-                <div className='w-full flex flex-col items-start justify-center space-y-4 px-2 md:px-[5vw]'>
-                    {privacyContent.map((section, index) => (
-                        <PrivacySection key={index} title={section.title} content={section.content} />
-                    ))}
+                <div className='py-4 w-full'>
+                    <h1 className='font-semibold text-xl tracking-wide'>Last Updated: 26 March, 2024</h1>
 
-                    <div className='gap-1'>
-                        <h1 className='text-xl md:text-2xl font-semibold tracking-wide'>Contact Us</h1>
-                        <p className='text-lg'>
-                        If you have any questions or concerns about this Privacy Policy, please contact us at{' '}
-                            <a href='mailto:harshalraikwar07@gmail.com' className='text-blue-800 dark:text-blue-400 underline cursor-pointer'>
-                                harshalraikwar07@gmail.com
-                            </a>
-                            .
-                        </p>
-                        <p className='text-lg'>By using SoFLEX, you consent to the terms of this Privacy Policy. Thank you for trusting SoFLEX with your information.</p>
+                    <div className='flex items-center justify-center py-2'>
+                        <p className='text-lg md:text-xl text-center max-w-5xl'>Thank you for choosing SoFLEX. This Privacy Policy describes how SoFLEX (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) collects, uses, and shares your information when you use our platform. By accessing or using SoFLEX, you agree to the terms of this Privacy Policy.</p>
+                    </div>
+
+                    <div className='w-full flex flex-col items-start justify-center space-y-4 px-2 md:px-[5vw]'>
+                        {privacyContent.map((section, index) => (
+                            <PrivacySection key={index} title={section.title} content={section.content} />
+                        ))}
+
+                        <div className='gap-1'>
+                            <h1 className='text-xl md:text-2xl font-semibold tracking-wide'>Contact Us</h1>
+                            <p className='text-lg'>
+                                If you have any questions or concerns about this Privacy Policy, please contact us at{' '}
+                                <a href='mailto:harshalraikwar07@gmail.com' className='text-blue-800 dark:text-blue-400 underline cursor-pointer'>
+                                    harshalraikwar07@gmail.com
+                                </a>
+                                .
+                            </p>
+                            <p className='text-lg'>By using SoFLEX, you consent to the terms of this Privacy Policy. Thank you for trusting SoFLEX with your information.</p>
+                        </div>
+
                     </div>
 
                 </div>
-
-            </div>
-        </MaxWidthWrapper>
+            </MaxWidthWrapper>
+        </Suspense>
     )
 }

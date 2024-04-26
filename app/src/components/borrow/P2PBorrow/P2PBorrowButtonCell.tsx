@@ -32,7 +32,7 @@ export default function P2PBorrowButtonCell({ row }: { row: { original: Borrowin
     const [nftImages, setNftImages] = useState<string[]>([]);
 
     const order = row.original;
-    const { connected } = useWallet();
+    const { publicKey } = useWallet();
     const wallet = useWallet();
 
     const shyft_api_key = process.env.NEXT_PUBLIC_SHYFTAPI!;
@@ -139,8 +139,8 @@ export default function P2PBorrowButtonCell({ row }: { row: { original: Borrowin
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button className='text-white' disabled={!connected}>
-                    {connected ? 'Borrow' : 'Connect Wallet'}
+                <Button className='text-white' disabled={!publicKey}>
+                    {publicKey ? 'Borrow' : 'Connect Wallet'}
                 </Button>
             </DialogTrigger>
             <DialogContent className='max-w-[90vw] md:max-w-[40vw]'>

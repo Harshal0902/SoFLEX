@@ -1,8 +1,7 @@
 "use client"
 
-import React, { useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
 import { useWallet, useConnection } from '@solana/wallet-adapter-react'
 import { addNewUser } from '@/lib/supabaseRequests'
 import useUserSOLBalance from '@/store/useUserSOLBalanceStore'
@@ -11,19 +10,23 @@ import ResponsiveNavbar from './ResponsiveNavbar'
 import { Button } from './ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Bell, User, LogOut } from 'lucide-react'
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import Image from 'next/image'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import Notifications from './Notifications'
 import ModeToggle from './ModeToggle'
 
 export default function Navbar() {
-    const { connected, disconnect } = useWallet();
+    const [open, setOpen] = useState<boolean>(false);
+
+    const { select, wallets, publicKey, disconnect, connecting, connected } = useWallet();
     const wallet = useWallet();
     const { connection } = useConnection();
     const { balance, getUserSOLBalance } = useUserSOLBalance();
 
     useEffect(() => {
         const addUserToDB = async () => {
-            if (connected) {
+            if (publicKey) {
                 try {
                     await addNewUser({
                         walletAddress: wallet.publicKey?.toString(),
@@ -37,7 +40,7 @@ export default function Navbar() {
 
         addUserToDB();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [connected]);
+    }, [publicKey]);
 
     useEffect(() => {
         if (wallet.publicKey) {
@@ -45,8 +48,20 @@ export default function Navbar() {
         }
     }, [wallet.publicKey, connection, getUserSOLBalance])
 
+    const handleWalletSelect = async (walletName: any) => {
+        if (walletName) {
+            try {
+                select(walletName);
+                setOpen(false);
+            } catch (error) {
+                toast.error('An error occurred while connecting your wallet. Please try again later.');
+            }
+        }
+    };
+
     const handleDisconnect = async () => {
         disconnect();
+        toast.success('Wallet disconnected successfully!');
     };
 
     return (
@@ -71,7 +86,7 @@ export default function Navbar() {
                                 Lend
                             </Link>
                         </Button>
-                        {connected ? (
+                        {publicKey ? (
                             <>
                                 <Popover>
                                     <PopoverTrigger>
@@ -117,14 +132,27 @@ export default function Navbar() {
                                 </Popover>
                             </>
                         ) : (
-                            <div className='relative'>
-                                <Button className='text-white text-md'>
-                                    Connect Wallet
-                                </Button>
-                                <div className='absolute top-0 left-0 opacity-0'>
-                                    <WalletMultiButton />
-                                </div>
-                            </div>
+                            <Dialog open={open} onOpenChange={setOpen}>
+                                <DialogTrigger asChild>
+                                    <Button className='text-white text-md'>
+                                        {connecting ? 'Connecting...' : 'Connect Wallet'}
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent className='max-w-[90vw] md:max-w-[380px]'>
+                                    <DialogTitle className='text-xl md:text-2xl tracking-wide text-center'>Connect a wallet on Solana to continue</DialogTitle>
+                                    <div className='flex flex-col space-y-2'>
+                                        {wallets.map((wallet) => (
+                                            <Button key={wallet.adapter.name} variant='ghost' className='flex flex-row space-x-2 w-full justify-start hover:bg-accent' onClick={() => handleWalletSelect(wallet.adapter.name)}>
+                                                <Image height='20' width='20' src={wallet.adapter.icon} alt={wallet.adapter.name} />
+                                                <div className='text-xl'>
+                                                    {wallet.adapter.name}
+                                                </div>
+                                            </Button>
+                                        ))}
+                                    </div>
+                                    <p className='px-2 text-center'>By connecting a wallet, you agree to SoFLEX&apos;s <a href='/tos' target='_blank'><span className='underline'>Terms of Service</span></a>, <a href='/ua' target='_blank'><span className='underline'>User Agreement</span></a>, and consent to its <a href='/privacy' target='_blank'><span className='underline'>Privacy Policy</span></a>.</p>
+                                </DialogContent>
+                            </Dialog>
                         )}
                     </div>
                 </div>

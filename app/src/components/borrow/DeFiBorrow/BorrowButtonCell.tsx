@@ -83,7 +83,7 @@ export default function BorrowButtonCell({ row }: { row: { original: BorrowingAs
     const [interestRate, setInterestRate] = useState(undefined);
 
     const order = row.original;
-    const { connected } = useWallet();
+    const { publicKey } = useWallet();
     const wallet = useWallet();
 
     const shyft_api_key = process.env.NEXT_PUBLIC_SHYFTAPI!;
@@ -246,6 +246,30 @@ export default function BorrowButtonCell({ row }: { row: { original: BorrowingAs
         setInterestRate(interestRate.toFixed(2));
     };
 
+    const addOrdinalSuffix = (day: number) => {
+        if (day >= 11 && day <= 13) {
+            return `${day}th`;
+        }
+        switch (day % 10) {
+            case 1: return `${day}st`;
+            case 2: return `${day}nd`;
+            case 3: return `${day}rd`;
+            default: return `${day}th`;
+        }
+    }
+
+    const today = new Date();
+
+    const futureDate = new Date(today);
+    futureDate.setDate(futureDate.getDate() + parseInt(form.watch('borrowing_duration')));
+
+    const dueByDate = `${addOrdinalSuffix(futureDate.getDate())} ${futureDate.toLocaleString('en-US', {
+        month: 'long',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+    })}`;
+
     async function onSubmit(values: z.infer<typeof FormSchema>) {
         try {
             const data = await newDeFiBorrowing({
@@ -274,8 +298,8 @@ export default function BorrowButtonCell({ row }: { row: { original: BorrowingAs
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button className='text-white' disabled={!connected}>
-                    {connected ? 'Borrow' : 'Connect Wallet'}
+                <Button className='text-white' disabled={!publicKey}>
+                    {publicKey ? 'Borrow' : 'Connect Wallet'}
                 </Button>
             </DialogTrigger>
             <DialogContent className='max-w-[90vw] md:max-w-[60vw]'>
@@ -498,6 +522,13 @@ export default function BorrowButtonCell({ row }: { row: { original: BorrowingAs
                                             </TooltipProvider>
                                         </div>
                                         <div>{interestRate} %</div>
+                                    </div>
+
+                                    <div className='flex flex-row items-center justify-between'>
+                                        <div className='flex flex-row items-center space-x-1'>
+                                            <h1 className='font-semibold tracking-wide'>Due By</h1>
+                                        </div>
+                                        <div>{dueByDate}</div>
                                     </div>
 
                                 </>

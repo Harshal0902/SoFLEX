@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
 import { useWallet, useConnection } from '@solana/wallet-adapter-react'
 import { addNewUser } from '@/lib/supabaseRequests'
 import { toast } from 'sonner'
@@ -10,6 +9,8 @@ import { Menu, X, Home, HandCoins, Gem, Bell, BellRing, ChevronDown } from 'luci
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import Image from 'next/image'
 import useUserSOLBalance from '@/store/useUserSOLBalanceStore'
 
 interface Notification {
@@ -33,18 +34,16 @@ const notifications: Notification[] = [
 ]
 
 export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
-    const [isOpen, setOpen] = useState(false);
-    const [dropdownVisible, setDropdownVisible] = useState({
-        notification: false,
-        profile: false
-    });
+    const [isOpen, setIsOpen] = useState(false);
+    const [open, setOpen] = useState<boolean>(false);
+    const [dropdownVisible, setDropdownVisible] = useState({ notification: false, profile: false });
 
     // @ts-ignore
     const toggleDropdown = (dropdown) => setDropdownVisible((prev) => ({ ...prev, [dropdown]: !prev[dropdown] }));
     const toggleDropdownNotification = () => toggleDropdown('notification');
     const toggleDropdownProfile = () => toggleDropdown('profile');
 
-    const toggleOpen = () => setOpen((prev) => !prev);
+    const toggleOpen = () => setIsOpen((prev) => !prev);
 
     const pathname = usePathname();
 
@@ -59,14 +58,14 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
         }
     }
 
-    const { connected, disconnect } = useWallet();
+    const { select, wallets, publicKey, disconnect, connecting, connected } = useWallet();
     const wallet = useWallet();
     const { connection } = useConnection();
     const { balance, getUserSOLBalance } = useUserSOLBalance();
 
     useEffect(() => {
         const addUserToDB = async () => {
-            if (connected) {
+            if (publicKey) {
                 try {
                     await addNewUser({
                         walletAddress: wallet.publicKey?.toString(),
@@ -80,7 +79,7 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
 
         addUserToDB();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [connected]);
+    }, [publicKey]);
 
     useEffect(() => {
         if (wallet.publicKey) {
@@ -88,8 +87,22 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
         }
     }, [wallet.publicKey, connection, getUserSOLBalance])
 
+    const handleWalletSelect = async (walletName: any) => {
+        if (walletName) {
+            try {
+                select(walletName);
+                setOpen(false);
+                setIsOpen(false);
+            } catch (error) {
+                toast.error('An error occurred while connecting your wallet. Please try again later.');
+            }
+        }
+    };
+
     const handleDisconnect = async () => {
         disconnect();
+        setIsOpen(false);
+        toast.success('Wallet disconnected successfully!');
     };
 
     return (
@@ -149,18 +162,7 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
                                         </Link>
                                     </div>
 
-                                    {!isWallet ? (
-                                        <div className='border-y-2 py-2 px-2 cursor-pointer w-full'>
-                                            <div className='relative'>
-                                                <Button className='text-white text-md w-full'>
-                                                    Connect Wallet
-                                                </Button>
-                                                <div className='absolute top-0 right-0 w-[133px] h-[40px] opacity-0'>
-                                                    <WalletMultiButton />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ) : (
+                                    {isWallet ? (
                                         <>
                                             <div className='border-t-2 pt-2 px-2 cursor-pointer w-full'>
                                                 <div className='flex flex-row justify-between items-center' onClick={toggleDropdownNotification}>
@@ -238,6 +240,30 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
                                                 </Button>
                                             </div>
                                         </>
+                                    ) : (
+                                        <div className='border-y-2 w-full p-2'>
+                                            <Dialog open={open} onOpenChange={setOpen}>
+                                                <DialogTrigger asChild>
+                                                    <Button className='text-white text-md w-full'>
+                                                        {connecting ? 'Connecting...' : 'Connect Wallet'}
+                                                    </Button>
+                                                </DialogTrigger>
+                                                <DialogContent className='max-w-[90vw] md:max-w-[450px]'>
+                                                    <DialogTitle className='text-xl md:text-2xl tracking-wide text-center'>Connect a wallet on Solana to continue</DialogTitle>
+                                                    <div className='flex flex-col space-y-2'>
+                                                        {wallets.map((wallet) => (
+                                                            <Button key={wallet.adapter.name} variant='ghost' className='flex flex-row space-x-2 w-full justify-start hover:bg-accent' onClick={() => handleWalletSelect(wallet.adapter.name)}>
+                                                                <Image height='20' width='20' src={wallet.adapter.icon} alt={wallet.adapter.name} />
+                                                                <div className='text-xl'>
+                                                                    {wallet.adapter.name}
+                                                                </div>
+                                                            </Button>
+                                                        ))}
+                                                    </div>
+                                                    <p className='text-center text-sm'>By connecting a wallet, you agree to SoFLEX&apos;s <a href='/tos' target='_blank'><span className='underline'>Terms of Service</span></a>, <a href='/ua' target='_blank'><span className='underline'>User Agreement</span></a>, and consent to its <a href='/privacy' target='_blank'><span className='underline'>Privacy Policy</span></a>.</p>
+                                                </DialogContent>
+                                            </Dialog>
+                                        </div>
                                     )}
 
                                 </div>
