@@ -70,7 +70,7 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
                     await addNewUser({
                         walletAddress: wallet.publicKey?.toString(),
                     });
-                    toast.success('Wallet connected successfully!');
+                    // toast.success('Wallet connected successfully!');
                 } catch (error) {
                     toast.error('An error occurred while setting up your account. Please try again later.');
                 }

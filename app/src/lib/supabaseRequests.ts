@@ -33,10 +33,20 @@ interface NewDeFiBorrowingType {
     walletAddress?: string;
     borrowingAmount: string;
     borrowingToken: string;
-    collateralizationAssets: string[];
+    collateralizationAssets: NFTType[];
     borrowingDuration: string;
-    borrowingInterestRate?: string;
-    borrowingCollateralType: string;
+    borrowingInterestRate: string;
+    borrowingDueBy: Date;
+    borrowingTotal: string;
+}
+
+interface NFTType {
+    image_uri?: string;
+    name?: string;
+    floorprice?: number;
+    external_url?: string;
+    mint?: string;
+    royalty?: number;
 }
 
 export const addUserWaitlist = async ({ email }: WaitlistUserType) => {
@@ -207,7 +217,7 @@ export const newDeFiLending = async ({ walletAddress, lendingAmount, lendingToke
     }
 };
 
-export const newDeFiBorrowing = async ({ walletAddress, borrowingAmount, borrowingToken, collateralizationAssets, borrowingDuration, borrowingInterestRate, borrowingCollateralType }: NewDeFiBorrowingType) => {
+export const newDeFiBorrowing = async ({ walletAddress, borrowingAmount, borrowingToken, collateralizationAssets, borrowingDuration, borrowingInterestRate, borrowingDueBy, borrowingTotal }: NewDeFiBorrowingType) => {
     try {
         const uuid = crypto.randomBytes(16).toString('hex');
         const generateNewBorrowingId = uuid.substring(0, 8) + uuid.substring(9, 13) + uuid.substring(14, 18) + uuid.substring(19, 23) + uuid.substring(24);
@@ -224,7 +234,9 @@ export const newDeFiBorrowing = async ({ walletAddress, borrowingAmount, borrowi
                 borrowing_collateralization_assets: collateralizationAssets,
                 borrowing_duration: borrowingDuration,
                 borrowing_interest_rate: borrowingInterestRate,
-                borrowing_collateral_type: borrowingCollateralType,
+                borrowing_status: 'Active',
+                borrowing_due_by: borrowingDueBy,
+                borrowing_total: borrowingTotal,
                 borrowing_submitted_at: created_at
             })
             .select();

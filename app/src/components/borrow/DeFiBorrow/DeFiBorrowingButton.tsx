@@ -5,7 +5,7 @@ import * as z from 'zod'
 import { updateUserCreditScore, newDeFiBorrowing } from '@/lib/supabaseRequests'
 import { toast } from 'sonner'
 import { useWallet } from '@solana/wallet-adapter-react'
-import { Loader2, Info, ExternalLink } from 'lucide-react'
+import { ChevronRight, ChevronLeft, Loader2, Info, ExternalLink } from 'lucide-react'
 import InfoButton from '@/components/InfoButton'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Button } from '@/components/ui/button'
@@ -16,6 +16,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import Loading from '@/components/Loading'
 import Image from 'next/image'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Checkbox } from '@/components/ui/checkbox'
 
 export type BorrowingAssetDataType = {
     asset_name: string;
@@ -34,6 +35,7 @@ interface NFTType {
     floorprice?: number;
     external_url?: string;
     mint?: string;
+    royalty?: number;
 }
 
 const borrowDuration = [
@@ -48,10 +50,16 @@ const borrowDuration = [
 const FormSchema = z.object({
     borrowing_amount: z
         .string()
-        .refine(value => !isNaN(Number(value)), {
+        .refine(value => {
+            const parsedValue = parseFloat(value);
+            return !isNaN(parsedValue);
+        }, {
             message: 'Amount must be a number.',
         })
-        .refine(value => Number(value) > 0, {
+        .refine(value => {
+            const parsedValue = parseFloat(value);
+            return parsedValue > 0;
+        }, {
             message: 'Amount must be a positive number.',
         })
         .refine(value => {
@@ -64,20 +72,30 @@ const FormSchema = z.object({
 
             return true;
         }, {
-            message: 'Amount must have up to 7 digits before the decimal point and up to 8 digits after the decimal point.',
+            message: 'Amount must have up to 7 digits before the decimal point.',
         }),
     borrowing_duration: z.string({
         required_error: 'Borrowing duration is required.',
     }),
+    agree_terms: z.boolean()
+        .refine(value => value === true, {
+            message: 'You must agree to the Terms of Service and Privacy Policy.',
+            path: ['agree_terms']
+        }),
 });
 
 export default function DeFiBorrowingButton({ row }: { row: { original: BorrowingAssetDataType } }) {
-    const [isSubmitting, setIsSubmitting] = useState(false);
     const [open, setOpen] = useState(false);
+    const [currentSection, setCurrentSection] = useState(1);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [cNFTResult, setcNFTResult] = useState<NFTType[]>([]);
     const [cNFTLoading, setcNFTLoading] = useState<boolean>(false);
     const [NFTResult, setNFTResult] = useState<NFTType[]>([]);
     const [NFTLoading, setNFTLoading] = useState<boolean>(false);
+    const [selectedCNFT, setSelectedCNFT] = useState<number[]>([]);
+    const [selectedNFT, setSelectedNFT] = useState<number[]>([]);
+    const [totalCNFTPrice, setTotalCNFTPrice] = useState<number>(0);
+    const [totalNFTPrice, setTotalNFTPrice] = useState<number>(0);
     const [loading, setLoading] = useState(false);
     const [creditScore, setCreditScore] = useState(null);
     const [interestRate, setInterestRate] = useState(undefined);
@@ -168,17 +186,52 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
         fetchData();
     }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
+    useEffect(() => {
+        const totalCNFT = selectedCNFT.reduce((acc, index) => acc + (cNFTResult[index]?.floorprice || 0), 0);
+        setTotalCNFTPrice(totalCNFT);
+    }, [selectedCNFT, cNFTResult]);
+
+    useEffect(() => {
+        const totalNFT = selectedNFT.reduce((acc, index) => acc + (NFTResult[index]?.floorprice || 0), 0);
+        setTotalNFTPrice(totalNFT);
+    }, [selectedNFT, NFTResult]);
+
+    const handleSubmitSection = () => {
+        setCurrentSection((prevSection) => prevSection + 1);
+        knowTransactionHistory();
+    };
+
+    const handleNFTSection = () => {
+        setCurrentSection((prevSection) => prevSection - 1);
+    };
+
+    const form = useForm<z.infer<typeof FormSchema>>({
+        resolver: zodResolver(FormSchema),
+    });
+
     function formatAsset_price(value: number): string {
         return (value / 100).toFixed(5);
     }
 
-    const form = useForm<z.infer<typeof FormSchema>>({
-        resolver: zodResolver(FormSchema),
-        defaultValues: {
-            borrowing_amount: '1',
-            borrowing_duration: '15 days',
-        },
-    });
+    const toggleCNFTSelection = (index: number) => {
+        setSelectedCNFT(prev => {
+            if (prev.includes(index)) {
+                return prev.filter(i => i !== index);
+            } else {
+                return [...prev, index];
+            }
+        });
+    };
+
+    const toggleNFTSelection = (index: number) => {
+        setSelectedNFT(prev => {
+            if (prev.includes(index)) {
+                return prev.filter(i => i !== index);
+            } else {
+                return [...prev, index];
+            }
+        });
+    };
 
     const knowTransactionHistory = async () => {
         setLoading(true);
@@ -270,23 +323,30 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
         minute: '2-digit',
     })}`;
 
+    const combinedCollateralList = [...selectedCNFT.map(index => cNFTResult[index]), ...selectedNFT.map(index => NFTResult[index])];
+
     async function onSubmit(values: z.infer<typeof FormSchema>) {
         try {
             const data = await newDeFiBorrowing({
                 walletAddress: wallet.publicKey?.toString(),
                 borrowingAmount: values.borrowing_amount,
                 borrowingToken: order.asset_symbol,
-                collateralizationAssets: ['none'],
+                collateralizationAssets: combinedCollateralList,
                 borrowingDuration: values.borrowing_duration,
+                // @ts-ignore
                 borrowingInterestRate: interestRate,
-                borrowingCollateralType: 'NFT',
+                borrowingDueBy: futureDate,
+                // @ts-ignore
+                borrowingTotal: `${(parseFloat(form.watch('borrowing_amount')) + ((interestRate / 100) * parseFloat(form.watch('borrowing_amount'))))}`,
             });
 
             setIsSubmitting(true);
+            setCurrentSection(1);
             if (data) {
                 setIsSubmitting(false);
                 setOpen(false);
                 toast.success('Borrowing successful! Assets will be credited to your wallet shortly.');
+                form.reset();
             } else {
                 toast.error('Error completing the process. Please try again!');
             }
@@ -312,246 +372,394 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                         Borrow token from the lending pool.
                     </DialogDescription>
                 </DialogHeader>
-                <div className='max-h-[45vh] md:max-h-[60vh] px-2 md:px-4 overflow-y-auto'>
-                    <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} autoComplete='off' className='flex flex-col space-y-2'>
 
-                            <FormField
-                                control={form.control}
-                                name='borrowing_amount'
-                                render={({ field }) => (
-                                    <FormItem className='w-full'>
-                                        <FormLabel>Borrowing amount (in {order.asset_symbol})</FormLabel>
-                                        <FormControl>
-                                            <Input {...field} />
-                                        </FormControl>
-                                        <FormDescription>
-                                            Enter the amount you want to borrow.
-                                        </FormDescription>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} autoComplete='off'>
 
-                            <div className='flex flex-row items-center justify-between'>
-                                <div className='flex flex-row items-center space-x-1'>
-                                    <h1 className='font-semibold tracking-wide'>Current Price</h1>
-                                    <TooltipProvider>
-                                        <Tooltip delayDuration={300}>
-                                            <TooltipTrigger asChild>
-                                                <span><Info className='h-4 w-4 ml-1 cursor-pointer' /></span>
-                                            </TooltipTrigger>
-                                            <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
-                                                The current price of the asset in USD.
-                                            </TooltipContent>
-                                        </Tooltip>
-                                    </TooltipProvider>
-                                </div>
-                                <div>{order.asset_price}</div>
-                            </div>
+                        {currentSection === 1 && (
+                            <div className='w-full flex flex-col space-y-2 max-h-[45vh] md:max-h-[60vh] overflow-y-auto px-2'>
 
-                            <div>
-                                <Accordion type='multiple' defaultValue={['cNFT', 'NFT']}>
-                                    <AccordionItem value='cNFT'>
-                                        <AccordionTrigger className='hover:no-underline text-left font-semibold tracking-wide'>Select cNFT(s) or Synthetic Asset(s) for Collateral</AccordionTrigger>
-                                        <AccordionContent>
-                                            {cNFTLoading ? <Loading /> : (
-                                                <div className='flex flex-row space-x-2 flex-wrap justify-evenly'>
-                                                    {cNFTResult.length ? (
-                                                        cNFTResult.map((nft, index) => (
-                                                            <>
-                                                                {nft.image_uri && nft.image_uri.startsWith('http') && (
-                                                                    <div className='border rounded mt-4 p-2 flex flex-col space-y-2' key={index}>
-                                                                        <div className='flex items-center justify-center'>
-                                                                            <Image src={nft.image_uri} width={180} height={40} alt={nft.image_uri} />
-                                                                        </div>
-                                                                        <p className='text-center'>{nft.name}</p>
-                                                                        {
-                                                                            nft.external_url !== undefined && nft.external_url !== null && nft.external_url !== '' && (
-                                                                                <div className='flex flex-row items-center justify-center space-x-2'>
-                                                                                    <a href={nft.external_url} target='_blank' className='text-primary'>View collection</a>
-                                                                                    <ExternalLink className='h-4 w-4' />
-                                                                                </div>
-                                                                            )
-                                                                        }
-                                                                        <div className='flex flex-row items-center justify-center space-x-2'>
-                                                                            <a href={`https://solscan.io/token/${nft.mint}`} target='_blank' className='text-primary'>View on Solscan</a>
-                                                                            <ExternalLink className='h-4 w-4' />
-                                                                        </div>
-                                                                        {nft.floorprice && nft.floorprice > 0 ? (
-                                                                            <p className='text-center'>cNFT Price: {formatAsset_price(nft.floorprice)} SOL</p>
-                                                                        ) : (
-                                                                            <p className='text-center'>cNFT Price: 0 SOL</p>
-                                                                        )}
-                                                                    </div>
-                                                                )}
-                                                            </>
-                                                        ))
-                                                    ) : (
-                                                        <p>No cNFT(s) or Synthetic Asset(s) found for you wallet.</p>
-                                                    )}
-                                                </div>
-                                            )}
-                                        </AccordionContent>
-                                    </AccordionItem>
-
-                                    <AccordionItem value='NFT'>
-                                        <AccordionTrigger className='hover:no-underline text-left font-semibold tracking-wide'>Select NFT(s) for Collateral</AccordionTrigger>
-                                        <AccordionContent>
-                                            {NFTLoading ? <Loading /> : (
-                                                <div className='flex flex-row space-x-2 flex-wrap justify-evenly'>
-                                                    {NFTResult.length ? (
-                                                        NFTResult.map((nft, index) => (
-                                                            <>
-                                                                {nft.image_uri && nft.image_uri.startsWith('http') && (
-                                                                    <div className='border rounded mt-4 p-2 flex flex-col space-y-2' key={index}>
-                                                                        <div className='flex items-center justify-center'>
-                                                                            <Image src={nft.image_uri} width={180} height={40} alt={nft.image_uri} />
-                                                                        </div>
-                                                                        <p className='text-center'>{nft.name}</p>
-                                                                        {
-                                                                            nft.external_url !== undefined && nft.external_url !== null && nft.external_url !== '' && (
-                                                                                <div className='flex flex-row items-center justify-center space-x-2'>
-                                                                                    <a href={nft.external_url} target='_blank' className='text-primary'>View collection</a>
-                                                                                    <ExternalLink className='h-4 w-4' />
-                                                                                </div>
-                                                                            )
-                                                                        }
-                                                                        <div className='flex flex-row items-center justify-center space-x-2'>
-                                                                            <a href={`https://solscan.io/token/${nft.mint}`} target='_blank' className='text-primary'>View on Solscan</a>
-                                                                            <ExternalLink className='h-4 w-4' />
-                                                                        </div>
-                                                                        {nft.floorprice && nft.floorprice > 0 ? (
-                                                                            <p className='text-center'>NFT Price: {formatAsset_price(nft.floorprice)} SOL</p>
-                                                                        ) : (
-                                                                            <p className='text-center'>NFT Price: 0 SOL</p>
-                                                                        )}
-                                                                    </div>
-                                                                )}
-                                                            </>
-                                                        ))
-                                                    ) : (
-                                                        <p>No NFT(s) found for you wallet.</p>
-                                                    )}
-                                                </div>
-                                            )}
-                                        </AccordionContent>
-                                    </AccordionItem>
-                                </Accordion>
-                            </div>
-
-                            <FormField
-                                control={form.control}
-                                name='borrowing_duration'
-                                render={({ field }) => (
-                                    <FormItem className='w-full'>
-                                        <FormLabel>Borrow Duration</FormLabel>
-                                        <Select onValueChange={field.onChange} defaultValue='15 days'>
+                                <FormField
+                                    control={form.control}
+                                    name='borrowing_amount'
+                                    render={({ field }) => (
+                                        <FormItem className='w-full'>
+                                            <FormLabel>Borrowing amount (in {order.asset_symbol})</FormLabel>
                                             <FormControl>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder='Select borrow duration' />
-                                                </SelectTrigger>
+                                                <Input {...field} />
                                             </FormControl>
-                                            <SelectContent>
-                                                {borrowDuration.map((days) => (
-                                                    <SelectItem key={days} value={days}>
-                                                        {days}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                        <FormDescription>
-                                            Select the duration for borrowing the asset.
-                                        </FormDescription>
-                                        <FormMessage />
-                                    </FormItem>
+                                            <FormDescription>
+                                                Enter the amount you want to borrow.
+                                            </FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <div className='flex flex-row items-center justify-between'>
+                                    <div className='flex flex-row items-center space-x-1'>
+                                        <h1 className='font-semibold tracking-wide'>Current Price</h1>
+                                        <TooltipProvider>
+                                            <Tooltip delayDuration={300}>
+                                                <TooltipTrigger asChild>
+                                                    <span><Info className='h-4 w-4 ml-1 cursor-pointer' /></span>
+                                                </TooltipTrigger>
+                                                <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
+                                                    The current price of the asset in USD.
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
+                                    </div>
+                                    <div>{order.asset_price}</div>
+                                </div>
+
+                                <div>
+                                    <Accordion type='multiple' defaultValue={['cNFT', 'NFT']}>
+                                        <AccordionItem value='cNFT'>
+                                            <AccordionTrigger className='hover:no-underline text-left font-semibold tracking-wide'>Select cNFT(s) or Synthetic Asset(s) for Collateral</AccordionTrigger>
+                                            <AccordionContent>
+                                                {cNFTLoading ? <Loading /> : (
+                                                    <div className='flex flex-row space-x-2 flex-wrap justify-evenly'>
+                                                        {cNFTResult.length ? (
+                                                            cNFTResult.map((nft, index) => (
+                                                                <>
+                                                                    {nft.image_uri && nft.image_uri.startsWith('http') && (
+                                                                        <div className={`border rounded mt-4 p-2 flex flex-col space-y-2 cursor-pointer ${selectedCNFT.includes(index) ? 'border-primary' : ''}`} key={index} onClick={() => toggleCNFTSelection(index)}>
+                                                                            <div className='flex items-center justify-center'>
+                                                                                <Image src={nft.image_uri} width={180} height={40} alt={nft.image_uri} />
+                                                                            </div>
+                                                                            <p className='text-center'>{nft.name}</p>
+                                                                            {
+                                                                                nft.external_url !== undefined && nft.external_url !== null && nft.external_url !== '' && (
+                                                                                    <div className='flex flex-row items-center justify-center space-x-2'>
+                                                                                        <a href={nft.external_url} target='_blank' className='text-primary'>View collection</a>
+                                                                                        <ExternalLink className='h-4 w-4' />
+                                                                                    </div>
+                                                                                )
+                                                                            }
+                                                                            <div className='flex flex-row items-center justify-center space-x-2'>
+                                                                                <a href={`https://solscan.io/token/${nft.mint}`} target='_blank' className='text-primary'>View on Solscan</a>
+                                                                                <ExternalLink className='h-4 w-4' />
+                                                                            </div>
+                                                                            {nft.floorprice && nft.floorprice > 0 ? (
+                                                                                <p className='text-center'>cNFT Price: {formatAsset_price(nft.floorprice)} SOL</p>
+                                                                            ) : (
+                                                                                <p className='text-center'>cNFT Price: 0 SOL</p>
+                                                                            )}
+                                                                        </div>
+                                                                    )}
+                                                                </>
+                                                            ))
+                                                        ) : (
+                                                            <p>No cNFT(s) or Synthetic Asset(s) found for you wallet.</p>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </AccordionContent>
+                                        </AccordionItem>
+
+                                        <AccordionItem value='NFT'>
+                                            <AccordionTrigger className='hover:no-underline text-left font-semibold tracking-wide'>Select NFT(s) for Collateral</AccordionTrigger>
+                                            <AccordionContent>
+                                                {NFTLoading ? <Loading /> : (
+                                                    <div className='flex flex-row space-x-2 flex-wrap justify-evenly'>
+                                                        {NFTResult.length ? (
+                                                            NFTResult.map((nft, index) => (
+                                                                <>
+                                                                    {nft.image_uri && nft.image_uri.startsWith('http') && (
+                                                                        <div className={`border rounded mt-4 p-2 flex flex-col space-y-2 cursor-pointer ${selectedNFT.includes(index) ? 'border-primary' : ''}`} key={index} onClick={() => toggleNFTSelection(index)}>
+                                                                            <div className='flex items-center justify-center'>
+                                                                                <Image src={nft.image_uri} width={180} height={40} alt={nft.image_uri} />
+                                                                            </div>
+                                                                            <p className='text-center'>{nft.name}</p>
+                                                                            {
+                                                                                nft.external_url !== undefined && nft.external_url !== null && nft.external_url !== '' && (
+                                                                                    <div className='flex flex-row items-center justify-center space-x-2'>
+                                                                                        <a href={nft.external_url} target='_blank' className='text-primary'>View collection</a>
+                                                                                        <ExternalLink className='h-4 w-4' />
+                                                                                    </div>
+                                                                                )
+                                                                            }
+                                                                            <div className='flex flex-row items-center justify-center space-x-2'>
+                                                                                <a href={`https://solscan.io/token/${nft.mint}`} target='_blank' className='text-primary'>View on Solscan</a>
+                                                                                <ExternalLink className='h-4 w-4' />
+                                                                            </div>
+                                                                            {nft.floorprice && nft.floorprice > 0 ? (
+                                                                                <p className='text-center'>NFT Price: {formatAsset_price(nft.floorprice)} SOL</p>
+                                                                            ) : (
+                                                                                <p className='text-center'>NFT Price: 0 SOL</p>
+                                                                            )}
+                                                                        </div>
+                                                                    )}
+                                                                </>
+                                                            ))
+                                                        ) : (
+                                                            <p>No NFT(s) found for you wallet.</p>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </AccordionContent>
+                                        </AccordionItem>
+                                    </Accordion>
+                                </div>
+
+                                <div className='flex flex-row items-center justify-between pt-2'>
+                                    <div className='flex flex-row items-center space-x-1'>
+                                        <h1 className='font-semibold tracking-wide'>Total Collateral Value</h1>
+                                        <TooltipProvider>
+                                            <Tooltip delayDuration={300}>
+                                                <TooltipTrigger asChild>
+                                                    <span><Info className='h-4 w-4 ml-1 cursor-pointer' /></span>
+                                                </TooltipTrigger>
+                                                <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
+                                                    The total value of the collateral in SOL.
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
+                                    </div>
+                                    <div>{formatAsset_price(totalCNFTPrice + totalNFTPrice)} SOL</div>
+                                </div>
+
+                                <FormField
+                                    control={form.control}
+                                    name='borrowing_duration'
+                                    render={({ field }) => (
+                                        <FormItem className='w-full'>
+                                            <FormLabel>Borrow Duration</FormLabel>
+                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                <FormControl>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder='Select borrow duration' />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    {borrowDuration.map((days) => (
+                                                        <SelectItem key={days} value={days}>
+                                                            {days}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            <FormDescription>
+                                                Select the duration for borrowing the asset.
+                                            </FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <div>
+                                    {/* @ts-ignore */}
+                                    {formatAsset_price(totalCNFTPrice + totalNFTPrice) < parseFloat(form.watch('borrowing_amount')) &&
+                                        <p className='text-destructive text-center'>The value of the collateral must be greater than the amount borrowed.</p>
+                                    }
+                                </div>
+
+                                {/* @ts-ignore */}
+                                {((parseFloat(formatAsset_price(totalCNFTPrice + totalNFTPrice)) + (0.4 * formatAsset_price(totalCNFTPrice + totalNFTPrice))) > parseFloat(form.watch('borrowing_amount'))) && form.watch('borrowing_duration') &&
+                                    <div className='flex flex-col items-end justify-center pt-2'>
+                                        <div className='border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded cursor-pointer text-sm py-2.5 px-4 w-full md:w-auto flex flex-row items-center justify-center' onClick={handleSubmitSection}>
+                                            Calculate Intrest Rate
+                                            <ChevronRight className='w-4 h-4 ml-1' />
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        )}
+                        {currentSection === 2 && (
+                            <div className='w-full flex flex-col space-y-2 max-h-[45vh] md:max-h-[60vh] overflow-y-auto px-2'>
+
+                                {interestRate && creditScore && !loading ? (
+                                    <>
+                                        <div className='flex flex-row items-center justify-between'>
+                                            <div className='flex flex-row items-center space-x-1 text-sm md:text-lg'>
+                                                <h1 className='tracking-wide'>Credit Score</h1>
+                                                <TooltipProvider>
+                                                    <Tooltip delayDuration={300}>
+                                                        <TooltipTrigger asChild>
+                                                            <span><Info className='h-4 w-4 ml-1 cursor-pointer' /></span>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent className='max-w-[18rem] md:max-w-[26rem]'>
+                                                            How we calculate credit score:
+                                                            <p className='text-center'>a x BH  +  b x (TH + CD) + c</p>
+                                                            <div className='py-1'>
+                                                                <p>Where:</p>
+                                                                <p>BH: Borrower History Score (0-100)</p>
+                                                                <p>TH: Transaction History Score (0-100)</p>
+                                                                <p>CD: Collateral Diversity Score (0-100)</p>
+                                                                <p>a: 0.55 (Moderate weight on BH)</p>
+                                                                <p>b: 0.35 (Moderate weight on combined TH + CD)</p>
+                                                                <p>c: 30 (Constant value to adjust score range)</p>
+                                                            </div>
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                </TooltipProvider>
+                                            </div>
+                                            <div>{isNaN(creditScore) ? '36.48' : creditScore}</div>
+                                        </div>
+
+                                        <div className='flex flex-row items-center justify-between text-sm md:text-lg'>
+                                            <div className='flex flex-row items-center space-x-1'>
+                                                <h1 className='tracking-wide'>Intrest Rate</h1>
+                                                <TooltipProvider>
+                                                    <Tooltip delayDuration={300}>
+                                                        <TooltipTrigger asChild>
+                                                            <span><Info className='h-4 w-4 ml-1 cursor-pointer' /></span>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent className='max-w-[18rem] md:max-w-[26rem]'>
+                                                            How we calculate intrest rate:
+                                                            <p className='text-center'>Cost x ( BR + RP  + DA)</p>
+                                                            <div className='py-1'>
+                                                                <p>Where:</p>
+                                                                <p>Cost: Requested Loan Amount</p>
+                                                                <p>Base Rate: 0.05  (Minimum interest rate)</p>
+                                                                <p>Risk Premium: (155 - OCS) x (RF / (155 - 30))</p>
+                                                                <p>OCS: On-Chain Credit Score</p>
+                                                                <p>Duration Adjustment = Duration(in months) x DF</p>
+                                                                <p>Duration_Factor (DF) = 0.5 ( To Adjust Duration)</p>
+                                                            </div>
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                </TooltipProvider>
+                                            </div>
+                                            <div>{interestRate} %</div>
+                                        </div>
+
+                                        <div className='flex flex-row items-center justify-between flex-wrap text-sm md:text-lg'>
+                                            <div className='flex flex-row items-center space-x-1'>
+                                                <h1 className='tracking-wide'>Due By</h1>
+                                            </div>
+                                            <div>{dueByDate}</div>
+                                        </div>
+
+                                        <Accordion type='multiple'>
+                                            <AccordionItem value='summary'>
+                                                <AccordionTrigger className='hover:no-underline text-left font-semibold tracking-wide'>Borrow Summary</AccordionTrigger>
+                                                <AccordionContent className='flex flex-col space-y-2'>
+                                                    <div className='flex flex-row items-center justify-between flex-wrap text-sm md:text-lg'>
+                                                        <div className='flex flex-row items-center space-x-1'>
+                                                            <h1 className='tracking-wide'>Borrowing Amount</h1>
+                                                            <TooltipProvider>
+                                                                <Tooltip delayDuration={300}>
+                                                                    <TooltipTrigger asChild>
+                                                                        <span><Info className='h-4 w-4 ml-1 cursor-pointer' /></span>
+                                                                    </TooltipTrigger>
+                                                                    <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
+                                                                        The total amount you are borrowing.
+                                                                    </TooltipContent>
+                                                                </Tooltip>
+                                                            </TooltipProvider>
+                                                        </div>
+                                                        <div>{parseFloat(form.watch('borrowing_amount'))} {order.asset_symbol}</div>
+                                                    </div>
+
+                                                    <div className='flex flex-row items-center justify-between flex-wrap text-sm md:text-lg'>
+                                                        <div className='flex flex-row items-center space-x-1'>
+                                                            <h1 className='tracking-wide'>Borrowing Duration</h1>
+                                                            <TooltipProvider>
+                                                                <Tooltip delayDuration={300}>
+                                                                    <TooltipTrigger asChild>
+                                                                        <span><Info className='h-4 w-4 ml-1 cursor-pointer' /></span>
+                                                                    </TooltipTrigger>
+                                                                    <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
+                                                                        The total duration for borrowing the asset.
+                                                                    </TooltipContent>
+                                                                </Tooltip>
+                                                            </TooltipProvider>
+                                                        </div>
+                                                        <div>{form.watch('borrowing_duration')}</div>
+                                                    </div>
+
+                                                    <div className='flex flex-row items-center justify-between flex-wrap text-sm md:text-lg'>
+                                                        <div className='flex flex-row items-center space-x-1'>
+                                                            <h1 className='tracking-wide'>Borrowing Interest</h1>
+                                                            <TooltipProvider>
+                                                                <Tooltip delayDuration={300}>
+                                                                    <TooltipTrigger asChild>
+                                                                        <span><Info className='h-4 w-4 ml-1 cursor-pointer' /></span>
+                                                                    </TooltipTrigger>
+                                                                    <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
+                                                                        The interest rate for borrowing the asset.
+                                                                    </TooltipContent>
+                                                                </Tooltip>
+                                                            </TooltipProvider>
+                                                        </div>
+                                                        <div>{interestRate} % ~ {((interestRate / 100) * parseFloat(form.watch('borrowing_amount'))).toFixed(4)} {order.asset_symbol}</div>
+                                                    </div>
+
+                                                    <div>
+                                                        <div className='text-sm md:text-lg'>Select NFT(s) and cNFT(s) for Collateral</div>
+                                                        <div className='flex flex-row space-x-2 flex-wrap justify-evenly py-2'>
+                                                            {combinedCollateralList.map((item, index) => (
+                                                                <div className='border rounded mt-4 p-2 flex flex-col space-y-2' key={index}>
+                                                                    <div className='flex items-center justify-center'>
+                                                                        {/* @ts-ignore */}
+                                                                        <Image src={item.image_uri} width={180} height={40} alt={item.image_uri} />
+                                                                    </div>
+                                                                    <p className='text-center'>{item.name}</p>
+                                                                    <div className='flex flex-row items-center justify-center space-x-2'>
+                                                                        <a href={item.external_url} target='_blank' className='text-primary'>View collection</a>
+                                                                        <ExternalLink className='h-4 w-4' />
+                                                                    </div>
+                                                                    <div className='flex flex-row items-center justify-center space-x-2'>
+                                                                        <a href={`https://solscan.io/token/${item.mint}`} target='_blank' className='text-primary'>View on Solscan</a>
+                                                                        <ExternalLink className='h-4 w-4' />
+                                                                    </div>
+                                                                    {/* @ts-ignore */}
+                                                                    <p className='text-center'>cNFT Price: {formatAsset_price(item.floorprice)} SOL</p>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+
+                                                </AccordionContent>
+                                            </AccordionItem>
+                                        </Accordion>
+
+                                        <div className='text-center py-2'>
+                                            Repay {(parseFloat(form.watch('borrowing_amount')) + ((interestRate / 100) * parseFloat(form.watch('borrowing_amount'))))} {order.asset_symbol} within {form.watch('borrowing_duration')} (By {dueByDate})
+                                        </div>
+
+                                        <div>
+                                            <FormField
+                                                control={form.control}
+                                                name='agree_terms'
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <div className='flex flex-row space-x-2 items-center justify-start'>
+                                                            <FormControl>
+                                                                <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                                                            </FormControl>
+                                                            <FormLabel>
+                                                                By checking this box, you agree to SoFLEX&apos;s <a href='/tos' target='_blank'><span className='underline'>Terms of Service</span></a>, <a href='/ua' target='_blank'><span className='underline'>User Agreement</span></a>, and consent to its <a href='/privacy' target='_blank'><span className='underline'>Privacy Policy</span></a>.
+                                                            </FormLabel>
+                                                        </div>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </div>
+                                    </>
+                                ) : (
+                                    <Loading />
                                 )}
-                            />
 
-                            {creditScore && (
-                                <>
-                                    <div className='flex flex-row items-center justify-between'>
-                                        <div className='flex flex-row items-center space-x-1'>
-                                            <h1 className='font-semibold tracking-wide'>Credit Score</h1>
-                                            <TooltipProvider>
-                                                <Tooltip delayDuration={300}>
-                                                    <TooltipTrigger asChild>
-                                                        <span><Info className='h-4 w-4 ml-1 cursor-pointer' /></span>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent className='max-w-[18rem] md:max-w-[26rem]'>
-                                                        How we calculate credit score:
-                                                        <p className='text-center'>a x BH  +  b x (TH + CD) + c</p>
-                                                        <div className='py-1'>
-                                                            <p>Where:</p>
-                                                            <p>BH: Borrower History Score (0-100)</p>
-                                                            <p>TH: Transaction History Score (0-100)</p>
-                                                            <p>CD: Collateral Diversity Score (0-100)</p>
-                                                            <p>a: 0.55 (Moderate weight on BH)</p>
-                                                            <p>b: 0.35 (Moderate weight on combined TH + CD)</p>
-                                                            <p>c: 30 (Constant value to adjust score range)</p>
-                                                        </div>
-                                                    </TooltipContent>
-                                                </Tooltip>
-                                            </TooltipProvider>
-                                        </div>
-                                        <div>{isNaN(creditScore) ? '36.48' : creditScore}</div>
+
+                                <div className='flex flex-col md:flex-row items-center justify-between md:pt-2 space-y-2 md:space-y-0'>
+                                    <div className='border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded cursor-pointer text-sm py-2.5 px-4 w-full md:w-auto flex flex-row items-center justify-center' onClick={handleNFTSection}>
+                                        <ChevronLeft className='w-4 h-4 mr-1' />
+                                        Edit borrow details
                                     </div>
+                                    <Button type='submit' className='text-white px-16 w-full md:w-auto' disabled={isSubmitting}>
+                                        {isSubmitting && <Loader2 className='animate-spin mr-2' size={15} />}
+                                        {isSubmitting ? 'Borrowing...' : 'Borrow'}
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
 
-                                    <div className='flex flex-row items-center justify-between'>
-                                        <div className='flex flex-row items-center space-x-1'>
-                                            <h1 className='font-semibold tracking-wide'>Intrest Rate</h1>
-                                            <TooltipProvider>
-                                                <Tooltip delayDuration={300}>
-                                                    <TooltipTrigger asChild>
-                                                        <span><Info className='h-4 w-4 ml-1 cursor-pointer' /></span>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent className='max-w-[18rem] md:max-w-[26rem]'>
-                                                        How we calculate intrest rate:
-                                                        <p className='text-center'>Cost x ( BR + RP  + DA)</p>
-                                                        <div className='py-1'>
-                                                            <p>Where:</p>
-                                                            <p>Cost: Requested Loan Amount</p>
-                                                            <p>Base Rate: 0.05  (Minimum interest rate)</p>
-                                                            <p>Risk Premium: (155 - OCS) x (RF / (155 - 30))</p>
-                                                            <p>OCS: On-Chain Credit Score</p>
-                                                            <p>Duration Adjustment = Duration(in months) x DF</p>
-                                                            <p>Duration_Factor (DF) = 0.5 ( To Adjust Duration)</p>
-                                                        </div>
-                                                    </TooltipContent>
-                                                </Tooltip>
-                                            </TooltipProvider>
-                                        </div>
-                                        <div>{interestRate} %</div>
-                                    </div>
-
-                                    <div className='flex flex-row items-center justify-between'>
-                                        <div className='flex flex-row items-center space-x-1'>
-                                            <h1 className='font-semibold tracking-wide'>Due By</h1>
-                                        </div>
-                                        <div>{dueByDate}</div>
-                                    </div>
-
-                                </>
-                            )}
-                            {creditScore && interestRate && (
-                                <Button type='submit' className='text-white w-full mt-4' disabled={isSubmitting}>
-                                    {isSubmitting && <Loader2 className='animate-spin mr-2' size={15} />}
-                                    {isSubmitting ? 'Borrowing...' : 'Borrow'}
-                                </Button>
-                            )}
-                        </form>
-                    </Form>
-
-                    {!creditScore ? (
-                        <Button className='text-white w-full mt-4' onClick={knowTransactionHistory} disabled={loading} >
-                            {loading ? 'Calculating...' : 'Calculate Intrest Rate'}
-                        </Button>
-                    ) : (
-                        <Button variant='outline' className='w-full mt-4' onClick={knowTransactionHistory} disabled={loading} >
-                            {loading ? 'Calculating...' : 'Re-Calculate Intrest Rate'}
-                        </Button>
-                    )}
-                </div>
+                    </form>
+                </Form>
             </DialogContent>
         </Dialog>
     )
