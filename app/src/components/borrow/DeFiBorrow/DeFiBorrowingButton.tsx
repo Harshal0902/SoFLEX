@@ -329,7 +329,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
         try {
             const data = await newDeFiBorrowing({
                 walletAddress: wallet.publicKey?.toString(),
-                borrowingAmount: values.borrowing_amount,
+                borrowingAmount: `${values.borrowing_amount} ${order.asset_symbol}`,
                 borrowingToken: order.asset_symbol,
                 collateralizationAssets: combinedCollateralList,
                 borrowingDuration: values.borrowing_duration,
@@ -337,7 +337,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                 borrowingInterestRate: interestRate,
                 borrowingDueBy: futureDate,
                 // @ts-ignore
-                borrowingTotal: `${(parseFloat(form.watch('borrowing_amount')) + ((interestRate / 100) * parseFloat(form.watch('borrowing_amount'))))}`,
+                borrowingTotal: `${(parseFloat(form.watch('borrowing_amount')) + ((interestRate / 100) * parseFloat(form.watch('borrowing_amount'))))} ${order.asset_symbol}`,
             });
 
             setIsSubmitting(true);
@@ -362,7 +362,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                     {publicKey ? 'Borrow' : 'Connect Wallet'}
                 </Button>
             </DialogTrigger>
-            <DialogContent className='max-w-[90vw] md:max-w-[60vw]'>
+            <DialogContent className='max-w-[90vw] md:max-w-[40vw]'>
                 <DialogHeader>
                     <DialogTitle className='flex flex-row space-x-1 items-center'>
                         <h1>Borrow Token</h1>
@@ -426,7 +426,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                                                     {nft.image_uri && nft.image_uri.startsWith('http') && (
                                                                         <div className={`border rounded mt-4 p-2 flex flex-col space-y-2 cursor-pointer ${selectedCNFT.includes(index) ? 'border-primary' : ''}`} key={index} onClick={() => toggleCNFTSelection(index)}>
                                                                             <div className='flex items-center justify-center'>
-                                                                                <Image src={nft.image_uri} width={180} height={40} alt={nft.image_uri} />
+                                                                                <Image src={nft.image_uri} width={150} height={40} alt={nft.image_uri} />
                                                                             </div>
                                                                             <p className='text-center'>{nft.name}</p>
                                                                             {
@@ -688,13 +688,13 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                                     </div>
 
                                                     <div>
-                                                        <div className='text-sm md:text-lg'>Select NFT(s) and cNFT(s) for Collateral</div>
+                                                        <div className='text-sm md:text-lg'>Selected NFT(s) and cNFT(s) for Collateral</div>
                                                         <div className='flex flex-row space-x-2 flex-wrap justify-evenly py-2'>
                                                             {combinedCollateralList.map((item, index) => (
                                                                 <div className='border rounded mt-4 p-2 flex flex-col space-y-2' key={index}>
                                                                     <div className='flex items-center justify-center'>
                                                                         {/* @ts-ignore */}
-                                                                        <Image src={item.image_uri} width={180} height={40} alt={item.image_uri} />
+                                                                        <Image src={item.image_uri} width={180} height={40} alt={item.image_uri} className='rounded' />
                                                                     </div>
                                                                     <p className='text-center'>{item.name}</p>
                                                                     <div className='flex flex-row items-center justify-center space-x-2'>
@@ -717,7 +717,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                         </Accordion>
 
                                         <div className='text-center py-2'>
-                                            Repay {(parseFloat(form.watch('borrowing_amount')) + ((interestRate / 100) * parseFloat(form.watch('borrowing_amount'))))} {order.asset_symbol} within {form.watch('borrowing_duration')} (By {dueByDate})
+                                            Repay {(parseFloat(form.watch('borrowing_amount')) + ((interestRate / 100) * parseFloat(form.watch('borrowing_amount'))))} {order.asset_symbol} within {form.watch('borrowing_duration')} (by {dueByDate})
                                         </div>
 
                                         <div>
@@ -726,12 +726,12 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                                 name='agree_terms'
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <div className='flex flex-row space-x-2 items-center justify-start'>
+                                                        <div className='flex flex-row space-x-2 justify-start'>
                                                             <FormControl>
                                                                 <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                                                             </FormControl>
                                                             <FormLabel>
-                                                                By checking this box, you agree to SoFLEX&apos;s <a href='/tos' target='_blank'><span className='underline'>Terms of Service</span></a>, <a href='/ua' target='_blank'><span className='underline'>User Agreement</span></a>, and consent to its <a href='/privacy' target='_blank'><span className='underline'>Privacy Policy</span></a>.
+                                                                By checking this box, you agree to the terms: failure to repay {(parseFloat(form.watch('borrowing_amount')) + ((interestRate / 100) * parseFloat(form.watch('borrowing_amount'))))} {order.asset_symbol} within {form.watch('borrowing_duration')} results in default. In such cases, the pool may claim collateral. Manage loans on the portfolio page.
                                                             </FormLabel>
                                                         </div>
                                                         <FormMessage />
@@ -750,7 +750,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                         <ChevronLeft className='w-4 h-4 mr-1' />
                                         Edit borrow details
                                     </div>
-                                    <Button type='submit' className='text-white px-16 w-full md:w-auto' disabled={isSubmitting}>
+                                    <Button type='submit' className='text-white px-16 w-full md:w-auto' disabled={isSubmitting || loading}>
                                         {isSubmitting && <Loader2 className='animate-spin mr-2' size={15} />}
                                         {isSubmitting ? 'Borrowing...' : 'Borrow'}
                                     </Button>

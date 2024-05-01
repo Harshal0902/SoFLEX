@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from 'react'
-import { userPortfolioDetails, updateUserData, teUserStatsDetails, teUserLoanDetails } from '@/lib/supabaseRequests'
+import { userPortfolioDetails, updateUserData, teUserStatsDetails, userLoanDetails } from '@/lib/supabaseRequests'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
@@ -99,7 +99,7 @@ export default function Portfolio({ walletAddress }: { walletAddress?: string })
 
     useEffect(() => {
         const fetchLoanHistoryData = async () => {
-            const result = await teUserLoanDetails({ walletAddress: walletAddress });
+            const result = await userLoanDetails({ walletAddress: walletAddress });
             setLoanHistoryData(result as LoanDataType[]);
             setLoading(false);
         };
@@ -260,8 +260,8 @@ export default function Portfolio({ walletAddress }: { walletAddress?: string })
                                 <DataTable
                                     columns={loanColumns}
                                     data={loanHistoryData}
-                                    userSearchColumn='assetName'
-                                    inputPlaceHolder='Search by Asset Name'
+                                    userSearchColumn='borrowing_amount'
+                                    inputPlaceHolder='Search by borrowed Token Name'
                                     noResultsMessage='No loan found.'
                                 />
                             </div>

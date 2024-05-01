@@ -132,6 +132,7 @@ export default function P2PBorrowingButton({ row }: { row: { original: Borrowing
                 }
             }
         }
+
         fetchData();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open]);

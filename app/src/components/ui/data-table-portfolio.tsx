@@ -55,6 +55,32 @@ export function DataTable<TData, TValue>({
         table.getColumn(userSearchColumn)?.setFilterValue('');
     };
 
+    const formatDate = (dateString: string): string => {
+        const date = new Date(dateString);
+        const addOrdinalSuffix = (day: number): string => {
+            if (day >= 11 && day <= 13) {
+                return day + 'th';
+            }
+            switch (day % 10) {
+                case 1: return day + 'st';
+                case 2: return day + 'nd';
+                case 3: return day + 'rd';
+                default: return day + 'th';
+            }
+        };
+        const day = date.getDate();
+        const month = date.toLocaleString('default', { month: 'long' });
+        const year = date.getFullYear();
+        const hour = date.getHours();
+        const minute = date.getMinutes();
+        const formattedDay = addOrdinalSuffix(day);
+        const formattedHour = hour % 12 === 0 ? 12 : hour % 12;
+        const period = hour < 12 ? 'AM' : 'PM';
+        const formattedDate = `${formattedDay} ${month} ${year} at ${formattedHour}:${minute.toString().padStart(2, '0')} ${period}`;
+
+        return formattedDate;
+    };
+
     return (
         <div className='flex flex-col space-y-2'>
             <div className='flex items-center'>
@@ -103,7 +129,15 @@ export function DataTable<TData, TValue>({
                                 >
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell key={cell.id}>
-                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                            {cell.id === `${row.id}_borrowing_due_by` ? (
+                                                <>
+                                                    {formatDate((flexRender(cell.column.columnDef.cell, cell.getContext()) as React.ReactElement<any>).props.cell?.renderValue())}
+                                                </>
+                                            ) : (
+                                                <>
+                                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                                </>
+                                            )}
                                         </TableCell>
                                     ))}
                                 </TableRow>

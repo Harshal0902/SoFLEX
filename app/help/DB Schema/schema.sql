@@ -55,8 +55,10 @@ create table
     borrowing_status text not null,
     borrowing_due_by timestamp with time zone null,
     borrowing_total text null,
+    transaction_signature text null,
     constraint defi_borrowing_pkey primary key (borrow_id),
     constraint defi_borrowing_borrow_id_key unique (borrow_id),
+    constraint defi_borrowing_transaction_signature_key unique (transaction_signature),
     constraint public_defi_borrowing_user_address_fkey foreign key (user_address) references users (user_address)
   ) tablespace pg_default;
 
