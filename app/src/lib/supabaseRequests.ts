@@ -317,7 +317,8 @@ export const userLoanDetails = async ({ walletAddress }: { walletAddress?: strin
         const { data, error } = await supabase
             .from('defi_borrowing')
             .select('borrow_id, borrowing_amount, borrowing_submitted_at, borrowing_token, borrowing_collateralization_assets, borrowing_duration, borrowing_interest_rate, borrowing_status, borrowing_due_by, borrowing_total')
-            .eq('user_address', walletAddress);
+            .eq('user_address', walletAddress)
+            .order('borrowing_submitted_at', { ascending: false });
 
         if (error) {
             return new Response('Error fetching user loan details', {

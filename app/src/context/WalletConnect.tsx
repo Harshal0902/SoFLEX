@@ -1,11 +1,11 @@
 "use client"
 
+import React, { useMemo } from 'react'
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base'
 import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react'
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui'
 import { CoinbaseWalletAdapter, LedgerWalletAdapter, PhantomWalletAdapter, SolflareWalletAdapter } from '@solana/wallet-adapter-wallets'
 import { clusterApiUrl } from '@solana/web3.js'
-import React, { useMemo } from 'react'
 
 export const WalletConnect = ({ children }: { children: React.ReactNode }) => {
     // Update this for the network you want to connect to

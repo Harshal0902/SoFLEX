@@ -6,7 +6,6 @@ import { updateUserBorrowStatus } from '@/lib/supabaseRequests'
 import { toast } from 'sonner'
 import { useWallet, useConnection } from '@solana/wallet-adapter-react'
 import { Loader2, Info, ExternalLink } from 'lucide-react'
-import InfoButton from '@/components/InfoButton'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog'
@@ -76,7 +75,7 @@ export default function LoanRepay({ row }: { row: { original: LoanDataType } }) 
             let tokenAddress;
 
             if (order.borrowing_token === 'SOL') {
-                amount = LAMPORTS_PER_SOL * parseFloat(order.borrowing_amount);
+                amount = LAMPORTS_PER_SOL * parseFloat(order.borrowing_total);
                 const transaction = new web3.Transaction();
                 const sendSolInstruction = web3.SystemProgram.transfer({
                     fromPubkey: publicKey,
@@ -86,7 +85,7 @@ export default function LoanRepay({ row }: { row: { original: LoanDataType } }) 
                 transaction.add(sendSolInstruction);
                 sig = await sendTransaction(transaction, connection);
             } else {
-                amount = parseFloat(order.borrowing_amount);
+                amount = parseFloat(order.borrowing_total);
                 if (order.borrowing_token === 'USDC') {
                     tokenAddress = new web3.PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
                 } else if (order.borrowing_token === 'USDT') {
@@ -133,8 +132,8 @@ export default function LoanRepay({ row }: { row: { original: LoanDataType } }) 
 
                 if (data) {
                     setOpen(false);
+                    console.log('Transaction successful!')
                     toast.success('Loan repaid successfully. Refreshing...');
-                    window.location.reload();
                 } else {
                     toast.error('Error completing the process. Please try again!');
                 }
@@ -155,9 +154,8 @@ export default function LoanRepay({ row }: { row: { original: LoanDataType } }) 
             </DialogTrigger>
             <DialogContent className='max-w-[90vw] md:max-w-[40vw]'>
                 <DialogHeader>
-                    <DialogTitle className='flex flex-row space-x-1 items-center'>
-                        <h1>Repay Loan</h1>
-                        <InfoButton />
+                    <DialogTitle>
+                        Repay Loan
                     </DialogTitle>
                     <DialogDescription>
                         Repay your loan with the amount you borrowed and the interest rate.
@@ -167,13 +165,13 @@ export default function LoanRepay({ row }: { row: { original: LoanDataType } }) 
                 <div className='w-full flex flex-col space-y-2 max-h-[45vh] md:max-h-[60vh] overflow-y-auto px-2'>
                     <h1 className='flex flex-row flex-wrap space-x-2'>Loan details for Loan ID: <span className='block md:hidden font-semibold tracking-wide'>{order.borrow_id.slice(0, 8)}...{order.borrow_id.slice(-8)}</span> <span className='hidden md:block font-semibold tracking-wide'>{order.borrow_id}</span></h1>
 
-                    <div className='flex flex-col md:flex-row items-start md:items-center justify-between'>
+                    <div className='flex flex-row flex-wrap items-center justify-between'>
                         <div className='flex flex-row items-center space-x-1'>
                             <h1 className='font-semibold tracking-wide'>Borrow Amount</h1>
                             <TooltipProvider>
                                 <Tooltip delayDuration={300}>
                                     <TooltipTrigger asChild>
-                                        <span><Info className='h-4 w-4 ml-0.5 cursor-pointer hidden md:block' /></span>
+                                        <span><Info className='h-4 w-4 ml-0.5 cursor-pointer' /></span>
                                     </TooltipTrigger>
                                     <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
                                         The amount you borrowed.
@@ -190,7 +188,7 @@ export default function LoanRepay({ row }: { row: { original: LoanDataType } }) 
                             <TooltipProvider>
                                 <Tooltip delayDuration={300}>
                                     <TooltipTrigger asChild>
-                                        <span><Info className='h-4 w-4 ml-0.5 cursor-pointer hidden md:block' /></span>
+                                        <span><Info className='h-4 w-4 ml-0.5 cursor-pointer' /></span>
                                     </TooltipTrigger>
                                     <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
                                         The date and time you borrowed the amount.
@@ -201,13 +199,13 @@ export default function LoanRepay({ row }: { row: { original: LoanDataType } }) 
                         <div>{formatDate(`${order.borrowing_submitted_at}`)}</div>
                     </div>
 
-                    <div className='flex flex-col md:flex-row items-start md:items-center justify-between'>
+                    <div className='flex flex-row flex-wrap items-center justify-between'>
                         <div className='flex flex-row items-center space-x-1'>
                             <h1 className='font-semibold tracking-wide'>Interest Rate</h1>
                             <TooltipProvider>
                                 <Tooltip delayDuration={300}>
                                     <TooltipTrigger asChild>
-                                        <span><Info className='h-4 w-4 ml-0.5 cursor-pointer hidden md:block' /></span>
+                                        <span><Info className='h-4 w-4 ml-0.5 cursor-pointer' /></span>
                                     </TooltipTrigger>
                                     <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
                                         The interest rate for the loan.
@@ -218,13 +216,13 @@ export default function LoanRepay({ row }: { row: { original: LoanDataType } }) 
                         <div>{order.borrowing_interest_rate}</div>
                     </div>
 
-                    <div className='flex flex-col md:flex-row items-start md:items-center justify-between'>
+                    <div className='flex flex-row flex-wrap items-center justify-between'>
                         <div className='flex flex-row items-center space-x-1'>
                             <h1 className='font-semibold tracking-wide'>Repayment Total</h1>
                             <TooltipProvider>
                                 <Tooltip delayDuration={300}>
                                     <TooltipTrigger asChild>
-                                        <span><Info className='h-4 w-4 ml-0.5 cursor-pointer hidden md:block' /></span>
+                                        <span><Info className='h-4 w-4 ml-0.5 cursor-pointer' /></span>
                                     </TooltipTrigger>
                                     <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
                                         Total Repayment Amount (Borrowed Amount + Interest).
@@ -235,13 +233,13 @@ export default function LoanRepay({ row }: { row: { original: LoanDataType } }) 
                         <div>{order.borrowing_total}</div>
                     </div>
 
-                    <div className='flex flex-col md:flex-row items-start md:items-center justify-between'>
+                    <div className='flex flex-row flex-wrap items-center justify-between'>
                         <div className='flex flex-row items-center space-x-1'>
                             <h1 className='font-semibold tracking-wide'>Borrow Duration</h1>
                             <TooltipProvider>
                                 <Tooltip delayDuration={300}>
                                     <TooltipTrigger asChild>
-                                        <span><Info className='h-4 w-4 ml-0.5 cursor-pointer hidden md:block' /></span>
+                                        <span><Info className='h-4 w-4 ml-0.5 cursor-pointer' /></span>
                                     </TooltipTrigger>
                                     <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
                                         The duration of the loan.
@@ -252,13 +250,13 @@ export default function LoanRepay({ row }: { row: { original: LoanDataType } }) 
                         <div>{order.borrowing_duration}</div>
                     </div>
 
-                    <div className='flex flex-col md:flex-row items-start md:items-center justify-between'>
+                    <div className='flex flex-row flex-wrap items-center justify-between'>
                         <div className='flex flex-row items-center space-x-1'>
                             <h1 className='font-semibold tracking-wide'>Due By</h1>
                             <TooltipProvider>
                                 <Tooltip delayDuration={300}>
                                     <TooltipTrigger asChild>
-                                        <span><Info className='h-4 w-4 ml-0.5 cursor-pointer hidden md:block' /></span>
+                                        <span><Info className='h-4 w-4 ml-0.5 cursor-pointer' /></span>
                                     </TooltipTrigger>
                                     <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
                                         Deadline for repayment.
@@ -269,13 +267,13 @@ export default function LoanRepay({ row }: { row: { original: LoanDataType } }) 
                         <div>{formatDate(`${order.borrowing_due_by}`)}</div>
                     </div>
 
-                    <div className='flex flex-col md:flex-row items-start md:items-center justify-between'>
+                    <div className='flex flex-row flex-wrap items-center justify-between'>
                         <div className='flex flex-row items-center space-x-1'>
                             <h1 className='font-semibold tracking-wide'>Borrow Status</h1>
                             <TooltipProvider>
                                 <Tooltip delayDuration={300}>
                                     <TooltipTrigger asChild>
-                                        <span><Info className='h-4 w-4 ml-0.5 cursor-pointer hidden md:block' /></span>
+                                        <span><Info className='h-4 w-4 ml-0.5 cursor-pointer' /></span>
                                     </TooltipTrigger>
                                     <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
                                         The status of your loan.

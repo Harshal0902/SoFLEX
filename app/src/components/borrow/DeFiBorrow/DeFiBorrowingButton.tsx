@@ -503,7 +503,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                     </Accordion>
                                 </div>
 
-                                <div className='flex flex-row items-center justify-between pt-2'>
+                                <div className='flex flex-row flex-wrap items-center justify-between pt-2'>
                                     <div className='flex flex-row items-center space-x-1'>
                                         <h1 className='font-semibold tracking-wide'>Total Collateral Value</h1>
                                         <TooltipProvider>
@@ -744,17 +744,18 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                     <Loading />
                                 )}
 
-
-                                <div className='flex flex-col md:flex-row items-center justify-between md:pt-2 space-y-2 md:space-y-0'>
-                                    <div className='border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded cursor-pointer text-sm py-2.5 px-4 w-full md:w-auto flex flex-row items-center justify-center' onClick={handleNFTSection}>
-                                        <ChevronLeft className='w-4 h-4 mr-1' />
-                                        Edit borrow details
+                                {!loading &&
+                                    <div className='flex flex-col md:flex-row items-center justify-between md:pt-2 space-y-2 md:space-y-0'>
+                                        <div className='border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded cursor-pointer text-sm py-2.5 px-4 w-full md:w-auto flex flex-row items-center justify-center' onClick={handleNFTSection}>
+                                            <ChevronLeft className='w-4 h-4 mr-1' />
+                                            Edit borrow details
+                                        </div>
+                                        <Button type='submit' className='text-white px-16 w-full md:w-auto' disabled={isSubmitting || loading}>
+                                            {isSubmitting && <Loader2 className='animate-spin mr-2' size={15} />}
+                                            {isSubmitting ? 'Borrowing...' : 'Borrow'}
+                                        </Button>
                                     </div>
-                                    <Button type='submit' className='text-white px-16 w-full md:w-auto' disabled={isSubmitting || loading}>
-                                        {isSubmitting && <Loader2 className='animate-spin mr-2' size={15} />}
-                                        {isSubmitting ? 'Borrowing...' : 'Borrow'}
-                                    </Button>
-                                </div>
+                                }
                             </div>
                         )}
 

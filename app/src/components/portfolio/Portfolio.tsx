@@ -97,15 +97,28 @@ export default function Portfolio({ walletAddress }: { walletAddress?: string })
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [userPortfolio]);
 
-    useEffect(() => {
-        const fetchLoanHistoryData = async () => {
-            const result = await userLoanDetails({ walletAddress: walletAddress });
-            setLoanHistoryData(result as LoanDataType[]);
-            setLoading(false);
-        };
+    const fetchLoanHistoryData = async () => {
+        const result = await userLoanDetails({ walletAddress: walletAddress });
+        setLoanHistoryData(result as LoanDataType[]);
+        setLoading(false);
+    };
 
+    useEffect(() => {
         fetchLoanHistoryData();
-    }, [walletAddress]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    useEffect(() => {
+        const originalConsoleLog = console.log;
+        console.log = function (message: any) {
+            if (typeof message === 'string' && message.includes('Transaction successful')) {
+                fetchLoanHistoryData();
+                return;
+            }
+            originalConsoleLog.apply(console, Array.from(arguments));
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema)
