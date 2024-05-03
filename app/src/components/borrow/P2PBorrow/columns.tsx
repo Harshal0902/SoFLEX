@@ -3,7 +3,7 @@
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/components/ui/data-table-column-header'
 import BorrowingNFTCollectionDataType from './P2PBorrowing'
-import P2PBorrowButtonCell from './P2PBorrowButtonCell'
+import P2PBorrowingButton from './P2PBorrowingButton'
 
 export type BorrowingNFTCollectionDataType = {
     nft_name: string;
@@ -48,6 +48,6 @@ export const borrowingNFTCollectionColumns: ColumnDef<BorrowingNFTCollectionData
     },
     {
         id: 'actions',
-        cell: P2PBorrowButtonCell
+        cell: P2PBorrowingButton
     }
 ]

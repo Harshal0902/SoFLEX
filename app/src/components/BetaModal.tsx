@@ -13,7 +13,6 @@ const emailSchema = z.string().email();
 export default function BetaModal() {
     const [showModal, setShowModal] = useState(true);
     const [email, setEmail] = useState('');
-    const [waitlist, setWaitlist] = useState([]);
     const [inputError, setInputError] = useState<string | null>(null);
 
     const errorMessage = '';
@@ -63,10 +62,6 @@ export default function BetaModal() {
     useEffect(() => {
         const isClosed = localStorage.getItem('betaModalClosedSoFLEX') === 'true';
         setShowModal(!isClosed);
-        const storedWaitlist = localStorage.getItem('waitlist');
-        if (storedWaitlist) {
-            setWaitlist(JSON.parse(storedWaitlist));
-        }
     }, [])
 
     if (!showModal) {

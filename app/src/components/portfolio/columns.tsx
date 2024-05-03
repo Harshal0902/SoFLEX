@@ -5,13 +5,16 @@ import { DataTableColumnHeader } from '@/components/ui/data-table-column-header'
 import LoanRepay from './LoanRepay'
 
 export type LoanDataType = {
-    loanId: string;
-    assetName: string;
-    amount: string;
-    interestRate: number;
-    duration: number;
-    due_by: Date;
-    status: 'Active' | 'Repaid' | 'Defaulted' | 'Pending' | 'Cancelled' | 'Expired' | 'Closed';
+    borrow_id: string;
+    borrowing_amount: string;
+    borrowing_total: string;
+    borrowing_due_by: Date;
+    borrowing_status: 'Active' | 'Repaid' | 'Defaulted' | 'Pending' | 'Cancelled' | 'Expired' | 'Closed';
+    borrowing_interest_rate: string;
+    borrowing_duration: string;
+    borrowing_submitted_at: Date;
+    borrowing_collateralization_assets: string;
+    borrowing_token: string;
 }
 
 // Active: The loan is currently active and ongoing.
@@ -24,43 +27,31 @@ export type LoanDataType = {
 
 export const loanColumns: ColumnDef<LoanDataType>[] = [
     {
-        accessorKey: 'loanId',
+        accessorKey: 'borrow_id',
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title='Loan ID' />
         ),
     },
     {
-        accessorKey: 'assetName',
+        accessorKey: 'borrowing_amount',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title='Asset Name(s)' />
+            <DataTableColumnHeader column={column} title='Borrowed Amount' />
         ),
     },
     {
-        accessorKey: 'amount',
+        accessorKey: 'borrowing_total',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title='Amount Borrowed' />
+            <DataTableColumnHeader column={column} title='Repayment Total' info='Total Repayment Amount (Borrowed Amount + Interest).' />
         ),
     },
     {
-        accessorKey: 'interestRate',
+        accessorKey: 'borrowing_due_by',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title='Interest Rate (in %)' />
+            <DataTableColumnHeader column={column} title='Due By' info='Deadline for repayment.' />
         ),
     },
     {
-        accessorKey: 'duration',
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title='Duration (in Days)' />
-        ),
-    },
-    {
-        accessorKey: 'due_by',
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title='Due By' />
-        ),
-    },
-    {
-        accessorKey: 'status',
+        accessorKey: 'borrowing_status',
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title='Status' />
         ),

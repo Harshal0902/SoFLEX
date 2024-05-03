@@ -3,7 +3,7 @@
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/components/ui/data-table-column-header'
 import BorrowingAssetDataType from './DeFiBorrowing'
-import BorrowButtonCell from './BorrowButtonCell'
+import DeFiBorrowingButton from './DeFiBorrowingButton'
 
 export type BorrowingAssetDataType = {
     asset_name: string;
@@ -49,6 +49,6 @@ export const borrowingAssetColumns: ColumnDef<BorrowingAssetDataType>[] = [
     },
     {
         id: 'actions',
-        cell: BorrowButtonCell,
+        cell: DeFiBorrowingButton,
     }
 ]

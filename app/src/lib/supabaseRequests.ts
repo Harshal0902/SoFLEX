@@ -33,10 +33,27 @@ interface NewDeFiBorrowingType {
     walletAddress?: string;
     borrowingAmount: string;
     borrowingToken: string;
-    collateralizationAssets: string[];
+    collateralizationAssets: NFTType[];
     borrowingDuration: string;
-    borrowingInterestRate?: string;
-    borrowingCollateralType: string;
+    borrowingInterestRate: string;
+    borrowingDueBy: Date;
+    borrowingTotal: string;
+}
+
+interface NFTType {
+    image_uri?: string;
+    name?: string;
+    floorprice?: number;
+    external_url?: string;
+    mint?: string;
+    royalty?: number;
+}
+
+interface UserBorrowStatusType {
+    walletAddress?: string;
+    borrowId: string;
+    borrowStatus: string;
+    transactionSignature: string;
 }
 
 export const addUserWaitlist = async ({ email }: WaitlistUserType) => {
@@ -53,7 +70,6 @@ export const addUserWaitlist = async ({ email }: WaitlistUserType) => {
         }
 
         return data;
-
     } catch (error) {
         return new Response('Error checking for existing user', { status: 500 });
     }
@@ -78,7 +94,7 @@ export const addNewUser = async ({ walletAddress }: { walletAddress?: string }) 
             return new Response('User already exists', { status: 200 });
         }
 
-        const { data, error: insertError } = await supabase
+        const { error: insertError } = await supabase
             .from('users')
             .upsert([
                 {
@@ -92,7 +108,7 @@ export const addNewUser = async ({ walletAddress }: { walletAddress?: string }) 
             throw new Error('Error inserting a new user');
         }
 
-        return data;
+        return 'Success';
     } catch (error) {
         return new Response('Error adding a new user', { status: 500 });
     }
@@ -120,7 +136,7 @@ export const userPortfolioDetails = async ({ walletAddress }: { walletAddress?: 
 
 export const updateUserData = async ({ walletAddress, name, email }: UserType) => {
     try {
-        const { data, error } = await supabase
+        const { error } = await supabase
             .from('users')
             .update({
                 name: name,
@@ -132,7 +148,7 @@ export const updateUserData = async ({ walletAddress, name, email }: UserType) =
             return new Response('Error updating user data', { status: 500 });
         }
 
-        return data;
+        return 'Success';
     } catch (error) {
         return new Response('Error updating user data', { status: 500 });
     }
@@ -140,7 +156,7 @@ export const updateUserData = async ({ walletAddress, name, email }: UserType) =
 
 export const updateUserCreditScore = async ({ walletAddress, creditScore }: { walletAddress?: string, creditScore: string }) => {
     try {
-        const { data, error } = await supabase
+        const { error } = await supabase
             .from('users')
             .update({
                 on_chain_credit_score: creditScore,
@@ -151,7 +167,7 @@ export const updateUserCreditScore = async ({ walletAddress, creditScore }: { wa
             return new Response('Error updating user credit score', { status: 500 });
         }
 
-        return data;
+        return 'Success';
     } catch (error) {
         return new Response('Error updating user credit score', { status: 500 });
     }
@@ -207,7 +223,7 @@ export const newDeFiLending = async ({ walletAddress, lendingAmount, lendingToke
     }
 };
 
-export const newDeFiBorrowing = async ({ walletAddress, borrowingAmount, borrowingToken, collateralizationAssets, borrowingDuration, borrowingInterestRate, borrowingCollateralType }: NewDeFiBorrowingType) => {
+export const newDeFiBorrowing = async ({ walletAddress, borrowingAmount, borrowingToken, collateralizationAssets, borrowingDuration, borrowingInterestRate, borrowingDueBy, borrowingTotal }: NewDeFiBorrowingType) => {
     try {
         const uuid = crypto.randomBytes(16).toString('hex');
         const generateNewBorrowingId = uuid.substring(0, 8) + uuid.substring(9, 13) + uuid.substring(14, 18) + uuid.substring(19, 23) + uuid.substring(24);
@@ -224,7 +240,9 @@ export const newDeFiBorrowing = async ({ walletAddress, borrowingAmount, borrowi
                 borrowing_collateralization_assets: collateralizationAssets,
                 borrowing_duration: borrowingDuration,
                 borrowing_interest_rate: borrowingInterestRate,
-                borrowing_collateral_type: borrowingCollateralType,
+                borrowing_status: 'Active',
+                borrowing_due_by: borrowingDueBy,
+                borrowing_total: borrowingTotal,
                 borrowing_submitted_at: created_at
             })
             .select();
@@ -294,12 +312,13 @@ export const teUserStatsDetails = async ({ walletAddress }: { walletAddress?: st
     }
 };
 
-export const teUserLoanDetails = async ({ walletAddress }: { walletAddress?: string }) => {
+export const userLoanDetails = async ({ walletAddress }: { walletAddress?: string }) => {
     try {
         const { data, error } = await supabase
-            .from('te_user_loan_details')
-            .select('*')
-            .eq('user_address', walletAddress);
+            .from('defi_borrowing')
+            .select('borrow_id, borrowing_amount, borrowing_submitted_at, borrowing_token, borrowing_collateralization_assets, borrowing_duration, borrowing_interest_rate, borrowing_status, borrowing_due_by, borrowing_total')
+            .eq('user_address', walletAddress)
+            .order('borrowing_submitted_at', { ascending: false });
 
         if (error) {
             return new Response('Error fetching user loan details', {
@@ -310,5 +329,26 @@ export const teUserLoanDetails = async ({ walletAddress }: { walletAddress?: str
         return data;
     } catch (error) {
         return new Response('Error fetching user loan details', { status: 500 });
+    }
+};
+
+export const updateUserBorrowStatus = async ({ walletAddress, borrowId, borrowStatus, transactionSignature }: UserBorrowStatusType) => {
+    try {
+        const { error } = await supabase
+            .from('defi_borrowing')
+            .update({
+                borrowing_status: borrowStatus,
+                transaction_signature: transactionSignature,
+            })
+            .eq('user_address', walletAddress)
+            .eq('borrow_id', borrowId);
+
+        if (error) {
+            return new Response('Error updating user borrow status', { status: 500 });
+        }
+
+        return 'Success';
+    } catch (error) {
+        return new Response('Error updating user borrow status', { status: 500 });
     }
 };

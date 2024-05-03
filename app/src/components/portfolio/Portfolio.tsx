@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from 'react'
-import { userPortfolioDetails, updateUserData, teUserStatsDetails, teUserLoanDetails } from '@/lib/supabaseRequests'
+import { userPortfolioDetails, updateUserData, teUserStatsDetails, userLoanDetails } from '@/lib/supabaseRequests'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
@@ -97,15 +97,28 @@ export default function Portfolio({ walletAddress }: { walletAddress?: string })
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [userPortfolio]);
 
-    useEffect(() => {
-        const fetchLoanHistoryData = async () => {
-            const result = await teUserLoanDetails({ walletAddress: walletAddress });
-            setLoanHistoryData(result as LoanDataType[]);
-            setLoading(false);
-        };
+    const fetchLoanHistoryData = async () => {
+        const result = await userLoanDetails({ walletAddress: walletAddress });
+        setLoanHistoryData(result as LoanDataType[]);
+        setLoading(false);
+    };
 
+    useEffect(() => {
         fetchLoanHistoryData();
-    }, [walletAddress]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    useEffect(() => {
+        const originalConsoleLog = console.log;
+        console.log = function (message: any) {
+            if (typeof message === 'string' && message.includes('Transaction successful')) {
+                fetchLoanHistoryData();
+                return;
+            }
+            originalConsoleLog.apply(console, Array.from(arguments));
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema)
@@ -178,7 +191,14 @@ export default function Portfolio({ walletAddress }: { walletAddress?: string })
                 <Card className='relative md:my-4'>
                     <TooltipProvider>
                         <CardHeader>
-                            <div className='text-2xl md:text-4xl'>My Portfolio</div>
+                            <div className='flex flex-col md:flex-row justify-between items-start md:items-center space-y-2 md:space-y-0'>
+                                <div className='text-2xl md:text-4xl'>My Portfolio</div>
+                                {cardData[0].currentData !== undefined && typeof cardData[0].currentData === 'string' && parseFloat(cardData[0].currentData) > 0 &&
+                                    <div className='w-full md:w-auto'>
+                                        <Button className='text-white w-full md:w-auto'>Withdraw Token</Button>
+                                    </div>
+                                }
+                            </div>
                             <Form {...form}>
                                 <form onSubmit={form.handleSubmit(onSubmitUpdateUserData)} autoComplete='off'>
                                     <div className='flex flex-col md:flex-row w-full items-center justify-between space-x-0 md:space-x-4 space-y-4 md:space-y-0 py-2'>
@@ -260,8 +280,8 @@ export default function Portfolio({ walletAddress }: { walletAddress?: string })
                                 <DataTable
                                     columns={loanColumns}
                                     data={loanHistoryData}
-                                    userSearchColumn='assetName'
-                                    inputPlaceHolder='Search by Asset Name'
+                                    userSearchColumn='borrowing_amount'
+                                    inputPlaceHolder='Search by borrowed Token Name'
                                     noResultsMessage='No loan found.'
                                 />
                             </div>
