@@ -54,25 +54,25 @@ const FormSchema = z.object({
             const parsedValue = parseFloat(value);
             return !isNaN(parsedValue);
         }, {
-            message: 'Amount must be a number.',
+            message: 'Borrow amount must be a number.',
         })
         .refine(value => {
             const parsedValue = parseFloat(value);
             return parsedValue > 0;
         }, {
-            message: 'Amount must be a positive number.',
+            message: 'Borrow amount must be a positive number.',
         })
         .refine(value => {
             const stringValue = String(value);
             const [integerPart, decimalPart] = stringValue.split('.');
 
-            if (integerPart.length > 7 || (decimalPart && decimalPart.length > 8)) {
+            if (integerPart.length > 7 || (decimalPart && decimalPart.length > 6)) {
                 return false;
             }
 
             return true;
         }, {
-            message: 'Amount must have up to 7 digits before the decimal point.',
+            message: 'Borrow amount must have up to 6 digits before the decimal point.',
         }),
     borrowing_duration: z.string({
         required_error: 'Borrowing duration is required.',
@@ -377,13 +377,13 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                     <form onSubmit={form.handleSubmit(onSubmit)} autoComplete='off'>
 
                         {currentSection === 1 && (
-                            <div className='w-full flex flex-col space-y-2 max-h-[45vh] md:max-h-[60vh] overflow-y-auto px-2'>
+                            <div className='w-full flex flex-col space-y-2 max-h-[45vh] md:max-h-[60vh] overflow-y-auto'>
 
                                 <FormField
                                     control={form.control}
                                     name='borrowing_amount'
                                     render={({ field }) => (
-                                        <FormItem className='w-full'>
+                                        <FormItem className='w-full px-2'>
                                             <FormLabel>Borrowing amount (in {order.asset_symbol})</FormLabel>
                                             <FormControl>
                                                 <Input {...field} />
@@ -396,7 +396,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                     )}
                                 />
 
-                                <div className='flex flex-row items-center justify-between'>
+                                <div className='flex flex-row items-center justify-between hover:bg-accent hover:rounded px-2'>
                                     <div className='flex flex-row items-center space-x-1'>
                                         <h1 className='font-semibold tracking-wide'>Current Price</h1>
                                         <TooltipProvider>
@@ -414,7 +414,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                 </div>
 
                                 <div>
-                                    <Accordion type='multiple' defaultValue={['cNFT', 'NFT']}>
+                                    <Accordion type='multiple' defaultValue={['cNFT', 'NFT']} className='px-2'>
                                         <AccordionItem value='cNFT'>
                                             <AccordionTrigger className='hover:no-underline text-left font-semibold tracking-wide'>Select cNFT(s) or Synthetic Asset(s) for Collateral</AccordionTrigger>
                                             <AccordionContent>
@@ -503,7 +503,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                     </Accordion>
                                 </div>
 
-                                <div className='flex flex-row flex-wrap items-center justify-between pt-2'>
+                                <div className='flex flex-row flex-wrap items-center justify-between hover:bg-accent hover:rounded px-2 mt-2'>
                                     <div className='flex flex-row items-center space-x-1'>
                                         <h1 className='font-semibold tracking-wide'>Total Collateral Value</h1>
                                         <TooltipProvider>
@@ -524,7 +524,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                     control={form.control}
                                     name='borrowing_duration'
                                     render={({ field }) => (
-                                        <FormItem className='w-full'>
+                                        <FormItem className='w-full px-2'>
                                             <FormLabel>Borrow Duration</FormLabel>
                                             <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                 <FormControl>
@@ -551,13 +551,13 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                 <div>
                                     {/* @ts-ignore */}
                                     {formatAsset_price(totalCNFTPrice + totalNFTPrice) < parseFloat(form.watch('borrowing_amount')) &&
-                                        <p className='text-destructive text-center'>The value of the collateral must be greater than the amount borrowed.</p>
+                                        <p className='text-destructive text-center px-2'>The value of the collateral must be greater than the amount borrowed.</p>
                                     }
                                 </div>
 
                                 {/* @ts-ignore */}
                                 {((parseFloat(formatAsset_price(totalCNFTPrice + totalNFTPrice)) + (0.4 * formatAsset_price(totalCNFTPrice + totalNFTPrice))) > parseFloat(form.watch('borrowing_amount'))) && form.watch('borrowing_duration') &&
-                                    <div className='flex flex-col items-end justify-center pt-2'>
+                                    <div className='flex flex-col items-end justify-center px-2'>
                                         <div className='border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded cursor-pointer text-sm py-2.5 px-4 w-full md:w-auto flex flex-row items-center justify-center' onClick={handleSubmitSection}>
                                             Calculate Intrest Rate
                                             <ChevronRight className='w-4 h-4 ml-1' />
@@ -567,11 +567,11 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                             </div>
                         )}
                         {currentSection === 2 && (
-                            <div className='w-full flex flex-col space-y-2 max-h-[45vh] md:max-h-[60vh] overflow-y-auto px-2'>
+                            <div className='w-full flex flex-col space-y-2 max-h-[45vh] md:max-h-[60vh] overflow-y-auto'>
 
                                 {interestRate && creditScore && !loading ? (
                                     <>
-                                        <div className='flex flex-row items-center justify-between'>
+                                        <div className='flex flex-row items-center justify-between hover:bg-accent hover:rounded px-2'>
                                             <div className='flex flex-row items-center space-x-1 text-sm md:text-lg'>
                                                 <h1 className='tracking-wide'>Credit Score</h1>
                                                 <TooltipProvider>
@@ -598,7 +598,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                             <div>{isNaN(creditScore) ? '36.48' : creditScore}</div>
                                         </div>
 
-                                        <div className='flex flex-row items-center justify-between text-sm md:text-lg'>
+                                        <div className='flex flex-row items-center justify-between text-sm md:text-lg hover:bg-accent hover:rounded px-2'>
                                             <div className='flex flex-row items-center space-x-1'>
                                                 <h1 className='tracking-wide'>Intrest Rate</h1>
                                                 <TooltipProvider>
@@ -625,7 +625,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                             <div>{interestRate} %</div>
                                         </div>
 
-                                        <div className='flex flex-row items-center justify-between flex-wrap text-sm md:text-lg'>
+                                        <div className='flex flex-row items-center justify-between flex-wrap text-sm md:text-lg hover:bg-accent hover:rounded px-2'>
                                             <div className='flex flex-row items-center space-x-1'>
                                                 <h1 className='tracking-wide'>Due By</h1>
                                             </div>
@@ -634,9 +634,9 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
 
                                         <Accordion type='multiple'>
                                             <AccordionItem value='summary'>
-                                                <AccordionTrigger className='hover:no-underline text-left font-semibold tracking-wide'>Borrow Summary</AccordionTrigger>
+                                                <AccordionTrigger className='hover:no-underline text-left font-semibold tracking-wide px-2'>Borrow Summary</AccordionTrigger>
                                                 <AccordionContent className='flex flex-col space-y-2'>
-                                                    <div className='flex flex-row items-center justify-between flex-wrap text-sm md:text-lg'>
+                                                    <div className='flex flex-row items-center justify-between flex-wrap text-sm md:text-lg hover:bg-accent hover:rounded px-2'>
                                                         <div className='flex flex-row items-center space-x-1'>
                                                             <h1 className='tracking-wide'>Borrowing Amount</h1>
                                                             <TooltipProvider>
@@ -653,7 +653,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                                         <div>{parseFloat(form.watch('borrowing_amount'))} {order.asset_symbol}</div>
                                                     </div>
 
-                                                    <div className='flex flex-row items-center justify-between flex-wrap text-sm md:text-lg'>
+                                                    <div className='flex flex-row items-center justify-between flex-wrap text-sm md:text-lg hover:bg-accent hover:rounded px-2'>
                                                         <div className='flex flex-row items-center space-x-1'>
                                                             <h1 className='tracking-wide'>Borrowing Duration</h1>
                                                             <TooltipProvider>
@@ -670,7 +670,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                                         <div>{form.watch('borrowing_duration')}</div>
                                                     </div>
 
-                                                    <div className='flex flex-row items-center justify-between flex-wrap text-sm md:text-lg'>
+                                                    <div className='flex flex-row items-center justify-between flex-wrap text-sm md:text-lg hover:bg-accent hover:rounded px-2'>
                                                         <div className='flex flex-row items-center space-x-1'>
                                                             <h1 className='tracking-wide'>Borrowing Interest</h1>
                                                             <TooltipProvider>
@@ -688,7 +688,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                                     </div>
 
                                                     <div>
-                                                        <div className='text-sm md:text-lg'>Selected NFT(s) and cNFT(s) for Collateral</div>
+                                                        <div className='text-sm md:text-lg px-2'>Selected NFT(s) and cNFT(s) for Collateral</div>
                                                         <div className='flex flex-row space-x-2 flex-wrap justify-evenly py-2'>
                                                             {combinedCollateralList.map((item, index) => (
                                                                 <div className='border rounded mt-4 p-2 flex flex-col space-y-2' key={index}>
@@ -719,6 +719,19 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                         <div className='text-center py-2'>
                                             Repay {(parseFloat(form.watch('borrowing_amount')) + ((interestRate / 100) * parseFloat(form.watch('borrowing_amount'))))} {order.asset_symbol} within {form.watch('borrowing_duration')} (by {dueByDate})
                                         </div>
+
+                                        <FormField
+                                            control={form.control}
+                                            name='borrowing_amount'
+                                            render={({ field }) => (
+                                                <FormItem className='w-full px-2'>
+                                                    <FormControl>
+                                                        <Input {...field} className='hidden' disabled />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
 
                                         <div>
                                             <FormField

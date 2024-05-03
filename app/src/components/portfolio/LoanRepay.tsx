@@ -75,7 +75,8 @@ export default function LoanRepay({ row }: { row: { original: LoanDataType } }) 
             let tokenAddress;
 
             if (order.borrowing_token === 'SOL') {
-                amount = LAMPORTS_PER_SOL * parseFloat(order.borrowing_total);
+                let amount = LAMPORTS_PER_SOL * parseFloat(order.borrowing_total);
+                amount = parseFloat(amount.toFixed(6));
                 const transaction = new web3.Transaction();
                 const sendSolInstruction = web3.SystemProgram.transfer({
                     fromPubkey: publicKey,
@@ -85,7 +86,8 @@ export default function LoanRepay({ row }: { row: { original: LoanDataType } }) 
                 transaction.add(sendSolInstruction);
                 sig = await sendTransaction(transaction, connection);
             } else {
-                amount = parseFloat(order.borrowing_total);
+                let amount = LAMPORTS_PER_SOL * parseFloat(order.borrowing_total);
+                amount = parseFloat(amount.toFixed(6));
                 if (order.borrowing_token === 'USDC') {
                     tokenAddress = new web3.PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
                 } else if (order.borrowing_token === 'USDT') {
@@ -162,10 +164,10 @@ export default function LoanRepay({ row }: { row: { original: LoanDataType } }) 
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className='w-full flex flex-col space-y-2 max-h-[45vh] md:max-h-[60vh] overflow-y-auto px-2'>
-                    <h1 className='flex flex-row flex-wrap space-x-2'>Loan details for Loan ID: <span className='block md:hidden font-semibold tracking-wide'>{order.borrow_id.slice(0, 8)}...{order.borrow_id.slice(-8)}</span> <span className='hidden md:block font-semibold tracking-wide'>{order.borrow_id}</span></h1>
+                <div className='w-full flex flex-col space-y-2 max-h-[45vh] md:max-h-[60vh] overflow-y-auto'>
+                    <h1 className='flex flex-row flex-wrap space-x-2 px-2'>Loan details for Loan ID: <span className='block md:hidden font-semibold tracking-wide'>{order.borrow_id.slice(0, 8)}...{order.borrow_id.slice(-8)}</span> <span className='hidden md:block font-semibold tracking-wide'>{order.borrow_id}</span></h1>
 
-                    <div className='flex flex-row flex-wrap items-center justify-between'>
+                    <div className='flex flex-row flex-wrap items-center justify-between hover:bg-accent hover:rounded px-2'>
                         <div className='flex flex-row items-center space-x-1'>
                             <h1 className='font-semibold tracking-wide'>Borrow Amount</h1>
                             <TooltipProvider>
@@ -182,7 +184,7 @@ export default function LoanRepay({ row }: { row: { original: LoanDataType } }) 
                         <div>{order.borrowing_amount}</div>
                     </div>
 
-                    <div className='flex flex-row flex-wrap items-center justify-between'>
+                    <div className='flex flex-row flex-wrap items-center justify-between hover:bg-accent hover:rounded px-2'>
                         <div className='flex flex-row items-center space-x-1'>
                             <h1 className='font-semibold tracking-wide'>Borrowed at</h1>
                             <TooltipProvider>
@@ -199,7 +201,7 @@ export default function LoanRepay({ row }: { row: { original: LoanDataType } }) 
                         <div>{formatDate(`${order.borrowing_submitted_at}`)}</div>
                     </div>
 
-                    <div className='flex flex-row flex-wrap items-center justify-between'>
+                    <div className='flex flex-row flex-wrap items-center justify-between hover:bg-accent hover:rounded px-2'>
                         <div className='flex flex-row items-center space-x-1'>
                             <h1 className='font-semibold tracking-wide'>Interest Rate</h1>
                             <TooltipProvider>
@@ -216,7 +218,7 @@ export default function LoanRepay({ row }: { row: { original: LoanDataType } }) 
                         <div>{order.borrowing_interest_rate}</div>
                     </div>
 
-                    <div className='flex flex-row flex-wrap items-center justify-between'>
+                    <div className='flex flex-row flex-wrap items-center justify-between hover:bg-accent hover:rounded px-2'>
                         <div className='flex flex-row items-center space-x-1'>
                             <h1 className='font-semibold tracking-wide'>Repayment Total</h1>
                             <TooltipProvider>
@@ -233,7 +235,7 @@ export default function LoanRepay({ row }: { row: { original: LoanDataType } }) 
                         <div>{order.borrowing_total}</div>
                     </div>
 
-                    <div className='flex flex-row flex-wrap items-center justify-between'>
+                    <div className='flex flex-row flex-wrap items-center justify-between hover:bg-accent hover:rounded px-2'>
                         <div className='flex flex-row items-center space-x-1'>
                             <h1 className='font-semibold tracking-wide'>Borrow Duration</h1>
                             <TooltipProvider>
@@ -250,7 +252,7 @@ export default function LoanRepay({ row }: { row: { original: LoanDataType } }) 
                         <div>{order.borrowing_duration}</div>
                     </div>
 
-                    <div className='flex flex-row flex-wrap items-center justify-between'>
+                    <div className='flex flex-row flex-wrap items-center justify-between hover:bg-accent hover:rounded px-2'>
                         <div className='flex flex-row items-center space-x-1'>
                             <h1 className='font-semibold tracking-wide'>Due By</h1>
                             <TooltipProvider>
@@ -267,7 +269,7 @@ export default function LoanRepay({ row }: { row: { original: LoanDataType } }) 
                         <div>{formatDate(`${order.borrowing_due_by}`)}</div>
                     </div>
 
-                    <div className='flex flex-row flex-wrap items-center justify-between'>
+                    <div className='flex flex-row flex-wrap items-center justify-between hover:bg-accent hover:rounded px-2'>
                         <div className='flex flex-row items-center space-x-1'>
                             <h1 className='font-semibold tracking-wide'>Borrow Status</h1>
                             <TooltipProvider>
@@ -285,7 +287,7 @@ export default function LoanRepay({ row }: { row: { original: LoanDataType } }) 
                     </div>
 
                     <div>
-                        <Accordion type='multiple'>
+                        <Accordion type='multiple' className='px-2'>
                             <AccordionItem value='collateral'>
                                 <AccordionTrigger className='hover:no-underline text-left font-medium tracking-wide'>Selected NFT(s) and cNFT(s) for Collateral</AccordionTrigger>
                                 <AccordionContent>

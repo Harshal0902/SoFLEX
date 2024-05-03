@@ -39,13 +39,13 @@ const FormSchema = z.object({
             const stringValue = String(value);
             const [integerPart, decimalPart] = stringValue.split('.');
 
-            if (integerPart.length > 7 || (decimalPart && decimalPart.length > 8)) {
+            if (integerPart.length > 7 || (decimalPart && decimalPart.length > 6)) {
                 return false;
             }
 
             return true;
         }, {
-            message: 'Amount must have up to 7 digits before the decimal point and up to 8 digits after the decimal point.',
+            message: 'Amount must have up to 7 digits before the decimal point and up to 6 digits after the decimal point.',
         }),
 });
 
@@ -173,7 +173,7 @@ export default function DeFiLendingButton({ row }: { row: { original: LendingAss
                                 control={form.control}
                                 name='lending_amount'
                                 render={({ field }) => (
-                                    <FormItem className='w-full'>
+                                    <FormItem className='w-full px-2'>
                                         <FormLabel>Lending amount (in {order.asset_symbol})</FormLabel>
                                         <FormControl>
                                             <Input {...field} placeholder={`Enter the ${order.asset_symbol} you want to lend `} />
@@ -187,7 +187,7 @@ export default function DeFiLendingButton({ row }: { row: { original: LendingAss
                             />
 
                             <div className='flex flex-col space-y-1 pt-2'>
-                                <div className='flex flex-row items-center justify-between'>
+                                <div className='flex flex-row items-center justify-between hover:bg-accent hover:rounded px-2'>
                                     <div className='flex flex-row items-center space-x-1'>
                                         <h1 className='font-semibold tracking-wide'>Current Price</h1>
                                         <TooltipProvider>
@@ -203,7 +203,7 @@ export default function DeFiLendingButton({ row }: { row: { original: LendingAss
                                     </div>
                                     <div>{order.asset_price}</div>
                                 </div>
-                                <div className='flex flex-row items-center justify-between'>
+                                <div className='flex flex-row items-center justify-between hover:bg-accent hover:rounded px-2'>
                                     <div className='flex flex-row items-center space-x-1'>
                                         <h1 className='font-semibold tracking-wide'>Asset Yield</h1>
                                         <TooltipProvider>

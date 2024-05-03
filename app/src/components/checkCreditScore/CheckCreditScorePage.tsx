@@ -5,6 +5,7 @@ import { useWallet } from '@solana/wallet-adapter-react'
 import { updateUserCreditScore } from '@/lib/supabaseRequests'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Loader2 } from 'lucide-react'
 
 export default function CheckCreditScorePage({ walletAddress }: { walletAddress?: string }) {
     const [loading, setLoading] = useState(false);
@@ -78,7 +79,8 @@ export default function CheckCreditScorePage({ walletAddress }: { walletAddress?
             <CardContent>
                 <div className='flex flex-col space-y-2'>
                     <div className='flex items-center justify-center'>
-                        <Button className='bg-primary text-white px-8' onClick={knowTransactionHistory} disabled={loading} >
+                        <Button className='bg-primary text-white px-8' onClick={knowTransactionHistory} disabled={loading}>
+                            {loading && <Loader2 className='animate-spin mr-2' size={15} />}
                             {loading ? 'Calculating...' : 'Check On-Chain Credit Score'}
                         </Button>
                     </div>
