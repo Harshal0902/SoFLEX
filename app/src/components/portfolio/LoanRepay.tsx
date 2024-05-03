@@ -135,7 +135,7 @@ export default function LoanRepay({ row }: { row: { original: LoanDataType } }) 
                 if (data) {
                     setOpen(false);
                     console.log('Transaction successful!')
-                    toast.success('Loan repaid successfully. Refreshing...');
+                    toast.success('Loan repaid successfully!');
                 } else {
                     toast.error('Error completing the process. Please try again!');
                 }

@@ -58,7 +58,7 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
         }
     }
 
-    const { select, wallets, publicKey, disconnect, connecting, connected } = useWallet();
+    const { select, wallets, publicKey, disconnect } = useWallet();
     const wallet = useWallet();
     const { connection } = useConnection();
     const { balance, getUserSOLBalance } = useUserSOLBalance();
@@ -245,7 +245,7 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
                                             <Dialog open={open} onOpenChange={setOpen}>
                                                 <DialogTrigger asChild>
                                                     <Button className='text-white text-md w-full'>
-                                                        {connecting ? 'Connecting...' : 'Connect Wallet'}
+                                                        Connect Wallet
                                                     </Button>
                                                 </DialogTrigger>
                                                 <DialogContent className='max-w-[90vw] md:max-w-[450px]'>

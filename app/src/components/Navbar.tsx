@@ -19,7 +19,7 @@ import ModeToggle from './ModeToggle'
 export default function Navbar() {
     const [open, setOpen] = useState<boolean>(false);
 
-    const { select, wallets, publicKey, disconnect, connecting, connected } = useWallet();
+    const { select, wallets, publicKey, disconnect, connected } = useWallet();
     const wallet = useWallet();
     const { connection } = useConnection();
     const { balance, getUserSOLBalance } = useUserSOLBalance();
@@ -135,7 +135,7 @@ export default function Navbar() {
                             <Dialog open={open} onOpenChange={setOpen}>
                                 <DialogTrigger asChild>
                                     <Button className='text-white text-md'>
-                                        {connecting ? 'Connecting...' : 'Connect Wallet'}
+                                        Connect Wallet
                                     </Button>
                                 </DialogTrigger>
                                 <DialogContent className='max-w-[90vw] md:max-w-[380px]'>
