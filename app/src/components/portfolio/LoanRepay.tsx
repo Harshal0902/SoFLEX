@@ -12,22 +12,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import Image from 'next/image'
 
-export type LoanDataType = {
-    borrow_id: string;
-    borrowing_amount: string;
-    borrowing_total: string;
-    borrowing_due_by: Date;
-    borrowing_status: 'Active' | 'Repaid' | 'Defaulted' | 'Pending' | 'Cancelled' | 'Expired' | 'Closed';
-    borrowing_interest_rate: string;
-    borrowing_duration: string;
-    borrowing_submitted_at: Date;
-    borrowing_collateralization_assets: string;
-    borrowing_token: string;
-}
-
-export default function LoanRepay({ row }: { row: { original: LoanDataType } }) {
+export default function LoanRepay({ row, onTrigger }: { row: any, onTrigger: () => void }) {
     const [open, setOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [trigger, setTrigger] = useState<boolean>(false);
 
     const order = row.original;
     const { publicKey, sendTransaction } = useWallet();
@@ -134,7 +122,8 @@ export default function LoanRepay({ row }: { row: { original: LoanDataType } }) 
 
                 if (data) {
                     setOpen(false);
-                    console.log('Transaction successful!')
+                    setTrigger(true);
+                    onTrigger();
                     toast.success('Loan repaid successfully!');
                 } else {
                     toast.error('Error completing the process. Please try again!');
@@ -215,7 +204,7 @@ export default function LoanRepay({ row }: { row: { original: LoanDataType } }) 
                                 </Tooltip>
                             </TooltipProvider>
                         </div>
-                        <div>{order.borrowing_interest_rate}</div>
+                        <div>{order.borrowing_interest_rate} %</div>
                     </div>
 
                     <div className='flex flex-row flex-wrap items-center justify-between hover:bg-accent hover:rounded px-2'>
@@ -314,7 +303,7 @@ export default function LoanRepay({ row }: { row: { original: LoanDataType } }) 
                         </Accordion>
                     </div>
 
-                    <Button className='text-white' disabled={order.borrowing_status !== 'Active' || isSubmitting} onClick={onRepay}>
+                    <Button className='text-white mx-2' disabled={order.borrowing_status !== 'Active' || isSubmitting} onClick={onRepay}>
                         {isSubmitting && <Loader2 className='animate-spin mr-2' size={15} />}
                         {order.borrowing_status === 'Active' ? 'Repay' : order.borrowing_status}
                     </Button>

@@ -1,6 +1,6 @@
 "use client"
 
-import { ColumnDef } from '@tanstack/react-table'
+import { ColumnDef, Cell, CellContext } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/components/ui/data-table-column-header'
 import LoanRepay from './LoanRepay'
 
@@ -25,7 +25,7 @@ export type LoanDataType = {
 // Expired: The loan offer has expired without being accepted or disbursed.
 // Closed: The loan has been closed for reasons such as early repayment or administrative closure.
 
-export const loanColumns: ColumnDef<LoanDataType>[] = [
+export const loanColumns = (onTrigger: () => void): ColumnDef<LoanDataType>[] => [
     {
         accessorKey: 'borrow_id',
         header: ({ column }) => (
@@ -58,6 +58,9 @@ export const loanColumns: ColumnDef<LoanDataType>[] = [
     },
     {
         id: 'actions',
-        cell: LoanRepay
+        cell: (props: CellContext<LoanDataType, unknown>) => {
+            const cell = props.cell as Cell<LoanDataType, any>;
+            return <LoanRepay row={cell.row} onTrigger={onTrigger} />;
+        }
     }
-]
+];

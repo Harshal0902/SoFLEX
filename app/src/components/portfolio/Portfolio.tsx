@@ -86,6 +86,7 @@ export default function Portfolio({ walletAddress }: { walletAddress?: string })
             setUserStats(data as UserStatsType[]);
             setLoading(false);
         };
+
         fetchUserStatsData();
     }, [walletAddress]);
 
@@ -108,18 +109,6 @@ export default function Portfolio({ walletAddress }: { walletAddress?: string })
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    useEffect(() => {
-        const originalConsoleLog = console.log;
-        console.log = function (message: any) {
-            if (typeof message === 'string' && message.includes('Transaction successful')) {
-                fetchLoanHistoryData();
-                return;
-            }
-            originalConsoleLog.apply(console, Array.from(arguments));
-        };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema)
     })
@@ -138,6 +127,10 @@ export default function Portfolio({ walletAddress }: { walletAddress?: string })
         } catch (error) {
             toast.error('Error updating portfolio. Please try again.');
         }
+    };
+
+    const onTrigger = () => {
+        fetchLoanHistoryData();
     };
 
     const renderIcon = (IconComponent: React.ComponentType<any>) => {
@@ -278,7 +271,7 @@ export default function Portfolio({ walletAddress }: { walletAddress?: string })
                             <div className='pt-2'>
                                 <h1 className='text-xl py-2'>Loan History</h1>
                                 <DataTable
-                                    columns={loanColumns}
+                                    columns={loanColumns(onTrigger)}
                                     data={loanHistoryData}
                                     userSearchColumn='borrowing_amount'
                                     inputPlaceHolder='Search by borrowed Token Name'
