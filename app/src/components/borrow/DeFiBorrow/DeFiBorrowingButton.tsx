@@ -559,7 +559,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                 {((parseFloat(formatAsset_price(totalCNFTPrice + totalNFTPrice)) + (0.4 * formatAsset_price(totalCNFTPrice + totalNFTPrice))) > parseFloat(form.watch('borrowing_amount'))) && form.watch('borrowing_duration') &&
                                     <div className='flex flex-col items-end justify-center px-2'>
                                         <div className='border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded cursor-pointer text-sm py-2.5 px-4 w-full md:w-auto flex flex-row items-center justify-center' onClick={handleSubmitSection}>
-                                            Calculate Intrest Rate
+                                            Calculate Interest Rate
                                             <ChevronRight className='w-4 h-4 ml-1' />
                                         </div>
                                     </div>
@@ -600,14 +600,14 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
 
                                         <div className='flex flex-row items-center justify-between text-sm md:text-lg hover:bg-accent hover:rounded px-2'>
                                             <div className='flex flex-row items-center space-x-1'>
-                                                <h1 className='tracking-wide'>Intrest Rate</h1>
+                                                <h1 className='tracking-wide'>Interest Rate</h1>
                                                 <TooltipProvider>
                                                     <Tooltip delayDuration={300}>
                                                         <TooltipTrigger asChild>
                                                             <span><Info className='h-4 w-4 ml-1 cursor-pointer' /></span>
                                                         </TooltipTrigger>
                                                         <TooltipContent className='max-w-[18rem] md:max-w-[26rem]'>
-                                                            How we calculate intrest rate:
+                                                            How we calculate interest rate:
                                                             <p className='text-center'>Cost x ( BR + RP  + DA)</p>
                                                             <div className='py-1'>
                                                                 <p>Where:</p>
@@ -632,9 +632,9 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                             <div>{dueByDate}</div>
                                         </div>
 
-                                        <Accordion type='multiple'>
+                                        <Accordion type='multiple' className='px-2'>
                                             <AccordionItem value='summary'>
-                                                <AccordionTrigger className='hover:no-underline text-left font-semibold tracking-wide px-2'>Borrow Summary</AccordionTrigger>
+                                                <AccordionTrigger className='hover:no-underline text-left font-semibold tracking-wide'>Borrow Summary</AccordionTrigger>
                                                 <AccordionContent className='flex flex-col space-y-2'>
                                                     <div className='flex flex-row items-center justify-between flex-wrap text-sm md:text-lg hover:bg-accent hover:rounded px-2'>
                                                         <div className='flex flex-row items-center space-x-1'>
@@ -739,7 +739,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                                 name='agree_terms'
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <div className='flex flex-row space-x-2 justify-start'>
+                                                        <div className='flex flex-row space-x-2 justify-start px-2'>
                                                             <FormControl>
                                                                 <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                                                             </FormControl>
@@ -758,7 +758,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                 )}
 
                                 {!loading &&
-                                    <div className='flex flex-col md:flex-row items-center justify-between md:pt-2 space-y-2 md:space-y-0'>
+                                    <div className='flex flex-col md:flex-row items-center justify-between md:pt-2 space-y-2 md:space-y-0 px-2'>
                                         <div className='border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded cursor-pointer text-sm py-2.5 px-4 w-full md:w-auto flex flex-row items-center justify-center' onClick={handleNFTSection}>
                                             <ChevronLeft className='w-4 h-4 mr-1' />
                                             Edit borrow details
