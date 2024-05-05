@@ -147,7 +147,7 @@ export default function P2PBorrowingButton({ row }: { row: { original: Borrowing
             <DialogContent className='max-w-[90vw] md:max-w-[40vw]'>
                 <DialogHeader>
                     <DialogTitle className='flex flex-row space-x-1 items-center'>
-                        <h1>Borrow SOL</h1>
+                        <div>Borrow SOL</div>
                         <InfoButton />
                     </DialogTitle>
                     <DialogDescription>
@@ -159,20 +159,20 @@ export default function P2PBorrowingButton({ row }: { row: { original: Borrowing
                         <div className='relative h-20 w-16 md:h-24 md:w-36'>
                             <Image src={order.nft_logo} alt={order.nft_name} className='rounded object-cover' fill priority />
                         </div>
-                        <div className='flex flex-col items-start w-full mt-1'>
+                        <div className='flex flex-col items-start w-full'>
                             <div className='text-xl tracking-wide break-words'>{order.nft_name}</div>
-                            <div className='grid grid-flow-col justify-between items-center col-span-3 w-full pt-1.5'>
-                                <div className='border rounded p-2 flex flex-col items-center justify-center px-[3vw] md:px-10'>
-                                    <h1 className='text-[0.6rem] md:text-sm tracking-wider break-words'>Offer</h1>
-                                    <p className='text-[0.5rem] md:text-sm'>{order.nft_best_offer}</p>
+                            <div className='grid grid-cols-3 gap-x-2 w-full pt-0.5'>
+                                <div className='flex flex-col items-center justify-center py-3 border rounded w-full h-full'>
+                                    <h1 className='text-[0.6rem] lg:text-sm tracking-wider break-words'>Offer</h1>
+                                    <p className='text-[0.5rem] lg:text-sm'>{order.nft_best_offer}</p>
                                 </div>
-                                <div className='border rounded p-2 flex flex-col items-center justify-center px-[3vw] md:px-10'>
-                                    <h1 className='text-[0.6rem] md:text-sm tracking-wider break-words'>Rate</h1>
-                                    <p className='text-[0.5rem] md:text-sm'>{order.nft_intrest}</p>
+                                <div className='flex flex-col items-center justify-center py-3 border rounded w-full h-full'>
+                                    <h1 className='text-[0.6rem] lg:text-sm tracking-wider break-words'>Rate</h1>
+                                    <p className='text-[0.5rem] lg:text-sm'>{order.nft_intrest}</p>
                                 </div>
-                                <div className='border rounded p-2 flex flex-col items-center justify-center px-[3vw] md:px-10'>
-                                    <h1 className='text-[0.6rem] md:text-sm tracking-wider break-words'>Duration</h1>
-                                    <p className='text-[0.5rem] md:text-sm'>{order.nft_duration}</p>
+                                <div className='flex flex-col items-center justify-center py-3 border rounded w-full h-full'>
+                                    <h1 className='text-[0.6rem] lg:text-sm tracking-wider break-words'>Duration</h1>
+                                    <p className='text-[0.5rem] lg:text-sm'>{order.nft_duration}</p>
                                 </div>
                             </div>
                         </div>
