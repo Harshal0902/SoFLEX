@@ -365,7 +365,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
             <DialogContent className='max-w-[90vw] md:max-w-[40vw]'>
                 <DialogHeader>
                     <DialogTitle className='flex flex-row space-x-1 items-center'>
-                        <h1>Borrow Token</h1>
+                        <div>Borrow Token</div>
                         <InfoButton />
                     </DialogTitle>
                     <DialogDescription>

@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import { useWallet, useConnection } from '@solana/wallet-adapter-react'
-import { addNewUser } from '@/lib/supabaseRequests'
 import { toast } from 'sonner'
 import { Menu, X, Home, HandCoins, Gem, Bell, BellRing, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
@@ -58,28 +57,10 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
         }
     }
 
-    const { select, wallets, publicKey, disconnect } = useWallet();
+    const { select, wallets, disconnect } = useWallet();
     const wallet = useWallet();
     const { connection } = useConnection();
     const { balance, getUserSOLBalance } = useUserSOLBalance();
-
-    useEffect(() => {
-        const addUserToDB = async () => {
-            if (publicKey) {
-                try {
-                    await addNewUser({
-                        walletAddress: wallet.publicKey?.toString(),
-                    });
-                    // toast.success('Wallet connected successfully!');
-                } catch (error) {
-                    toast.error('An error occurred while setting up your account. Please try again later.');
-                }
-            }
-        };
-
-        addUserToDB();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [publicKey]);
 
     useEffect(() => {
         if (wallet.publicKey) {

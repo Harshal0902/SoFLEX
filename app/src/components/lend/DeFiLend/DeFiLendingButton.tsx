@@ -159,7 +159,7 @@ export default function DeFiLendingButton({ row }: { row: { original: LendingAss
             <DialogContent className='max-w-[90vw] md:max-w-[425px]'>
                 <DialogHeader>
                     <DialogTitle className='flex flex-row space-x-1 items-center'>
-                        <h1>Lend Token</h1>
+                        <div>Lend Token</div>
                     </DialogTitle>
                     <DialogDescription>
                         Lend your token to earn interest.

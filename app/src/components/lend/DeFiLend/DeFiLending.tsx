@@ -109,7 +109,7 @@ export default function DeFiLending() {
             {publicKey && (
               <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
-                  <Button variant='outline' className='px-4'>Request new Asset for lending</Button>
+                  <Button variant='outline' className='w-full md:w-auto'>Request new Asset for lending</Button>
                 </DialogTrigger>
                 <DialogContent className='max-w-[90vw] md:max-w-[425px]'>
                   <DialogHeader>
