@@ -4,13 +4,13 @@ import React, { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import { useWallet, useConnection } from '@solana/wallet-adapter-react'
 import { toast } from 'sonner'
+import { PublicKey } from '@solana/web3.js'
 import { Menu, X, Home, HandCoins, Gem, Triangle, WalletMinimal, Bell, BellRing, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import Image from 'next/image'
-import useUserSOLBalance from '@/store/useUserSOLBalanceStore'
 
 interface Notification {
     title: string
@@ -39,6 +39,7 @@ const notifications: Notification[] = [
 
 export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
     const [isOpen, setIsOpen] = useState(false);
+    const [solBalance, setSolBalance] = useState<string>('0');
     const [open, setOpen] = useState<boolean>(false);
     const [isMoreOption, setIsMoreOption] = useState<boolean>(false);
     const [dropdownVisible, setDropdownVisible] = useState<DropdownState>({ notification: false, profile: false });
@@ -65,13 +66,23 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
     const { select, wallets, disconnect } = useWallet();
     const wallet = useWallet();
     const { connection } = useConnection();
-    const { balance, getUserSOLBalance } = useUserSOLBalance();
 
     useEffect(() => {
-        if (wallet.publicKey) {
-            getUserSOLBalance(wallet.publicKey, connection)
-        }
-    }, [wallet.publicKey, connection, getUserSOLBalance])
+        const fetchSolBalance = async () => {
+            try {
+                if (wallet.publicKey) {
+                    const walletAddress = new PublicKey(wallet.publicKey);
+                    const balance = await connection.getBalance(walletAddress);
+                    setSolBalance((balance / 10 ** 9).toFixed(4));
+                }
+            } catch (error) {
+                toast.error('An error occurred while fetching your balance. Please try again later.');
+            }
+        };
+
+        fetchSolBalance();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [connection]);
 
     const handleWalletSelect = async (walletName: any) => {
         if (walletName) {
@@ -104,7 +115,7 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
 
             {isOpen ? (
                 <div>
-                    <div className='animate-fade-in-down flex overflow-x-hidden mx-2 -mt-2 h-screen overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none lg:hidden'>
+                    <div className='animate-fade-in-down flex overflow-x-hidden mx-2 -mt-2 h-screen overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none lg:hidden transition-all duration-300'>
                         <div className='relative my-4 mx-auto w-screen'>
                             <div className='border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-background outline-none focus:outline-none'>
                                 <div className='flex items-start justify-between p-5 border-solid rounded-t'>
@@ -209,7 +220,7 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
                                                 <div className={`grid space-y-1 text-lg items-start pl-2 animate-fade-in-down-nav ${dropdownVisible.profile ? 'block' : 'hidden'}`}>
                                                     <div className='flex flex-row space-x-1'>
                                                         <div>
-                                                            Balance: {balance.toLocaleString()}
+                                                            Balance: {solBalance}
                                                         </div>
                                                         <div className='text-slate-600'>
                                                             SOL

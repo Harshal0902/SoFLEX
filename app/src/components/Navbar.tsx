@@ -4,8 +4,8 @@ import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useWallet, useConnection } from '@solana/wallet-adapter-react'
 import { addNewUser } from '@/actions/dbActions'
-import useUserSOLBalance from '@/store/useUserSOLBalanceStore'
 import { toast } from 'sonner'
+import { PublicKey } from '@solana/web3.js'
 import ResponsiveNavbar from './ResponsiveNavbar'
 import { Button } from './ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -17,13 +17,27 @@ import Notifications from './Notifications'
 import ModeToggle from './ModeToggle'
 
 export default function Navbar() {
+    const [isHidden, setIsHidden] = useState(false);
+    const [prevScrollPos, setPrevScrollPos] = useState(0);
+    const [solBalance, setSolBalance] = useState<string>('0');
     const [open, setOpen] = useState<boolean>(false);
     const [isMoreOption, setIsMoreOption] = useState<boolean>(false);
 
     const { select, wallets, publicKey, disconnect, connected } = useWallet();
     const wallet = useWallet();
     const { connection } = useConnection();
-    const { balance, getUserSOLBalance } = useUserSOLBalance();
+
+    useEffect(() => {
+        const handleScroll = () => {
+            const currentScrollPos = window.scrollY;
+            setIsHidden(currentScrollPos > prevScrollPos && currentScrollPos > 0);
+            setPrevScrollPos(currentScrollPos);
+        };
+
+        window.addEventListener('scroll', handleScroll);
+
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [prevScrollPos]);
 
     useEffect(() => {
         const addUserToDB = async () => {
@@ -44,10 +58,21 @@ export default function Navbar() {
     }, [publicKey]);
 
     useEffect(() => {
-        if (wallet.publicKey) {
-            getUserSOLBalance(wallet.publicKey, connection)
-        }
-    }, [wallet.publicKey, connection, getUserSOLBalance])
+        const fetchSolBalance = async () => {
+            try {
+                if (wallet.publicKey) {
+                    const walletAddress = new PublicKey(wallet.publicKey);
+                    const balance = await connection.getBalance(walletAddress);
+                    setSolBalance((balance / 10 ** 9).toFixed(4));
+                }
+            } catch (error) {
+                toast.error('An error occurred while fetching your balance. Please try again later.');
+            }
+        };
+
+        fetchSolBalance();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [connection]);
 
     const handleWalletSelect = async (walletName: any) => {
         if (walletName) {
@@ -70,7 +95,7 @@ export default function Navbar() {
     };
 
     return (
-        <div className='backdrop-blur-3xl fixed z-50 w-full'>
+        <div className={`backdrop-blur-3xl fixed top-0 z-50 w-full transition-all duration-300 ${isHidden ? '-translate-y-full' : 'translate-y-0'}`}>
             <nav className='flex items-center py-2 flex-wrap px-2.5 md:px-12 tracking-wider justify-between'>
                 <Link href='/' passHref>
                     <div className='inline-flex items-center justify-center text-2xl md:text-5xl cursor-pointer'>
@@ -111,7 +136,7 @@ export default function Navbar() {
                                     <PopoverContent align='end' className='mt-2 hidden lg:block max-w-[12rem]'>
                                         <div className='flex flex-row pb-2 space-x-1'>
                                             <div>
-                                                Balance: {balance.toLocaleString()}
+                                                Balance: {solBalance}
                                             </div>
                                             <div className='text-slate-600'>
                                                 SOL
