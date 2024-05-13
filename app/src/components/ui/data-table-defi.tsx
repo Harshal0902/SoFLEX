@@ -117,7 +117,7 @@ export function DataTable<TData, TValue>({
                                                     <Image src={row.original.asset_logo} alt={row.original.asset_name} width={35} height={35} priority className='mr-2' />
                                                     <div className='flex flex-col'>
                                                         <span>{row.original.asset_symbol}</span>
-                                                        <span>{row.original.asset_price}</span>
+                                                        <span>$ {row.original.asset_price}</span>
                                                     </div>
                                                 </div>
                                             ) : (

@@ -8,13 +8,18 @@ export default function ScrollToTopBtn() {
 
     useEffect(() => {
         window.addEventListener('scroll', () => {
-            if (window.pageYOffset > 400) {
+            if (window.scrollY > 400) {
                 setShowButton(true);
             } else {
                 setShowButton(false);
             }
         });
+
+        return () => {
+            window.removeEventListener('scroll', () => { });
+        };
     }, []);
+
 
     const scrollToTop = () => {
         window.scrollTo({

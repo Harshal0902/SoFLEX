@@ -1,0 +1,11 @@
+asset_name,asset_symbol,asset_logo,asset_price,asset_total_supply,asset_yield,asset_total_borrow,asset_ltv
+solana,SOL,/assets/token/sol.svg,$ 176.24,"1,250 SOL",42%,32 SOL,80%
+usd-coin,USDC,/assets/token/usdc.svg,$ 1.00,"125,669 USDC",52.20%,"68,55 USDC",64%
+tether,USDT,/assets/token/usdt.svg,$ 1.00,"100,556 USDT",36.88%,"62,55 USDT",82%
+jupiter-ag,JUP,/assets/token/jup.svg,$ 1.38,"156,89 JUP",43.22%,22.63 JUP,72.66%
+pyth-network,PYTH,/assets/token/pyth.svg,$ 0.8235,"26,551 PYTH",23%,227.56 PYTH,68%
+jito,JTO,/assets/token/jto.png,$ 3.90,"3,562 JTO",35%,136 JTO,64.24%
+raydium,RAY,/assets/token/ray.svg,$ 2.04,"125,559 RAY",46.22%,"22,789 RAY",86.78%
+Blze,BLZE,/assets/token/blze.png,$ 0.0018,"255,556 BLZE",51.36%,222.7 BLZE,68.55%
+tbtc-token,tBTC,/assets/token/tbtc.webp,$ 67963.90,2 tBTC,54.36%,0.55 tBTC,86.71%
+marinade,mSOL,/assets/token/msol.png,$ 207.58,"45,855 mSOL",46.87%,"21,73.45 mSOL",88.64%

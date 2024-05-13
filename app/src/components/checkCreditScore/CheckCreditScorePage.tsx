@@ -2,14 +2,23 @@
 
 import React, { useState } from 'react'
 import { useWallet } from '@solana/wallet-adapter-react'
-import { updateUserCreditScore } from '@/lib/supabaseRequests'
+import { updateUserCreditScore } from '@/actions/dbActions'
+import { toast } from 'sonner'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Loader2 } from 'lucide-react'
 
-export default function CheckCreditScorePage({ walletAddress }: { walletAddress?: string }) {
+interface Transaction {
+    actions: {
+        info: {
+            sender: string;
+        };
+    }[];
+}
+
+export default function CheckCreditScorePage({ walletAddress }: { walletAddress: string }) {
     const [loading, setLoading] = useState(false);
-    const [creditScore, setCreditScore] = useState(null);
+    const [creditScore, setCreditScore] = useState<number | null>(null);
 
     const wallet = useWallet();
 
@@ -23,12 +32,11 @@ export default function CheckCreditScorePage({ walletAddress }: { walletAddress?
 
             const requestOptions = {
                 method: 'GET',
-                headers: myHeaders,
-                redirect: 'follow'
+                headers: myHeaders
             };
+
             const response = await fetch(
                 `https://api.shyft.to/sol/v1/transaction/history?network=mainnet-beta&tx_num=2&account=${wallet.publicKey?.toString()}&enable_raw=true`,
-                // @ts-ignore
                 requestOptions
             );
 
@@ -37,8 +45,7 @@ export default function CheckCreditScorePage({ walletAddress }: { walletAddress?
             let sentTransactions = 0;
             let receivedTransactions = 0;
 
-            // @ts-ignore
-            data.result.forEach(transaction => {
+            data.result.forEach((transaction: Transaction) => {
                 if (transaction.actions.length > 0 && transaction.actions[0].info.sender === wallet.publicKey?.toString()) {
                     sentTransactions++;
                 } else {
@@ -53,28 +60,25 @@ export default function CheckCreditScorePage({ walletAddress }: { walletAddress?
             const transactionHistoryScore = ((sentPercentage - receivedPercentage) / 100).toFixed(2);
             calculateCreditScore(transactionHistoryScore);
         } catch (error) {
-            // @ts-ignore
-            setError('An error occurred while fetching data.');
+            toast.error('An error occurred while fetching data.');
         } finally {
             setLoading(false);
         }
     };
 
-    // @ts-ignore
-    const calculateCreditScore = async (transactionHistoryScore) => {
-        const creditScoreValue = 0.55 * 80 + 0.33 * (transactionHistoryScore + 20) + 30;
-        // @ts-ignore
-        setCreditScore(creditScoreValue.toFixed(2));
+    const calculateCreditScore = async (transactionHistoryScore: string) => {
+        const creditScoreValue = 0.55 * 80 + 0.33 * (parseFloat(transactionHistoryScore) + 20) + 30;
+        setCreditScore(parseFloat(creditScoreValue.toFixed(2)));
         await updateUserCreditScore({
             walletAddress: walletAddress,
-            creditScore: creditScoreValue.toFixed(2),
+            creditScore: parseFloat(creditScoreValue.toFixed(2)),
         });
     };
 
     return (
-        <Card className='relative md:my-4'>
+        <Card className='md:my-4'>
             <CardHeader>
-                <div className='text-2xl md:text-4xl'>My On-Chain Credit Score</div>
+                <div className='text-center md:text-start text-2xl md:text-4xl'>My On-Chain Credit Score</div>
             </CardHeader>
             <CardContent>
                 <div className='flex flex-col space-y-2'>
@@ -85,7 +89,7 @@ export default function CheckCreditScorePage({ walletAddress }: { walletAddress?
                         </Button>
                     </div>
                     {creditScore && (
-                        <h1 className='text-center pt-2 font-semibold tracking-wider'>Credit Score: {isNaN(creditScore) ? '36.48' : creditScore}</h1>
+                        <h1 className='text-center pt-2 font-semibold tracking-wider'>Your Credit Score: {isNaN(creditScore) ? '36.48' : creditScore}</h1>
                     )}
                     <div className='py-2'>
                         <p className='font-semibold'>Formula used = a * BH + b * (TH + CD) + c</p>

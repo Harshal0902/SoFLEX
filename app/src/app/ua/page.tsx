@@ -88,7 +88,7 @@ const UserSection: React.FC<UserContentType> = ({ title, content }) => (
 export default function Page() {
     return (
         <Suspense fallback={<Preloader />}>
-            <MaxWidthWrapper>
+            <MaxWidthWrapper className='md:my-4'>
                 <div className='flex items-center pb-4 justify-center'>
                     <h1 className='text-3xl md:text-4xl font-semibold tracking-wide'>User Agreement</h1>
                 </div>

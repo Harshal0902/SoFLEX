@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { newAssetOrCollectionRequest, assetDetails } from '@/lib/supabaseRequests'
+import { newAssetOrCollectionRequest, assetDetails } from '@/actions/dbActions'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { LendingAssetDataType, lendingAssetColumns } from './columns'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
@@ -15,152 +15,153 @@ import Loading from '@/components/Loading'
 import { DataTable } from '@/components/ui/data-table-defi'
 
 const FormSchema = z.object({
-  assetName: z.string({
-    required_error: 'Name is required',
-  }).min(3, {
-    message: 'Name must be at least 3 characters long',
-  }).optional()
+    assetName: z.string({
+        required_error: 'Name is required',
+    }).min(3, {
+        message: 'Name must be at least 3 characters long',
+    }).optional()
 })
 
 export default function DeFiLending() {
-  const [open, setOpen] = useState(false);
-  const [assetPrices, setAssetPrices] = useState<{ [key: string]: string }>({});
-  const [loadingData, setLoadingData] = useState<boolean>(true);
-  const [lendingAssetData, setLendingAssetData] = useState<LendingAssetDataType[]>([]);
+    const [open, setOpen] = useState(false);
+    const [assetPrices, setAssetPrices] = useState<{ [key: string]: string }>({});
+    const [loadingData, setLoadingData] = useState<boolean>(true);
+    const [lendingAssetData, setLendingAssetData] = useState<LendingAssetDataType[]>([]);
 
-  const { publicKey } = useWallet();
-  const wallet = useWallet();
+    const { publicKey } = useWallet();
+    const wallet = useWallet();
 
-  useEffect(() => {
-    const fetchAssetData = async () => {
-      const result = await assetDetails();
-      if (Array.isArray(result)) {
-        setLendingAssetData(result);
-      } else {
-        toast.error('Unexpected result format.');
-      }
-      setLoadingData(false);
-    };
+    useEffect(() => {
+        const fetchAssetData = async () => {
+            const result = await assetDetails();
+            if (Array.isArray(result)) {
+                setLendingAssetData(result);
+            } else {
+                toast.error('Unexpected result format.');
+            }
+            setLoadingData(false);
+        };
 
-    fetchAssetData();
-  }, []);
+        fetchAssetData();
+    }, []);
 
-  useEffect(() => {
-    const tokens = ['SOL', 'USDC', 'USDT', 'JLP', 'JTO', 'RAY', 'tBTC', 'MSOL'];
+    useEffect(() => {
+        const fetchData = async () => {
+            const tokens = ['SOL', 'USDC', 'USDT', 'JLP', 'JTO', 'RAY', 'tBTC', 'mSOL'];
+            for (const token of tokens) {
+                try {
+                    const response = await fetch(`https://api.coinbase.com/v2/prices/${token}-USD/buy`);
+                    const data = await response.json();
+                    setAssetPrices(prevState => ({
+                        ...prevState,
+                        [token]: data.data.amount
+                    }));
+                } catch (error) {
+                    toast.error(`Error fetching price for ${token}: ${error}`);
+                }
+            }
+        };
 
-    const fetchData = async () => {
-      for (const token of tokens) {
-        try {
-          const response = await fetch(`https://api.coinbase.com/v2/prices/${token}-USD/buy`);
-          const data = await response.json();
-          setAssetPrices(prevState => ({
-            ...prevState,
-            [token]: data.data.amount
-          }));
-        } catch (error) {
-          toast.error(`Error fetching price for ${token}: ${error}`);
+        fetchData();
+
+        // const intervalId = setInterval(fetchData, 10000);
+
+        // return () => clearInterval(intervalId);
+    }, []);
+
+    const form = useForm<z.infer<typeof FormSchema>>({
+        resolver: zodResolver(FormSchema),
+        defaultValues: {
+            assetName: '',
         }
-      }
-    };
+    })
 
-    fetchData();
-  }, []);
+    async function onSubmit(data: z.infer<typeof FormSchema>) {
+        const assetName = data.assetName;
 
-  const form = useForm<z.infer<typeof FormSchema>>({
-    resolver: zodResolver(FormSchema),
-    defaultValues: {
-      assetName: '',
+        if (assetName && wallet.publicKey) {
+            const result = await newAssetOrCollectionRequest({ walletAddress: wallet.publicKey.toString(), requestedAssetOrCollectionName: assetName, assetOrCollection: 'Asset' });
+
+            if (result) {
+                toast.success('Request sent successfully!');
+                setOpen(false);
+                form.reset();
+            } else {
+                toast.error('Error requesting new NFT Collection.');
+            }
+        }
     }
-  })
 
-  async function onSubmit(data: z.infer<typeof FormSchema>) {
-    const assetName = data.assetName;
-
-    if (assetName) {
-      const result = await newAssetOrCollectionRequest({ walletAddress: wallet.publicKey?.toString(), requestedAssetOrCollectionName: assetName, assetOrCollection: 'Asset' });
-
-      if (result) {
-        if (result instanceof Response && result.status === 409) {
-          toast.info('Request sent successfully!');
+    const formatPrice = (price: number | string): string => {
+        const numericPrice = typeof price === 'string' ? parseFloat(price) : price;
+        if (!isNaN(numericPrice)) {
+            return `${numericPrice.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
         } else {
-          toast.success('Request sent successfully!');
-          setOpen(false);
-          form.reset();
+            return price.toString();
         }
-      }
-    }
-  }
+    };
 
-  const formatPrice = (price: number | string): string => {
-    const numericPrice = typeof price === 'string' ? parseFloat(price) : price;
-    if (!isNaN(numericPrice)) {
-      return `$ ${numericPrice.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
-    } else {
-      return price.toString();
-    }
-  };
+    return (
+        <div className='py-2 md:py-4'>
+            <Card>
+                <CardHeader>
+                    <div className='flex flex-col md:flex-row justify-between md:items-center space-y-2 md:space-y-0'>
+                        <div className='text-center md:text-start text-2xl md:text-4xl'>All Assets</div>
+                        {publicKey && (
+                            <Dialog open={open} onOpenChange={setOpen}>
+                                <DialogTrigger asChild>
+                                    <Button variant='outline' className='w-full md:w-auto'>Request new Asset for lending</Button>
+                                </DialogTrigger>
+                                <DialogContent className='max-w-[90vw] md:max-w-[425px]'>
+                                    <DialogHeader>
+                                        <DialogTitle>Request for new assets</DialogTitle>
+                                        <DialogDescription>
+                                            Make request for new assets for lending.
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                    <Form {...form}>
+                                        <form onSubmit={form.handleSubmit(onSubmit)} autoComplete='off' className='flex flex-col space-y-4 pt-2'>
+                                            <FormField
+                                                control={form.control}
+                                                name='assetName'
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Asset Name</FormLabel>
+                                                        <FormControl>
+                                                            <Input {...field} className='w-full' placeholder='Asset Name' />
+                                                        </FormControl>
+                                                        <FormMessage className='text-destructive tracking-wide' />
+                                                    </FormItem>
+                                                )}
+                                            />
 
-  return (
-    <div className='py-2 md:py-4'>
-      <Card>
-        <CardHeader>
-          <div className='flex flex-col md:flex-row justify-between items-start md:items-center space-y-2 md:space-y-0'>
-            <div className='text-2xl md:text-4xl'>All Assets</div>
-            {publicKey && (
-              <Dialog open={open} onOpenChange={setOpen}>
-                <DialogTrigger asChild>
-                  <Button variant='outline' className='w-full md:w-auto'>Request new Asset for lending</Button>
-                </DialogTrigger>
-                <DialogContent className='max-w-[90vw] md:max-w-[425px]'>
-                  <DialogHeader>
-                    <DialogTitle>Request for new assets</DialogTitle>
-                    <DialogDescription>
-                      Make request for new assets for lending.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} autoComplete='off' className='flex flex-col space-y-4 pt-2'>
-                      <FormField
-                        control={form.control}
-                        name='assetName'
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Asset Name</FormLabel>
-                            <FormControl>
-                              <Input {...field} className='w-full' placeholder='Asset Name' />
-                            </FormControl>
-                            <FormMessage className='text-destructive tracking-wide' />
-                          </FormItem>
+                                            <Button type='submit' className='text-white bg-primary hover:bg-primary/90'>
+                                                Submit Request
+                                            </Button>
+                                        </form>
+                                    </Form>
+                                </DialogContent>
+                            </Dialog>
                         )}
-                      />
-
-                      <Button type='submit' className='text-white bg-primary hover:bg-primary/90'>
-                        Submit Request
-                      </Button>
-                    </form>
-                  </Form>
-                </DialogContent>
-              </Dialog>
-            )}
-          </div>
-        </CardHeader>
-        <CardContent>
-          {loadingData ? (
-            <Loading />
-          ) : (
-            <DataTable
-              columns={lendingAssetColumns}
-              data={lendingAssetData.map(asset => ({
-                ...asset,
-                assetPrice: assetPrices[asset.asset_symbol] ? formatPrice(assetPrices[asset.asset_symbol]) : asset.asset_price
-              }))}
-              userSearchColumn='asset_name'
-              inputPlaceHolder='Search for assets'
-              noResultsMessage='No assets found'
-            />
-          )}
-        </CardContent>
-      </Card>
-    </div>
-  )
+                    </div>
+                </CardHeader>
+                <CardContent>
+                    {loadingData ? (
+                        <Loading />
+                    ) : (
+                        <DataTable
+                            columns={lendingAssetColumns}
+                            data={lendingAssetData.map(asset => ({
+                                ...asset,
+                                asset_price: assetPrices[asset.asset_symbol] ? formatPrice(assetPrices[asset.asset_symbol]) : asset.asset_price
+                            }))}
+                            userSearchColumn='asset_name'
+                            inputPlaceHolder='Search for assets'
+                            noResultsMessage='No assets found'
+                        />
+                    )}
+                </CardContent>
+            </Card>
+        </div>
+    )
 }

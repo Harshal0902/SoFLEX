@@ -16,11 +16,11 @@ export type LendingNFTCollectionDataType = {
     nft_name: string;
     nft_logo: string;
     nft_pool: string;
-    nft_best_offer?: string;
-    nft_intrest?: string;
-    nft_apy?: string;
+    nft_best_offer: string;
+    nft_intrest: string;
+    nft_apy: string;
     nft_duration: string;
-    nft_floor_price?: string;
+    nft_floor_price: string;
 }
 
 const FormSchema = z.object({
@@ -51,9 +51,7 @@ export default function P2PLendingButton({ row }: { row: { original: LendingNFTC
         },
     });
 
-    // @ts-ignore
-    const lendingAmount = parseFloat(form.watch('lending_amount'));
-    // @ts-ignore
+    const lendingAmount = form.watch('lending_amount');
     const nft_floor_price = parseFloat(order.nft_floor_price);
     const threshold = nft_floor_price * 0.9;
 
@@ -123,7 +121,6 @@ export default function P2PLendingButton({ row }: { row: { original: LendingNFTC
                                         <FormItem className='w-full'>
                                             <FormLabel>Offer Amount (in SOL)</FormLabel>
                                             <FormControl>
-                                                {/* @ts-ignore */}
                                                 <Input type='number' max={parseFloat(order.nft_floor_price)} placeholder='Offer Amount' {...field} />
                                             </FormControl>
                                             <FormDescription>
@@ -139,8 +136,7 @@ export default function P2PLendingButton({ row }: { row: { original: LendingNFTC
 
                                 <div className='w-full'>
                                     <h1 className='text-sm font-medium leading-none md:pt-2'>Total Intrest (in SOL)</h1>
-                                    {/* @ts-ignore */}
-                                    <h1 className='text-lg md:text-2xl py-1 md:py-3'>{(parseFloat(order.nft_intrest) / 100) * parseFloat(form.watch('lending_amount') * offerCount).toFixed(4)} SOL</h1>
+                                    <h1 className='text-lg md:text-2xl py-1 md:py-3'>{((parseFloat(order.nft_intrest) / 100) * (form.watch('lending_amount') * offerCount)).toFixed(4)} SOL</h1>
                                     <p className='text-sm text-muted-foreground'>{order.nft_intrest} x {offerCount}</p>
                                 </div>
                             </div>
@@ -159,8 +155,7 @@ export default function P2PLendingButton({ row }: { row: { original: LendingNFTC
                             </div>
 
                             <div className='py-2'>
-                                {/* @ts-ignore */}
-                                <p className='text-lg'>Your total is {parseFloat(form.watch('lending_amount') * offerCount).toFixed(4)} SOL</p>
+                                <p className='text-lg'>Your total is {(form.watch('lending_amount') * offerCount).toFixed(4)} SOL</p>
                             </div>
 
                             {/* <Button type='submit' className='text-white w-full mt-4' disabled={isSubmitting}> */}

@@ -18,7 +18,7 @@ export default function RootLayout({ children, }: Readonly<{ children: React.Rea
           <ThemeProvider attribute='class' defaultTheme='system' enableSystem disableTransitionOnChange>
             <BetaModal />
             <Navbar />
-            <main className='flex-grow flex-1 pt-20'>
+            <main className='flex-grow flex-1 pt-16'>
               {children}
             </main>
             <Toaster richColors closeButton />

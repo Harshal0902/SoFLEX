@@ -5,7 +5,11 @@ const nextConfig = {
             {
                 source: '/email-api/:slug*',
                 destination: `/api/email/:slug*`,
-            }
+            },
+            {
+                source: '/ingest/:path*',
+                destination: 'https://us.i.posthog.com/:path*',
+            },
         ]
     },
     compiler: {
@@ -14,8 +18,8 @@ const nextConfig = {
     images: {
         remotePatterns: [
             {
-                protocol: "https",
-                hostname: "**",
+                protocol: 'https',
+                hostname: '**',
             },
         ],
     },

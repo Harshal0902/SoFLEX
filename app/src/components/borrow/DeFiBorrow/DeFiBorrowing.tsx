@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { newAssetOrCollectionRequest, assetDetails } from '@/lib/supabaseRequests'
+import { newAssetOrCollectionRequest, assetDetails } from '@/actions/dbActions'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { BorrowingAssetDataType, borrowingAssetColumns } from './columns'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
@@ -46,8 +46,8 @@ export default function DeFiBorrowing() {
   }, []);
 
   useEffect(() => {
-    const tokens = ['SOL', 'USDC', 'USDT', 'JLP', 'JTO', 'RAY', 'tBTC', 'MSOL'];
     const fetchData = async () => {
+      const tokens = ['SOL', 'USDC', 'USDT', 'JLP', 'JTO', 'RAY', 'tBTC', 'mSOL'];
       for (const token of tokens) {
         try {
           const response = await fetch(`https://api.coinbase.com/v2/prices/${token}-USD/buy`);
@@ -63,6 +63,10 @@ export default function DeFiBorrowing() {
     };
 
     fetchData();
+
+    // const intervalId = setInterval(fetchData, 10000);
+
+    // return () => clearInterval(intervalId);
   }, []);
 
   const form = useForm<z.infer<typeof FormSchema>>({
@@ -75,17 +79,15 @@ export default function DeFiBorrowing() {
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     const assetName = data.assetName;
 
-    if (assetName) {
-      const result = await newAssetOrCollectionRequest({ walletAddress: wallet.publicKey?.toString(), requestedAssetOrCollectionName: assetName, assetOrCollection: 'Asset' });
+    if (assetName && wallet.publicKey) {
+      const result = await newAssetOrCollectionRequest({ walletAddress: wallet.publicKey.toString(), requestedAssetOrCollectionName: assetName, assetOrCollection: 'Asset' });
 
       if (result) {
-        if (result instanceof Response && result.status === 409) {
-          toast.info('Request sent successfully!');
-        } else {
-          toast.success('Request sent successfully!');
-          setOpen(false);
-          form.reset();
-        }
+        toast.success('Request sent successfully!');
+        setOpen(false);
+        form.reset();
+      } else {
+        toast.error('Error requesting new NFT Collection.');
       }
     }
   }
@@ -93,7 +95,7 @@ export default function DeFiBorrowing() {
   const formatPrice = (price: number | string): string => {
     const numericPrice = typeof price === 'string' ? parseFloat(price) : price;
     if (!isNaN(numericPrice)) {
-      return `$ ${numericPrice.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+      return `${numericPrice.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
     } else {
       return price.toString();
     }
@@ -103,8 +105,8 @@ export default function DeFiBorrowing() {
     <div className='py-2 md:py-4'>
       <Card>
         <CardHeader>
-          <div className='flex flex-col md:flex-row justify-between items-start md:items-center space-y-2 md:space-y-0'>
-            <div className='text-2xl md:text-4xl'>All Assets</div>
+          <div className='flex flex-col md:flex-row justify-between md:items-center space-y-2 md:space-y-0'>
+            <div className='text-center md:text-start text-2xl md:text-4xl'>All Assets</div>
             {publicKey && (
               <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
@@ -151,7 +153,7 @@ export default function DeFiBorrowing() {
               columns={borrowingAssetColumns}
               data={borrowingAssetData.map(asset => ({
                 ...asset,
-                assetPrice: assetPrices[asset.asset_symbol] ? formatPrice(assetPrices[asset.asset_symbol]) : asset.asset_price
+                asset_price: assetPrices[asset.asset_symbol] ? formatPrice(assetPrices[asset.asset_symbol]) : asset.asset_price
               }))}
               userSearchColumn='asset_name'
               inputPlaceHolder='Search for assets'

@@ -6,11 +6,11 @@ import Image from 'next/image'
 
 export default function NotFound() {
 
-    return (
-        <div className='pt-8 w-full md:h-screen bg-[#020817]'>
+  return (
+    <div className='pt-8 w-full md:h-screen bg-[#020817]'>
 
-            <style jsx>
-                {`
+      <style jsx>
+        {`
         .object_astronaut {
           animation: rotate-astronaut 120s infinite linear both alternate;
         }
@@ -1501,31 +1501,31 @@ export default function NotFound() {
         }
       `}</style>
 
-            <div className='stars z-0'></div>
-            <div className='stars1 z-0'></div>
-            <div className='stars2 z-0'></div>
-            <div className='shooting-stars z-0'></div>
+      <div className='stars z-0'></div>
+      <div className='stars1 z-0'></div>
+      <div className='stars2 z-0'></div>
+      <div className='shooting-stars z-0'></div>
 
-            <div className='h-full md:grid md:grid-cols-2 px-4 md:px-36'>
+      <div className='h-full md:grid md:grid-cols-2 px-4 md:px-36'>
 
-                <div className='h-4/5 pt-4 md:pt-16 flex flex-col items-center justify-center'>
-                    <Link href='/' passHref>
-                        <Image src='/assets/404/earth.svg' priority={true} height='400' width='400' alt='Earth' className='backdrop-blur-0 md:inset-x cursor-pointer' />
-                    </Link>
-                    <Image src='/assets/404/moon.svg' height='100' width='100' alt='Moon' className='backdrop-blur-0 mt-2 ml-[25vw]' />
-                </div>
-
-                <div className='pl-4 md:pl-16 mt-8 py-4 tracking-wider text-left text-white flex flex-col justify-center italic'>
-                    <div style={{ animation: 'zigzag 2s infinite' }}>
-                        <Image src='/assets/404/astronaut.svg' priority={true} height='250' width='220' alt='Astronaut' className='mt-16 object_astronaut animate-spin-slow' />
-                    </div>
-                    <h1 className='text-6xl md:text-9xl'>404</h1>
-                    <h1 className='text-2xl md:text-5xl'>Page not Found</h1>
-                    <h1 className='text-xl md:text-3xl'>UH OH! Looks like you are lost in space</h1>
-                    <h1 className='text-xl md:text-3xl'>Click on Earth to land on home page</h1>
-                </div>
-            </div>
-
+        <div className='h-4/5 pt-4 md:pt-16 flex flex-col items-center justify-center'>
+          <Link href='/' passHref>
+            <Image src='/assets/404/earth.svg' priority={true} height='400' width='400' alt='Earth' className='backdrop-blur-0 md:inset-x cursor-pointer' />
+          </Link>
+          <Image src='/assets/404/moon.svg' height='100' width='100' alt='Moon' className='backdrop-blur-0 mt-2 ml-[25vw]' />
         </div>
-    )
+
+        <div className='pl-4 md:pl-16 mt-8 py-4 tracking-wider text-left text-white flex flex-col justify-center italic'>
+          <div style={{ animation: 'zigzag 2s infinite' }}>
+            <Image src='/assets/404/astronaut.svg' priority={true} height='250' width='220' alt='Astronaut' className='mt-16 object_astronaut animate-spin-slow' />
+          </div>
+          <h1 className='text-6xl md:text-9xl'>404</h1>
+          <h1 className='text-2xl md:text-5xl'>Page not Found</h1>
+          <h1 className='text-xl md:text-3xl'>UH OH! Looks like you are lost in space</h1>
+          <h1 className='text-xl md:text-3xl'>Click on Earth to land on home page</h1>
+        </div>
+      </div>
+
+    </div>
+  )
 }

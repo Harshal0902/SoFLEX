@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { updateUserCreditScore, newDeFiBorrowing } from '@/lib/supabaseRequests'
+import { updateUserCreditScore, newDeFiBorrowing } from '@/actions/dbActions'
 import { toast } from 'sonner'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { ChevronRight, ChevronLeft, Loader2, Info, ExternalLink } from 'lucide-react'
@@ -29,13 +29,21 @@ export type BorrowingAssetDataType = {
     asset_ltv: string;
 }
 
+interface Transaction {
+    actions: {
+        info: {
+            sender: string;
+        };
+    }[];
+}
+
 interface NFTType {
-    image_uri?: string;
-    name?: string;
-    floorprice?: number;
-    external_url?: string;
-    mint?: string;
-    royalty?: number;
+    image_uri: string;
+    name: string;
+    floorprice: number;
+    external_url: string;
+    mint: string;
+    royalty: number;
 }
 
 const borrowDuration = [
@@ -97,8 +105,8 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
     const [totalCNFTPrice, setTotalCNFTPrice] = useState<number>(0);
     const [totalNFTPrice, setTotalNFTPrice] = useState<number>(0);
     const [loading, setLoading] = useState(false);
-    const [creditScore, setCreditScore] = useState(null);
-    const [interestRate, setInterestRate] = useState(undefined);
+    const [creditScore, setCreditScore] = useState<number | null>(null);
+    const [interestRate, setInterestRate] = useState<number | undefined>(undefined);
 
     const order = row.original;
     const { publicKey } = useWallet();
@@ -124,12 +132,12 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                     const response = await fetch(`https://api.shyft.to/sol/v1/nft/compressed/read_all?network=mainnet-beta&wallet_address=${wallet.publicKey?.toString()}`, requestOptions);
                     const result = await response.json();
                     if (result && result.success && result.result && result.result.nfts) {
-                        const formattedResult = result.result.nfts.map((nft: any) => ({
+                        const formattedResult = result.result.nfts.map((nft: NFTType) => ({
                             image_uri: nft.image_uri,
                             name: nft.name,
                             external_url: nft.external_url,
                             mint: nft.mint,
-                            floorprice: nft.royalty
+                            floorprice: nft.royalty / 100
                         }));
                         setcNFTResult(formattedResult);
                     } else {
@@ -164,12 +172,12 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                     const response = await fetch(`https://api.shyft.to/sol/v1/nft/read_all?network=mainnet-beta&address=${wallet.publicKey?.toString()}`, requestOptions);
                     const result = await response.json();
                     if (result && result.success && result.result) {
-                        const formattedResult = result.result.map((nft: any) => ({
+                        const formattedResult = result.result.map((nft: NFTType) => ({
                             image_uri: nft.image_uri,
                             name: nft.name,
                             external_url: nft.external_url,
                             mint: nft.mint,
-                            floorprice: nft.royalty
+                            floorprice: nft.royalty / 100
                         }));
                         setNFTResult(formattedResult);
                     } else {
@@ -241,12 +249,11 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
 
             const requestOptions = {
                 method: 'GET',
-                headers: myHeaders,
-                redirect: 'follow'
+                headers: myHeaders
             };
+
             const response = await fetch(
                 `https://api.shyft.to/sol/v1/transaction/history?network=mainnet-beta&tx_num=2&account=${wallet.publicKey?.toString()}&enable_raw=true`,
-                // @ts-ignore
                 requestOptions
             );
 
@@ -255,7 +262,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
             let sentTransactions = 0;
             let receivedTransactions = 0;
 
-            data.result.forEach((transaction: { actions: string | any[] }) => {
+            data.result.forEach((transaction: Transaction) => {
                 if (transaction.actions.length > 0 && transaction.actions[0].info.sender === wallet.publicKey?.toString()) {
                     sentTransactions++;
                 } else {
@@ -276,27 +283,26 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
         }
     };
 
-    // @ts-ignore
-    const calculateCreditScore = async (transactionHistoryScore) => {
-        const creditScoreValue = 0.55 * 80 + 0.33 * (transactionHistoryScore + 20) + 30;
-        // @ts-ignore
-        setCreditScore(creditScoreValue.toFixed(2));
+    const calculateCreditScore = async (transactionHistoryScore: string) => {
+        const creditScoreValue = 0.55 * 80 + 0.33 * (parseFloat(transactionHistoryScore) + 20) + 30;
+        setCreditScore(parseFloat(creditScoreValue.toFixed(2)));
         calculateInterestRate(creditScoreValue.toFixed(2));
-        await updateUserCreditScore({
-            walletAddress: wallet.publicKey?.toString(),
-            creditScore: creditScoreValue.toFixed(2),
-        });
+        if (wallet.publicKey) {
+            await updateUserCreditScore({
+                walletAddress: wallet.publicKey.toString(),
+                creditScore: parseFloat(creditScoreValue.toFixed(2)),
+            });
+        }
     };
 
-    // @ts-ignore
-    const calculateInterestRate = (userCreditScore) => {
+    const calculateInterestRate = (userCreditScore: string) => {
         const borrowingAmount = parseFloat(form.watch('borrowing_amount'));
         const borrowingDuration = parseFloat(form.watch('borrowing_duration'));
         const borrowingDurationInMonths = borrowingDuration / 30.4;
-        let interestRate: number = borrowingAmount * (0.05 + Math.max(0, Math.min(125 / (155 - userCreditScore), 1)) * 2 + borrowingDurationInMonths * 0.5);
-        interestRate = Math.max(10.22, Math.min(interestRate, 54.21));
-        // @ts-ignore
-        setInterestRate(interestRate.toFixed(2));
+        let calculatedInterestRate: number = borrowingAmount * (0.05 + Math.max(0, Math.min(125 / (155 - parseFloat(userCreditScore)), 1)) * 2 + borrowingDurationInMonths * 0.5);
+        calculatedInterestRate = Math.max(10.22, Math.min(calculatedInterestRate, 54.21));
+        const formattedInterestRate = parseFloat(calculatedInterestRate.toFixed(2));
+        setInterestRate(formattedInterestRate);
     };
 
     const addOrdinalSuffix = (day: number) => {
@@ -327,28 +333,28 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
 
     async function onSubmit(values: z.infer<typeof FormSchema>) {
         try {
-            const data = await newDeFiBorrowing({
-                walletAddress: wallet.publicKey?.toString(),
-                borrowingAmount: `${values.borrowing_amount} ${order.asset_symbol}`,
-                borrowingToken: order.asset_symbol,
-                collateralizationAssets: combinedCollateralList,
-                borrowingDuration: values.borrowing_duration,
-                // @ts-ignore
-                borrowingInterestRate: interestRate,
-                borrowingDueBy: futureDate,
-                // @ts-ignore
-                borrowingTotal: `${(parseFloat(form.watch('borrowing_amount')) + ((interestRate / 100) * parseFloat(form.watch('borrowing_amount'))))} ${order.asset_symbol}`,
-            });
+            if (wallet.publicKey && interestRate) {
+                const data = await newDeFiBorrowing({
+                    walletAddress: wallet.publicKey.toString(),
+                    borrowingAmount: `${values.borrowing_amount} ${order.asset_symbol}`,
+                    borrowingToken: order.asset_symbol,
+                    collateralizationAssets: combinedCollateralList,
+                    borrowingDuration: values.borrowing_duration,
+                    borrowingInterestRate: interestRate.toString(),
+                    borrowingDueBy: futureDate.toISOString(),
+                    borrowingTotal: `${(parseFloat(form.watch('borrowing_amount')) + ((interestRate / 100) * parseFloat(form.watch('borrowing_amount'))))} ${order.asset_symbol}`,
+                });
 
-            setIsSubmitting(true);
-            setCurrentSection(1);
-            if (data) {
-                setIsSubmitting(false);
-                setOpen(false);
-                toast.success('Borrowing successful! Assets will be credited to your wallet shortly.');
-                form.reset();
-            } else {
-                toast.error('Error completing the process. Please try again!');
+                setIsSubmitting(true);
+                setCurrentSection(1);
+                if (data) {
+                    setIsSubmitting(false);
+                    setOpen(false);
+                    toast.success('Borrowing successful! Assets will be credited to your wallet shortly.');
+                    form.reset();
+                } else {
+                    toast.error('Error completing the process. Please try again!');
+                }
             }
         } catch (error) {
             toast.error('Error completing the process. Please try again!');
@@ -410,7 +416,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                             </Tooltip>
                                         </TooltipProvider>
                                     </div>
-                                    <div>{order.asset_price}</div>
+                                    <div>$ {order.asset_price}</div>
                                 </div>
 
                                 <div>
@@ -549,18 +555,16 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                 />
 
                                 <div>
-                                    {/* @ts-ignore */}
-                                    {formatAsset_price(totalCNFTPrice + totalNFTPrice) < parseFloat(form.watch('borrowing_amount')) &&
+                                    {parseFloat(formatAsset_price(totalCNFTPrice + totalNFTPrice)) < parseFloat(form.watch('borrowing_amount')) &&
                                         <p className='text-destructive text-center px-2'>The value of the collateral must be greater than the amount borrowed.</p>
                                     }
                                 </div>
 
-                                {/* @ts-ignore */}
-                                {((parseFloat(formatAsset_price(totalCNFTPrice + totalNFTPrice)) + (0.4 * formatAsset_price(totalCNFTPrice + totalNFTPrice))) > parseFloat(form.watch('borrowing_amount'))) && form.watch('borrowing_duration') &&
+                                {((parseFloat(formatAsset_price(totalCNFTPrice + totalNFTPrice)) + (0.4 * parseFloat(formatAsset_price(totalCNFTPrice + totalNFTPrice)))) > parseFloat(form.watch('borrowing_amount'))) && form.watch('borrowing_duration') &&
                                     <div className='flex flex-col items-end justify-center px-2'>
-                                        <div className='border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded cursor-pointer text-sm py-2.5 px-4 w-full md:w-auto flex flex-row items-center justify-center' onClick={handleSubmitSection}>
+                                        <div className='group border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded cursor-pointer text-sm py-2.5 px-4 w-full md:w-auto flex flex-row items-center justify-center' onClick={handleSubmitSection}>
                                             Calculate Interest Rate
-                                            <ChevronRight className='w-4 h-4 ml-1' />
+                                            <ChevronRight className='w-4 h-4 ml-1 group-hover:transform group-hover:translate-x-1 duration-300 ease-in-out' />
                                         </div>
                                     </div>
                                 }
@@ -693,7 +697,6 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                                             {combinedCollateralList.map((item, index) => (
                                                                 <div className='border rounded mt-4 p-2 flex flex-col space-y-2' key={index}>
                                                                     <div className='flex items-center justify-center'>
-                                                                        {/* @ts-ignore */}
                                                                         <Image src={item.image_uri} width={180} height={40} alt={item.image_uri} className='rounded' />
                                                                     </div>
                                                                     <p className='text-center'>{item.name}</p>
@@ -705,7 +708,6 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                                                         <a href={`https://solscan.io/token/${item.mint}`} target='_blank' className='text-primary'>View on Solscan</a>
                                                                         <ExternalLink className='h-4 w-4' />
                                                                     </div>
-                                                                    {/* @ts-ignore */}
                                                                     <p className='text-center'>cNFT Price: {formatAsset_price(item.floorprice)} SOL</p>
                                                                 </div>
                                                             ))}
@@ -759,8 +761,8 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
 
                                 {!loading &&
                                     <div className='flex flex-col md:flex-row items-center justify-between md:pt-2 space-y-2 md:space-y-0 px-2'>
-                                        <div className='border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded cursor-pointer text-sm py-2.5 px-4 w-full md:w-auto flex flex-row items-center justify-center' onClick={handleNFTSection}>
-                                            <ChevronLeft className='w-4 h-4 mr-1' />
+                                        <div className='group border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded cursor-pointer text-sm py-2.5 px-4 w-full md:w-auto flex flex-row items-center justify-center' onClick={handleNFTSection}>
+                                            <ChevronLeft className='w-4 h-4 mr-1 group-hover:-translate-x-1 duration-300 ease-in-out' />
                                             Edit borrow details
                                         </div>
                                         <Button type='submit' className='text-white px-16 w-full md:w-auto' disabled={isSubmitting || loading}>

@@ -7,7 +7,7 @@ import InformationCard from '@/components/InformationCard'
 export default function Page() {
     return (
         <Suspense fallback={<Preloader />}>
-            <MaxWidthWrapper>
+            <MaxWidthWrapper className='md:my-4'>
                 <InformationCard message='This page is under construction' />
             </MaxWidthWrapper>
         </Suspense>

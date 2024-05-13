@@ -9,17 +9,18 @@ export type BorrowingNFTCollectionDataType = {
     nft_name: string;
     nft_logo: string;
     nft_pool: string;
-    nft_best_offer?: string;
-    nft_intrest?: string;
-    nft_apy?: string;
+    nft_best_offer: string;
+    nft_intrest: string;
+    nft_apy: string;
     nft_duration: string;
+    nft_floor_price: string;
 }
 
 export const borrowingNFTCollectionColumns: ColumnDef<BorrowingNFTCollectionDataType>[] = [
     {
         accessorKey: 'nft_name',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title='NFT Collection Name'/>
+            <DataTableColumnHeader column={column} title='NFT Collection Name' />
         ),
     },
     {

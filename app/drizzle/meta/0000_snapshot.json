@@ -1,0 +1,712 @@
+{
+  "id": "00000000-0000-0000-0000-000000000000",
+  "prevId": "",
+  "version": "6",
+  "dialect": "postgresql",
+  "tables": {
+    "public.asset_details": {
+      "name": "asset_details",
+      "schema": "",
+      "columns": {
+        "asset_name": {
+          "name": "asset_name",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "asset_symbol": {
+          "name": "asset_symbol",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "asset_logo": {
+          "name": "asset_logo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "asset_price": {
+          "name": "asset_price",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "asset_total_supply": {
+          "name": "asset_total_supply",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "asset_yield": {
+          "name": "asset_yield",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "asset_total_borrow": {
+          "name": "asset_total_borrow",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "asset_ltv": {
+          "name": "asset_ltv",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "asset_details_asset_name_key": {
+          "columns": [
+            "asset_name"
+          ],
+          "nullsNotDistinct": false,
+          "name": "asset_details_asset_name_key"
+        },
+        "asset_details_asset_symbol_key": {
+          "columns": [
+            "asset_symbol"
+          ],
+          "nullsNotDistinct": false,
+          "name": "asset_details_asset_symbol_key"
+        }
+      }
+    },
+    "public.defi_lending": {
+      "name": "defi_lending",
+      "schema": "",
+      "columns": {
+        "user_address": {
+          "name": "user_address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lending_amount": {
+          "name": "lending_amount",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lending_submitted_at": {
+          "name": "lending_submitted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lending_id": {
+          "name": "lending_id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "lending_token": {
+          "name": "lending_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "transaction_signature": {
+          "name": "transaction_signature",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "defi_lending_lending_token_fkey": {
+          "name": "defi_lending_lending_token_fkey",
+          "tableFrom": "defi_lending",
+          "tableTo": "asset_details",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "lending_token"
+          ],
+          "columnsTo": [
+            "asset_symbol"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "public_defi_lending_user_address_fkey": {
+          "name": "public_defi_lending_user_address_fkey",
+          "tableFrom": "defi_lending",
+          "tableTo": "users",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "user_address"
+          ],
+          "columnsTo": [
+            "user_address"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "defi_lending_lending_id_key": {
+          "columns": [
+            "lending_id"
+          ],
+          "nullsNotDistinct": false,
+          "name": "defi_lending_lending_id_key"
+        },
+        "defi_lending_transaction_signature_key": {
+          "columns": [
+            "transaction_signature"
+          ],
+          "nullsNotDistinct": false,
+          "name": "defi_lending_transaction_signature_key"
+        }
+      }
+    },
+    "public.nft_collection_details": {
+      "name": "nft_collection_details",
+      "schema": "",
+      "columns": {
+        "nft_name": {
+          "name": "nft_name",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "nft_logo": {
+          "name": "nft_logo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nft_pool": {
+          "name": "nft_pool",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nft_best_offer": {
+          "name": "nft_best_offer",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nft_intrest": {
+          "name": "nft_intrest",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nft_duration": {
+          "name": "nft_duration",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nft_apy": {
+          "name": "nft_apy",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nft_floor_price": {
+          "name": "nft_floor_price",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "nft_collection_details_nft_name_key": {
+          "columns": [
+            "nft_name"
+          ],
+          "nullsNotDistinct": false,
+          "name": "nft_collection_details_nft_name_key"
+        }
+      }
+    },
+    "public.defi_borrowing": {
+      "name": "defi_borrowing",
+      "schema": "",
+      "columns": {
+        "borrow_id": {
+          "name": "borrow_id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "user_address": {
+          "name": "user_address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "borrowing_amount": {
+          "name": "borrowing_amount",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "borrowing_submitted_at": {
+          "name": "borrowing_submitted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "borrowing_token": {
+          "name": "borrowing_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "borrowing_collateralization_assets": {
+          "name": "borrowing_collateralization_assets",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "borrowing_duration": {
+          "name": "borrowing_duration",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "borrowing_interest_rate": {
+          "name": "borrowing_interest_rate",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "borrowing_status": {
+          "name": "borrowing_status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "borrowing_due_by": {
+          "name": "borrowing_due_by",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "borrowing_total": {
+          "name": "borrowing_total",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "transaction_signature": {
+          "name": "transaction_signature",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "defi_borrowing_borrowing_token_fkey": {
+          "name": "defi_borrowing_borrowing_token_fkey",
+          "tableFrom": "defi_borrowing",
+          "tableTo": "asset_details",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "borrowing_token"
+          ],
+          "columnsTo": [
+            "asset_symbol"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "public_defi_borrowing_user_address_fkey": {
+          "name": "public_defi_borrowing_user_address_fkey",
+          "tableFrom": "defi_borrowing",
+          "tableTo": "users",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "user_address"
+          ],
+          "columnsTo": [
+            "user_address"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "defi_borrowing_borrow_id_key": {
+          "columns": [
+            "borrow_id"
+          ],
+          "nullsNotDistinct": false,
+          "name": "defi_borrowing_borrow_id_key"
+        },
+        "defi_borrowing_transaction_signature_key": {
+          "columns": [
+            "transaction_signature"
+          ],
+          "nullsNotDistinct": false,
+          "name": "defi_borrowing_transaction_signature_key"
+        }
+      }
+    },
+    "public.new_asset_or_collection_request": {
+      "name": "new_asset_or_collection_request",
+      "schema": "",
+      "columns": {
+        "request_id": {
+          "name": "request_id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "user_address": {
+          "name": "user_address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "asset_or_collection_name": {
+          "name": "asset_or_collection_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "asset_or_collection": {
+          "name": "asset_or_collection",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "public_new_asset_or_collection_request_user_address_fkey": {
+          "name": "public_new_asset_or_collection_request_user_address_fkey",
+          "tableFrom": "new_asset_or_collection_request",
+          "tableTo": "users",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "user_address"
+          ],
+          "columnsTo": [
+            "user_address"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "new_asset_or_collection_request_request_id_key": {
+          "columns": [
+            "request_id"
+          ],
+          "nullsNotDistinct": false,
+          "name": "new_asset_or_collection_request_request_id_key"
+        }
+      }
+    },
+    "public.te_user_stats": {
+      "name": "te_user_stats",
+      "schema": "",
+      "columns": {
+        "user_address": {
+          "name": "user_address",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "interestearned": {
+          "name": "interestearned",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "interestearnedlastmonth": {
+          "name": "interestearnedlastmonth",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "completedloans": {
+          "name": "completedloans",
+          "type": "varchar(225)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "completedloanslastmonth": {
+          "name": "completedloanslastmonth",
+          "type": "varchar(225)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "activeloans": {
+          "name": "activeloans",
+          "type": "varchar(225)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "activeloanslastmonth": {
+          "name": "activeloanslastmonth",
+          "type": "varchar(225)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "activeborrowingsvalue": {
+          "name": "activeborrowingsvalue",
+          "type": "varchar(225)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "activeborrowingsvaluelastmonth": {
+          "name": "activeborrowingsvaluelastmonth",
+          "type": "varchar(225)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "activelendingvalue": {
+          "name": "activelendingvalue",
+          "type": "varchar(225)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "activelendingvaluelastmonth": {
+          "name": "activelendingvaluelastmonth",
+          "type": "varchar(225)",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "public_te_user_stats_user_address_fkey": {
+          "name": "public_te_user_stats_user_address_fkey",
+          "tableFrom": "te_user_stats",
+          "tableTo": "users",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "user_address"
+          ],
+          "columnsTo": [
+            "user_address"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.waitlist": {
+      "name": "waitlist",
+      "schema": "",
+      "columns": {
+        "waitlist_id": {
+          "name": "waitlist_id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "waitlist_waitlist_id_key": {
+          "columns": [
+            "waitlist_id"
+          ],
+          "nullsNotDistinct": false,
+          "name": "waitlist_waitlist_id_key"
+        },
+        "waitlist_email_key": {
+          "columns": [
+            "email"
+          ],
+          "nullsNotDistinct": false,
+          "name": "waitlist_email_key"
+        }
+      }
+    },
+    "public.users": {
+      "name": "users",
+      "schema": "",
+      "columns": {
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_address": {
+          "name": "user_address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "on_chain_credit_score": {
+          "name": "on_chain_credit_score",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "users_pkey": {
+          "name": "users_pkey",
+          "columns": [
+            "user_id",
+            "user_address"
+          ]
+        }
+      },
+      "uniqueConstraints": {
+        "users_user_id_key": {
+          "columns": [
+            "user_id"
+          ],
+          "nullsNotDistinct": false,
+          "name": "users_user_id_key"
+        },
+        "users_user_address_key": {
+          "columns": [
+            "user_address"
+          ],
+          "nullsNotDistinct": false,
+          "name": "users_user_address_key"
+        }
+      }
+    }
+  },
+  "enums": {
+    "auth.aal_level": {
+      "name": "aal_level",
+      "values": [
+        "aal1",
+        "aal2",
+        "aal3"
+      ],
+      "schema": "auth"
+    },
+    "auth.code_challenge_method": {
+      "name": "code_challenge_method",
+      "values": [
+        "s256",
+        "plain"
+      ],
+      "schema": "auth"
+    },
+    "auth.factor_status": {
+      "name": "factor_status",
+      "values": [
+        "unverified",
+        "verified"
+      ],
+      "schema": "auth"
+    },
+    "auth.factor_type": {
+      "name": "factor_type",
+      "values": [
+        "totp",
+        "webauthn"
+      ],
+      "schema": "auth"
+    },
+    "pgsodium.key_status": {
+      "name": "key_status",
+      "values": [
+        "default",
+        "valid",
+        "invalid",
+        "expired"
+      ],
+      "schema": "pgsodium"
+    },
+    "pgsodium.key_type": {
+      "name": "key_type",
+      "values": [
+        "aead-ietf",
+        "aead-det",
+        "hmacsha512",
+        "hmacsha256",
+        "auth",
+        "shorthash",
+        "generichash",
+        "kdf",
+        "secretbox",
+        "secretstream",
+        "stream_xchacha20"
+      ],
+      "schema": "pgsodium"
+    },
+    "realtime.action": {
+      "name": "action",
+      "values": [
+        "INSERT",
+        "UPDATE",
+        "DELETE",
+        "TRUNCATE",
+        "ERROR"
+      ],
+      "schema": "realtime"
+    },
+    "realtime.equality_op": {
+      "name": "equality_op",
+      "values": [
+        "eq",
+        "neq",
+        "lt",
+        "lte",
+        "gt",
+        "gte",
+        "in"
+      ],
+      "schema": "realtime"
+    }
+  },
+  "schemas": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "tables": {}
+  }
+}

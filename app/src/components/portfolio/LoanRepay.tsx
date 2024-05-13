@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
-import * as web3 from '@solana/web3.js'
-import { LAMPORTS_PER_SOL } from '@solana/web3.js'
-import { Token, TOKEN_PROGRAM_ID } from '@solana/spl-token'
-import { updateUserBorrowStatus } from '@/lib/supabaseRequests'
+import { SignerWalletAdapterProps } from '@solana/wallet-adapter-base'
+import { createTransferInstruction, createAssociatedTokenAccountInstruction, getAssociatedTokenAddress, getAccount } from '@solana/spl-token'
+import { LAMPORTS_PER_SOL, PublicKey, Transaction, Connection, TransactionInstruction, SystemProgram } from '@solana/web3.js'
+import { updateUserBorrowStatus } from '@/actions/dbActions'
 import { toast } from 'sonner'
 import { useWallet, useConnection } from '@solana/wallet-adapter-react'
 import { Loader2, Info, ExternalLink } from 'lucide-react'
@@ -12,13 +12,45 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import Image from 'next/image'
 
-export default function LoanRepay({ row, onTrigger }: { row: any, onTrigger: () => void }) {
+export type LoanDataType = {
+    borrow_id: string;
+    borrowing_amount: string;
+    borrowing_total: string;
+    borrowing_due_by: Date | string;
+    borrowing_status: 'Active' | 'Repaid' | 'Defaulted' | 'Pending' | 'Cancelled' | 'Expired' | 'Closed';
+    borrowing_interest_rate: string;
+    borrowing_duration: string;
+    borrowing_submitted_at: Date | string;
+    borrowing_collateralization_assets: string;
+    borrowing_token: string;
+}
+
+export const configureAndSendCurrentTransaction = async (
+    transaction: Transaction,
+    connection: Connection,
+    feePayer: PublicKey,
+    signTransaction: SignerWalletAdapterProps['signTransaction']
+) => {
+    const blockHash = await connection.getLatestBlockhash();
+    transaction.feePayer = feePayer;
+    transaction.recentBlockhash = blockHash.blockhash;
+    const signed = await signTransaction(transaction);
+    const signature = await connection.sendRawTransaction(signed.serialize());
+    await connection.confirmTransaction({
+        blockhash: blockHash.blockhash,
+        lastValidBlockHeight: blockHash.lastValidBlockHeight,
+        signature
+    });
+    return signature;
+};
+
+export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDataType }, onTrigger: () => void }) {
     const [open, setOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [trigger, setTrigger] = useState<boolean>(false);
 
     const order = row.original;
-    const { publicKey, sendTransaction } = useWallet();
+    const { publicKey, sendTransaction, signTransaction } = useWallet();
     const { connection } = useConnection();
     const wallet = useWallet();
 
@@ -51,22 +83,21 @@ export default function LoanRepay({ row, onTrigger }: { row: any, onTrigger: () 
     async function onRepay() {
         try {
             if (!connection || !publicKey) {
-                return;
+                return 'Error connecting to Solana network';
             }
 
             setIsSubmitting(true);
 
             let sig;
 
-            const recipientPubKey = new web3.PublicKey('Cq6JPmEspG6oNcUC47WHuEJWU1K4knsLzHYHSfvpnDHk');
-            let amount;
+            const recipientPubKey = new PublicKey('Cq6JPmEspG6oNcUC47WHuEJWU1K4knsLzHYHSfvpnDHk');
             let tokenAddress;
 
             if (order.borrowing_token === 'SOL') {
                 let amount = LAMPORTS_PER_SOL * parseFloat(order.borrowing_total);
                 amount = parseFloat(amount.toFixed(6));
-                const transaction = new web3.Transaction();
-                const sendSolInstruction = web3.SystemProgram.transfer({
+                const transaction = new Transaction();
+                const sendSolInstruction = SystemProgram.transfer({
                     fromPubkey: publicKey,
                     toPubkey: recipientPubKey,
                     lamports: amount
@@ -74,47 +105,72 @@ export default function LoanRepay({ row, onTrigger }: { row: any, onTrigger: () 
                 transaction.add(sendSolInstruction);
                 sig = await sendTransaction(transaction, connection);
             } else {
-                let amount = LAMPORTS_PER_SOL * parseFloat(order.borrowing_total);
-                amount = parseFloat(amount.toFixed(6));
+                let amount = 1000000 * parseFloat(order.borrowing_total);
+                amount = parseInt(amount.toFixed(6));
+
                 if (order.borrowing_token === 'USDC') {
-                    tokenAddress = new web3.PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
+                    // tokenAddress = new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'); // USDC token address on solana mainnet-beta
+                    tokenAddress = new PublicKey('4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU'); // USDC token address on solana devnet
                 } else if (order.borrowing_token === 'USDT') {
-                    tokenAddress = new web3.PublicKey('Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB');
+                    // tokenAddress = new PublicKey('Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB'); // USDT token address on solana mainnet-beta
+                    tokenAddress = new PublicKey('EJwZgeZrdC8TXTQbQBoL6bfuAnFUUy1PVCMB4DYPzVaS'); // USDT token address on solana devnet
                 } else if (order.borrowing_token === 'JUP') {
-                    tokenAddress = new web3.PublicKey('JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN');
+                    tokenAddress = new PublicKey('JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN'); // JUP token address on solana mainnet-beta
                 } else if (order.borrowing_token === 'PYTH') {
-                    tokenAddress = new web3.PublicKey('HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3RKwX8eACQBCt3');
+                    tokenAddress = new PublicKey('HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3RKwX8eACQBCt3'); // PYTH token address on solana mainnet-beta
                 } else if (order.borrowing_token === 'JTO') {
-                    tokenAddress = new web3.PublicKey('jtojtomepa8beP8AuQc6eXt5FriJwfFMwQx2v2f9mCL');
+                    tokenAddress = new PublicKey('jtojtomepa8beP8AuQc6eXt5FriJwfFMwQx2v2f9mCL'); // JTO token address on solana mainnet-beta
                 } else if (order.borrowing_token === 'RAY') {
-                    tokenAddress = new web3.PublicKey('4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R');
+                    tokenAddress = new PublicKey('4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R'); // RAY token address on solana mainnet-beta
                 } else if (order.borrowing_token === 'BLZE') {
-                    tokenAddress = new web3.PublicKey('BLZEEuZUBVqFhj8adcCFPJvPVCiCyVmh3hkJMrU8KuJA');
+                    tokenAddress = new PublicKey('BLZEEuZUBVqFhj8adcCFPJvPVCiCyVmh3hkJMrU8KuJA'); // BLZE token address on solana mainnet-beta
                 } else if (order.borrowing_token === 'tBTC') {
-                    tokenAddress = new web3.PublicKey('6DNSN2BJsaPFdFFc1zP37kkeNe4Usc1Sqkzr9C9vPWcU');
+                    tokenAddress = new PublicKey('6DNSN2BJsaPFdFFc1zP37kkeNe4Usc1Sqkzr9C9vPWcU'); // tBTC token address on solana mainnet-beta
                 } else if (order.borrowing_token === 'mSOL') {
-                    tokenAddress = new web3.PublicKey('mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So');
+                    tokenAddress = new PublicKey('mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So'); // mSOLO token address on solana mainnet-beta
                 }
 
-                if (tokenAddress) {
-                    const transaction = new web3.Transaction();
-                    const transferInstruction = Token.createTransferInstruction(
-                        TOKEN_PROGRAM_ID,
+                if (tokenAddress && signTransaction) {
+                    const transactionInstructions: TransactionInstruction[] = [];
+                    const associatedTokenFrom = await getAssociatedTokenAddress(
                         tokenAddress,
-                        recipientPubKey,
-                        publicKey,
-                        [],
-                        amount
+                        publicKey
                     );
-
-                    transaction.add(transferInstruction);
-                    sig = await sendTransaction(transaction, connection);
+                    const fromAccount = await getAccount(connection, associatedTokenFrom);
+                    const associatedTokenTo = await getAssociatedTokenAddress(
+                        tokenAddress,
+                        recipientPubKey
+                    );
+                    if (!(await connection.getAccountInfo(associatedTokenTo))) {
+                        transactionInstructions.push(
+                            createAssociatedTokenAccountInstruction(
+                                publicKey,
+                                associatedTokenTo,
+                                recipientPubKey,
+                                tokenAddress
+                            )
+                        );
+                    }
+                    transactionInstructions.push(
+                        createTransferInstruction(
+                            fromAccount.address,
+                            associatedTokenTo,
+                            publicKey,
+                            amount
+                        )
+                    );
+                    const transaction = new Transaction().add(...transactionInstructions);
+                    sig = await configureAndSendCurrentTransaction(
+                        transaction,
+                        connection,
+                        publicKey,
+                        signTransaction
+                    );
                 }
             }
 
-            if (sig) {
+            if (sig && wallet.publicKey) {
                 const data = await updateUserBorrowStatus({
-                    walletAddress: wallet.publicKey?.toString(),
                     borrowId: order.borrow_id,
                     borrowStatus: 'Repaid',
                     transactionSignature: sig
@@ -130,7 +186,11 @@ export default function LoanRepay({ row, onTrigger }: { row: any, onTrigger: () 
                 }
             }
         } catch (error) {
-            toast.error('Error completing the process. Please try again!');
+            if (error == 'TokenAccountNotFoundError') {
+                toast.error('Insufficient tokens found in wallet!');
+            } else {
+                toast.error('Error completing the process. Please try again!');
+            }
         } finally {
             setIsSubmitting(false);
         }
@@ -301,6 +361,10 @@ export default function LoanRepay({ row, onTrigger }: { row: any, onTrigger: () 
                                 </AccordionContent>
                             </AccordionItem>
                         </Accordion>
+                    </div>
+
+                    <div className='text-center px-2'>
+                        {isSubmitting && 'Transaction in progress. Please avoid refreshing or closing the tab.'}
                     </div>
 
                     <Button className='text-white mx-2' disabled={order.borrowing_status !== 'Active' || isSubmitting} onClick={onRepay}>

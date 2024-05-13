@@ -1,7 +1,7 @@
 "use client"
 
 import React from 'react'
-import { addUserWaitlist } from '@/lib/supabaseRequests'
+import { addUserWaitlist } from '@/actions/dbActions'
 import MaxWidthWrapper from './MaxWidthWrapper'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -105,7 +105,7 @@ export default function Footer() {
             const result = await addUserWaitlist({ email });
 
             if (result) {
-                if (result instanceof Response && result.status === 409) {
+                if (result === 'Error adding user to waitlist') {
                     toast.info('User already added to the newsletter.');
                 } else {
                     toast.success('User added to newslette.');

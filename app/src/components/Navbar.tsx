@@ -3,13 +3,13 @@
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useWallet, useConnection } from '@solana/wallet-adapter-react'
-import { addNewUser } from '@/lib/supabaseRequests'
+import { addNewUser } from '@/actions/dbActions'
 import useUserSOLBalance from '@/store/useUserSOLBalanceStore'
 import { toast } from 'sonner'
 import ResponsiveNavbar from './ResponsiveNavbar'
 import { Button } from './ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Bell, User, LogOut } from 'lucide-react'
+import { WalletMinimal, Triangle, Bell, User, LogOut } from 'lucide-react'
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import Image from 'next/image'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -18,6 +18,7 @@ import ModeToggle from './ModeToggle'
 
 export default function Navbar() {
     const [open, setOpen] = useState<boolean>(false);
+    const [isMoreOption, setIsMoreOption] = useState<boolean>(false);
 
     const { select, wallets, publicKey, disconnect, connected } = useWallet();
     const wallet = useWallet();
@@ -26,10 +27,10 @@ export default function Navbar() {
 
     useEffect(() => {
         const addUserToDB = async () => {
-            if (publicKey) {
+            if (wallet.publicKey) {
                 try {
                     await addNewUser({
-                        walletAddress: wallet.publicKey?.toString(),
+                        walletAddress: wallet.publicKey.toString(),
                     });
                     // toast.success('Wallet connected successfully!');
                 } catch (error) {
@@ -59,6 +60,10 @@ export default function Navbar() {
         }
     };
 
+    const toggleMoreOption = () => {
+        setIsMoreOption(!isMoreOption);
+    };
+
     const handleDisconnect = async () => {
         disconnect();
         toast.success('Wallet disconnected successfully!');
@@ -66,7 +71,7 @@ export default function Navbar() {
 
     return (
         <div className='backdrop-blur-3xl fixed z-50 w-full'>
-            <nav className='flex items-center py-2 flex-wrap px-2.5 md:px-16 tracking-wider justify-between'>
+            <nav className='flex items-center py-2 flex-wrap px-2.5 md:px-12 tracking-wider justify-between'>
                 <Link href='/' passHref>
                     <div className='inline-flex items-center justify-center text-2xl md:text-5xl cursor-pointer'>
                         SoFLEX
@@ -104,11 +109,11 @@ export default function Navbar() {
                                         <User className='hover:text-primary' />
                                     </PopoverTrigger>
                                     <PopoverContent align='end' className='mt-2 hidden lg:block max-w-[12rem]'>
-                                        <div className='flex flex-row pb-2'>
+                                        <div className='flex flex-row pb-2 space-x-1'>
                                             <div>
                                                 Balance: {balance.toLocaleString()}
                                             </div>
-                                            <div className='text-slate-600 ml-2'>
+                                            <div className='text-slate-600'>
                                                 SOL
                                             </div>
                                         </div>
@@ -139,17 +144,59 @@ export default function Navbar() {
                                     </Button>
                                 </DialogTrigger>
                                 <DialogContent className='max-w-[90vw] md:max-w-[380px]'>
-                                    <DialogTitle className='text-xl md:text-2xl tracking-wide text-center'>Connect a wallet on Solana to continue</DialogTitle>
+                                    {wallets.some((wallet) => wallet.readyState === 'Installed') &&
+                                        <DialogTitle className='text-xl md:text-2xl tracking-wide text-center'>Connect a wallet on Solana to continue</DialogTitle>
+                                    }
                                     <div className='flex flex-col space-y-2'>
-                                        {wallets.map((wallet) => (
-                                            <Button key={wallet.adapter.name} variant='ghost' className='flex flex-row space-x-2 w-full justify-start hover:bg-accent' onClick={() => handleWalletSelect(wallet.adapter.name)}>
-                                                <Image height='20' width='20' src={wallet.adapter.icon} alt={wallet.adapter.name} />
-                                                <div className='text-xl'>
-                                                    {wallet.adapter.name}
+                                        {wallets
+                                            .filter((wallet) => wallet.readyState === 'Installed')
+                                            .map((wallet) => (
+                                                <Button key={wallet.adapter.name} variant='ghost' className='flex flex-row w-full justify-between items-center hover:bg-accent' onClick={() => handleWalletSelect(wallet.adapter.name)}>
+                                                    <div className='flex flex-row space-x-2 items-center'>
+                                                        <Image height='20' width='20' src={wallet.adapter.icon} alt={wallet.adapter.name} />
+                                                        <div className='text-lg md:text-xl'>
+                                                            {wallet.adapter.name}
+                                                        </div>
+                                                    </div>
+                                                    <div className='text-sm text-accent-foreground/80'>
+                                                        Detected
+                                                    </div>
+                                                </Button>
+                                            ))}
+                                        {!wallets.some((wallet) => wallet.readyState === 'Installed') && (
+                                            <div className='flex flex-col space-y-2 items-center justify-center'>
+                                                <h1 className='text-xl md:text-2xl tracking-wide text-center'>You&apos;ll need a wallet on Solana to continue</h1>
+                                                <div className='p-4 rounded-full border-2'>
+                                                    <WalletMinimal strokeWidth={1} className='h-16 w-16 font-light' />
                                                 </div>
-                                            </Button>
-                                        ))}
+                                                <div className='flex flex-row justify-center py-2'>
+                                                    <a href='https://phantom.app' target='_blank'>
+                                                        <Button className='w-full px-20 text-white'>Get Wallet</Button>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        )}
+                                        <div className={`flex flex-col space-y-2 transition-all overflow-hidden ${isMoreOption ? 'max-h-screen transition-height duration-500' : 'max-h-0'}`}>
+                                            {wallets
+                                                .filter((wallet) => wallet.readyState !== 'Installed')
+                                                .map((wallet) => (
+                                                    <Button key={wallet.adapter.name} variant='ghost' className='flex flex-row space-x-2 w-full justify-start items-center hover:bg-accent' onClick={() => handleWalletSelect(wallet.adapter.name)}>
+                                                        <Image height='20' width='20' src={wallet.adapter.icon} alt={wallet.adapter.name} />
+                                                        <div className='text-lg md:text-xl'>
+                                                            {wallet.adapter.name}
+                                                        </div>
+                                                    </Button>
+                                                ))}
+                                        </div>
+                                        <div className='flex justify-end px-2'>
+                                            <div className='flex flex-row space-x-2 items-center cursor-pointer px-2' onClick={toggleMoreOption}>
+                                                <h1>{isMoreOption ? 'Less' : 'More'} option</h1>
+                                                <Triangle fill={`text-foreground`} className={`dark:hidden h-3 w-3 transform transition-transform duration-300 ${isMoreOption ? '' : 'rotate-180'}`} />
+                                                <Triangle fill={`white`} className={`hidden dark:block h-3 w-3 transform transition-transform duration-300 ${isMoreOption ? '' : 'rotate-180'}`} />
+                                            </div>
+                                        </div>
                                     </div>
+
                                     <p className='px-2 text-center'>By connecting a wallet, you agree to SoFLEX&apos;s <a href='/tos' target='_blank'><span className='underline'>Terms of Service</span></a>, <a href='/ua' target='_blank'><span className='underline'>User Agreement</span></a>, and consent to its <a href='/privacy' target='_blank'><span className='underline'>Privacy Policy</span></a>.</p>
                                 </DialogContent>
                             </Dialog>

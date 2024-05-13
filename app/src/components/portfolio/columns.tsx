@@ -8,11 +8,11 @@ export type LoanDataType = {
     borrow_id: string;
     borrowing_amount: string;
     borrowing_total: string;
-    borrowing_due_by: Date;
+    borrowing_due_by: Date | string;
     borrowing_status: 'Active' | 'Repaid' | 'Defaulted' | 'Pending' | 'Cancelled' | 'Expired' | 'Closed';
     borrowing_interest_rate: string;
     borrowing_duration: string;
-    borrowing_submitted_at: Date;
+    borrowing_submitted_at: Date | string;
     borrowing_collateralization_assets: string;
     borrowing_token: string;
 }
@@ -59,7 +59,7 @@ export const loanColumns = (onTrigger: () => void): ColumnDef<LoanDataType>[] =>
     {
         id: 'actions',
         cell: (props: CellContext<LoanDataType, unknown>) => {
-            const cell = props.cell as Cell<LoanDataType, any>;
+            const cell = props.cell as Cell<LoanDataType, LoanDataType>;
             return <LoanRepay row={cell.row} onTrigger={onTrigger} />;
         }
     }

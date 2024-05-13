@@ -12,10 +12,11 @@ interface NFTCOllectionDataType {
     nft_name: string;
     nft_logo: string;
     nft_pool: string;
-    nft_best_offer?: string;
-    nft_intrest?: string;
-    nft_apy?: string;
+    nft_best_offer: string;
+    nft_intrest: string;
+    nft_apy: string;
     nft_duration: string;
+    nft_floor_price: string;
 }
 
 interface DataTableProps<TData, TValue> {

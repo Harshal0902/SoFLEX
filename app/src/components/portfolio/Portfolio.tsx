@@ -1,13 +1,13 @@
 "use client"
 
 import React, { useState, useEffect } from 'react'
-import { userPortfolioDetails, updateUserData, teUserStatsDetails, userLoanDetails } from '@/lib/supabaseRequests'
+import { userPortfolioDetails, updateUserData, teUserStatsDetails, userLoanDetails } from '@/actions/dbActions'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
 import { toast } from 'sonner'
 import Loading from '@/components/Loading'
-import { Loader2, DollarSign, Landmark, BriefcaseBusiness, Banknote, Activity } from 'lucide-react'
+import { icons, Loader2 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormDescription, FormMessage } from '@/components/ui/form'
@@ -39,7 +39,7 @@ interface UserStatsType {
 interface CardData {
     title: string;
     tooltipContent: string;
-    icon: React.ComponentType<any>;
+    icon: string;
     currentData?: string | number;
     lastMonthData?: string | number;
 }
@@ -57,7 +57,7 @@ const FormSchema = z.object({
     }).optional().nullable().or(z.literal(''))
 })
 
-export default function Portfolio({ walletAddress }: { walletAddress?: string }) {
+export default function Portfolio({ walletAddress }: { walletAddress: string }) {
     const [loading, setLoading] = useState(true);
     const [userPortfolio, setUserPortfolio] = useState<UserType[]>([]);
     const [saveData, setSaveData] = useState(false);
@@ -133,44 +133,44 @@ export default function Portfolio({ walletAddress }: { walletAddress?: string })
         fetchLoanHistoryData();
     };
 
-    const renderIcon = (IconComponent: React.ComponentType<any>) => {
-        const Icon = <IconComponent className='h-5 w-5 text-muted-foreground' />;
-        return Icon;
+    const renderIcon = ({ name }: { name: string }) => {
+        const LucideIcon = (icons as Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>>)[name];
+        return <LucideIcon className='h-5 w-5 text-muted-foreground' />
     };
 
     const cardData: CardData[] = [
         {
             title: 'Active Lending Value',
             tooltipContent: 'See the SOL value of your active lending portfolio.',
-            icon: Activity,
+            icon: 'Activity',
             currentData: userStats[0]?.activelendingvalue,
             lastMonthData: userStats[0]?.activelendingvaluelastmonth
         },
         {
             title: 'Interest Earned',
             tooltipContent: 'Track your net SOL interest earned from completed loans.',
-            icon: DollarSign,
+            icon: 'DollarSign',
             currentData: userStats[0]?.interestearned,
             lastMonthData: userStats[0]?.interestearnedlastmonth
         },
         {
             title: 'Completed Loans',
             tooltipContent: 'Monitor the number of loans successfully repaid or liquidated.',
-            icon: Landmark,
+            icon: 'Landmark',
             currentData: userStats[0]?.completedloans,
             lastMonthData: userStats[0]?.completedloanslastmonth
         },
         {
             title: 'Active Loans',
             tooltipContent: 'Stay updated on the number of ongoing active loans and borrowings.',
-            icon: BriefcaseBusiness,
+            icon: 'BriefcaseBusiness',
             currentData: userStats[0]?.activeloans,
             lastMonthData: userStats[0]?.activeloanslastmonth
         },
         {
             title: 'Active Borrowings Value',
             tooltipContent: 'View the SOL value of all your current active borrowings.',
-            icon: Banknote,
+            icon: 'Banknote',
             currentData: userStats[0]?.activeborrowingsvalue,
             lastMonthData: userStats[0]?.activeborrowingsvaluelastmonth
         },
@@ -181,11 +181,11 @@ export default function Portfolio({ walletAddress }: { walletAddress?: string })
             {loading ? (
                 <Loading />
             ) : (
-                <Card className='relative md:my-4'>
+                <Card className='md:my-4'>
                     <TooltipProvider>
                         <CardHeader>
-                            <div className='flex flex-col md:flex-row justify-between items-start md:items-center space-y-2 md:space-y-0'>
-                                <div className='text-2xl md:text-4xl'>My Portfolio</div>
+                            <div className='flex flex-col md:flex-row justify-between md:items-center space-y-2 md:space-y-0'>
+                                <div className='text-center md:text-start text-2xl md:text-4xl'>My Portfolio</div>
                                 {cardData[0].currentData !== undefined && typeof cardData[0].currentData === 'string' && parseFloat(cardData[0].currentData) > 0 &&
                                     <div className='w-full md:w-auto'>
                                         <Button className='text-white w-full md:w-auto'>Withdraw Token</Button>
@@ -194,7 +194,7 @@ export default function Portfolio({ walletAddress }: { walletAddress?: string })
                             </div>
                             <Form {...form}>
                                 <form onSubmit={form.handleSubmit(onSubmitUpdateUserData)} autoComplete='off'>
-                                    <div className='flex flex-col md:flex-row w-full items-center justify-between space-x-0 md:space-x-4 space-y-4 md:space-y-0 py-2'>
+                                    <div className='flex flex-col md:flex-row w-full items-center justify-start space-x-0 md:space-x-4 space-y-4 md:space-y-0 py-2'>
                                         <FormField
                                             control={form.control}
                                             name='name'
@@ -247,7 +247,7 @@ export default function Portfolio({ walletAddress }: { walletAddress?: string })
                                                         <CardTitle className='text-sm font-medium flex flex-1 flex-row items-center space-x-1 text-start'>
                                                             <p>{card.title}</p>
                                                         </CardTitle>
-                                                        {renderIcon(card.icon)}
+                                                        {renderIcon({ name: card.icon })}
                                                     </CardHeader>
                                                     <CardContent className='text-start'>
                                                         <p className='text-2xl font-bold'>

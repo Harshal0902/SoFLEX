@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { newAssetOrCollectionRequest, nftCollectionDetails } from '@/lib/supabaseRequests'
+import { newAssetOrCollectionRequest, nftCollectionDetails } from '@/actions/dbActions'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { BorrowingNFTCollectionDataType, borrowingNFTCollectionColumns } from './columns'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
@@ -54,17 +54,14 @@ export default function P2PBorrowing() {
     async function onSubmit(data: z.infer<typeof FormSchema>) {
         const nftCollectionName = data.nftCollectionName;
 
-        if (nftCollectionName) {
-            const result = await newAssetOrCollectionRequest({ walletAddress: wallet.publicKey?.toString(), requestedAssetOrCollectionName: nftCollectionName, assetOrCollection: 'NFT Collectiion' });
-
+        if (nftCollectionName && wallet.publicKey) {
+            const result = await newAssetOrCollectionRequest({ walletAddress: wallet.publicKey.toString(), requestedAssetOrCollectionName: nftCollectionName, assetOrCollection: 'NFT Collectiion' });
             if (result) {
-                if (result instanceof Response && result.status === 409) {
-                    toast.info('Request sent successfully!');
-                } else {
-                    toast.success('Request sent successfully!');
-                    setOpen(false);
-                    form.reset();
-                }
+                toast.success('Request sent successfully!');
+                setOpen(false);
+                form.reset();
+            } else {
+                toast.error('Error requesting new NFT Collection.');
             }
         }
     }
@@ -73,8 +70,8 @@ export default function P2PBorrowing() {
         <div className='py-2 md:py-4'>
             <Card>
                 <CardHeader>
-                    <div className='flex flex-col md:flex-row justify-between items-start md:items-center space-y-2 md:space-y-0'>
-                        <div className='text-2xl md:text-4xl'>All NFT Collection</div>
+                    <div className='flex flex-col md:flex-row justify-between md:items-center space-y-2 md:space-y-0'>
+                        <div className='text-center md:text-start text-2xl md:text-4xl'>All NFT Collection</div>
                         {publicKey && (
                             <Dialog open={open} onOpenChange={setOpen}>
                                 <DialogTrigger asChild>

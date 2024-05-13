@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import * as web3 from '@solana/web3.js'
-import { LAMPORTS_PER_SOL } from '@solana/web3.js'
-import { Token, TOKEN_PROGRAM_ID } from '@solana/spl-token'
+import { SignerWalletAdapterProps } from '@solana/wallet-adapter-base'
+import { createTransferInstruction, createAssociatedTokenAccountInstruction, getAssociatedTokenAddress, getAccount } from '@solana/spl-token'
+import { LAMPORTS_PER_SOL, PublicKey, Transaction, Connection, TransactionInstruction, SystemProgram } from '@solana/web3.js'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { newDeFiLending } from '@/lib/supabaseRequests'
+import { newDeFiLending } from '@/actions/dbActions'
 import { toast } from 'sonner'
 import { useWallet, useConnection } from '@solana/wallet-adapter-react'
 import { Loader2, Info } from 'lucide-react'
@@ -49,12 +49,31 @@ const FormSchema = z.object({
         }),
 });
 
+export const configureAndSendCurrentTransaction = async (
+    transaction: Transaction,
+    connection: Connection,
+    feePayer: PublicKey,
+    signTransaction: SignerWalletAdapterProps['signTransaction']
+) => {
+    const blockHash = await connection.getLatestBlockhash();
+    transaction.feePayer = feePayer;
+    transaction.recentBlockhash = blockHash.blockhash;
+    const signed = await signTransaction(transaction);
+    const signature = await connection.sendRawTransaction(signed.serialize());
+    await connection.confirmTransaction({
+        blockhash: blockHash.blockhash,
+        lastValidBlockHeight: blockHash.lastValidBlockHeight,
+        signature
+    });
+    return signature;
+};
+
 export default function DeFiLendingButton({ row }: { row: { original: LendingAssetDataType } }) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [open, setOpen] = useState(false);
-    const { publicKey, sendTransaction } = useWallet();
 
     const order = row.original;
+    const { publicKey, sendTransaction, signTransaction } = useWallet();
     const { connection } = useConnection();
     const wallet = useWallet();
 
@@ -68,21 +87,20 @@ export default function DeFiLendingButton({ row }: { row: { original: LendingAss
     async function onSubmit(values: z.infer<typeof FormSchema>) {
         try {
             if (!connection || !publicKey) {
-                return;
+                return 'Error connecting to Solana network';
             }
 
             setIsSubmitting(true);
 
             let sig;
 
-            const recipientPubKey = new web3.PublicKey('Cq6JPmEspG6oNcUC47WHuEJWU1K4knsLzHYHSfvpnDHk');
-            let amount;
+            const recipientPubKey = new PublicKey('Cq6JPmEspG6oNcUC47WHuEJWU1K4knsLzHYHSfvpnDHk');
             let tokenAddress;
 
             if (order.asset_symbol === 'SOL') {
-                amount = LAMPORTS_PER_SOL * parseFloat(values.lending_amount);
-                const transaction = new web3.Transaction();
-                const sendSolInstruction = web3.SystemProgram.transfer({
+                let amount = LAMPORTS_PER_SOL * parseFloat(values.lending_amount);
+                const transaction = new Transaction();
+                const sendSolInstruction = SystemProgram.transfer({
                     fromPubkey: publicKey,
                     toPubkey: recipientPubKey,
                     lamports: amount
@@ -90,46 +108,73 @@ export default function DeFiLendingButton({ row }: { row: { original: LendingAss
                 transaction.add(sendSolInstruction);
                 sig = await sendTransaction(transaction, connection);
             } else {
-                amount = parseFloat(values.lending_amount);
+                let amount = 1000000 * parseFloat(values.lending_amount);
+                amount = parseFloat(amount.toFixed(6));
+
                 if (order.asset_symbol === 'USDC') {
-                    tokenAddress = new web3.PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
+                    // tokenAddress = new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'); // USDC token address on solana mainnet-beta
+                    tokenAddress = new PublicKey('4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU'); // USDC token address on solana devnet
                 } else if (order.asset_symbol === 'USDT') {
-                    tokenAddress = new web3.PublicKey('Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB');
+                    // tokenAddress = new PublicKey('Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB'); // USDT token address on solana mainnet-beta
+                    tokenAddress = new PublicKey('EJwZgeZrdC8TXTQbQBoL6bfuAnFUUy1PVCMB4DYPzVaS'); // USDT token address on solana devnet
                 } else if (order.asset_symbol === 'JUP') {
-                    tokenAddress = new web3.PublicKey('JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN');
+                    tokenAddress = new PublicKey('JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN'); // JUP token address on solana mainnet-beta
                 } else if (order.asset_symbol === 'PYTH') {
-                    tokenAddress = new web3.PublicKey('HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3RKwX8eACQBCt3');
+                    tokenAddress = new PublicKey('HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3RKwX8eACQBCt3'); // PYTH token address on solana mainnet-beta
                 } else if (order.asset_symbol === 'JTO') {
-                    tokenAddress = new web3.PublicKey('jtojtomepa8beP8AuQc6eXt5FriJwfFMwQx2v2f9mCL');
+                    tokenAddress = new PublicKey('jtojtomepa8beP8AuQc6eXt5FriJwfFMwQx2v2f9mCL'); // JTO token address on solana mainnet-beta
                 } else if (order.asset_symbol === 'RAY') {
-                    tokenAddress = new web3.PublicKey('4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R');
+                    tokenAddress = new PublicKey('4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R'); // RAY token address on solana mainnet-beta
                 } else if (order.asset_symbol === 'BLZE') {
-                    tokenAddress = new web3.PublicKey('BLZEEuZUBVqFhj8adcCFPJvPVCiCyVmh3hkJMrU8KuJA');
+                    tokenAddress = new PublicKey('BLZEEuZUBVqFhj8adcCFPJvPVCiCyVmh3hkJMrU8KuJA'); // BLZE token address on solana mainnet-beta
                 } else if (order.asset_symbol === 'tBTC') {
-                    tokenAddress = new web3.PublicKey('6DNSN2BJsaPFdFFc1zP37kkeNe4Usc1Sqkzr9C9vPWcU');
+                    tokenAddress = new PublicKey('6DNSN2BJsaPFdFFc1zP37kkeNe4Usc1Sqkzr9C9vPWcU'); // tBTC token address on solana mainnet-beta
                 } else if (order.asset_symbol === 'mSOL') {
-                    tokenAddress = new web3.PublicKey('mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So');
+                    tokenAddress = new PublicKey('mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So'); // mSOLO token address on solana mainnet-beta
                 }
 
-                if (tokenAddress) {
-                    const transaction = new web3.Transaction();
-                    const transferInstruction = Token.createTransferInstruction(
-                        TOKEN_PROGRAM_ID,
+                if (tokenAddress && signTransaction) {
+                    const transactionInstructions: TransactionInstruction[] = [];
+                    const associatedTokenFrom = await getAssociatedTokenAddress(
                         tokenAddress,
-                        recipientPubKey,
-                        publicKey,
-                        [],
-                        amount
+                        publicKey
                     );
-
-                    transaction.add(transferInstruction);
-                    sig = await sendTransaction(transaction, connection);
+                    const fromAccount = await getAccount(connection, associatedTokenFrom);
+                    const associatedTokenTo = await getAssociatedTokenAddress(
+                        tokenAddress,
+                        recipientPubKey
+                    );
+                    if (!(await connection.getAccountInfo(associatedTokenTo))) {
+                        transactionInstructions.push(
+                            createAssociatedTokenAccountInstruction(
+                                publicKey,
+                                associatedTokenTo,
+                                recipientPubKey,
+                                tokenAddress
+                            )
+                        );
+                    }
+                    transactionInstructions.push(
+                        createTransferInstruction(
+                            fromAccount.address,
+                            associatedTokenTo,
+                            publicKey,
+                            amount
+                        )
+                    );
+                    const transaction = new Transaction().add(...transactionInstructions);
+                    sig = await configureAndSendCurrentTransaction(
+                        transaction,
+                        connection,
+                        publicKey,
+                        signTransaction
+                    );
                 }
             }
 
-            if (sig) {
+            if (sig && wallet.publicKey) {
                 const data = await newDeFiLending({
-                    walletAddress: wallet.publicKey?.toString(),
+                    walletAddress: wallet.publicKey.toString(),
                     lendingAmount: values.lending_amount,
                     lendingToken: order.asset_symbol,
                     transactionSignature: sig
@@ -143,7 +188,11 @@ export default function DeFiLendingButton({ row }: { row: { original: LendingAss
                 }
             }
         } catch (error) {
-            toast.error('Error completing the process. Please try again!');
+            if (error == 'TokenAccountNotFoundError') {
+                toast.error('Insufficient tokens found in wallet!');
+            } else {
+                toast.error('Error completing the process. Please try again!');
+            }
         } finally {
             setIsSubmitting(false);
         }
@@ -201,7 +250,7 @@ export default function DeFiLendingButton({ row }: { row: { original: LendingAss
                                             </Tooltip>
                                         </TooltipProvider>
                                     </div>
-                                    <div>{order.asset_price}</div>
+                                    <div>$ {order.asset_price}</div>
                                 </div>
                                 <div className='flex flex-row items-center justify-between hover:bg-accent hover:rounded px-2'>
                                     <div className='flex flex-row items-center space-x-1'>
@@ -219,6 +268,10 @@ export default function DeFiLendingButton({ row }: { row: { original: LendingAss
                                     </div>
                                     <div>{order.asset_yield}</div>
                                 </div>
+                            </div>
+
+                            <div className='text-center px-2'>
+                                {isSubmitting && 'Transaction in progress. Please avoid refreshing or closing the tab.'}
                             </div>
 
                             <Button type='submit' className='text-white w-full mt-4' disabled={isSubmitting}>

@@ -75,7 +75,7 @@ const FeatureCard: React.FC<FeatureType> = ({ logo, title, description }) => (
 );
 
 export default function Page() {
-  const { typedMyService, selectedMyService } = useTypingEffect(['NFTs', 'Synthetic Assets', 'Tokens'])
+  const { typedMyService, selectedMyService } = useTypingEffect(['NFTs', 'Synthetic Assets', 'Tokens']);
 
   return (
     <Suspense fallback={<Preloader />}>
@@ -85,12 +85,12 @@ export default function Page() {
 
           <div className='md:flex md:flex-col md:justify-center'>
             <h2 className='mb-4 font-semibold tracking-wider text-3xl md:text-4xl' aria-label={selectedMyService}>
-              SoFLEX: Lend and Borrow <br /> <span className='text-primary hidden md:block'>{typedMyService}<span className='animate-pulse'>|</span></span> <span className='text-primary md:hidden block'>success stories begin</span>
+              SoFLEX: Lend and Borrow <br /> <span className='text-primary hidden md:block'>{typedMyService}<span className='animate-pulse'>|</span></span> <span className='text-primary md:hidden block'>Adventures Take Off</span>
             </h2>
             <p className='self-center text-lg md:text-xl tracking-wide text-left md:text-justify py-2'>
               SoFLEX introduces a comprehensive solution for lending and borrowing compressed NFTs and synthetic assets within the Solana ecosystem, addressing the increasing demand for liquidity and financial flexibility while empowering users to leverage assets efficiently and securely.
             </p>
-            <div className='flex flex-col items-center md:flex-row space-y-2 md:space-y-0 space-x-0 md:space-x-4 justify-start'>
+            <div className='flex flex-col items-center justify-start md:flex-row space-y-2 md:space-y-0 space-x-0 md:space-x-4'>
               <a href='https://gitbook.soflex.fi/' target='_blank' rel='noreferrer noopener'>
                 <Button className='px-14 text-white tracking-wider'>
                   Read GitBook <ExternalLink className='ml-2 h-4 w-4' />

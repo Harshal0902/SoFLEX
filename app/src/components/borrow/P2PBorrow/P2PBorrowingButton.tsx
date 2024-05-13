@@ -13,10 +13,11 @@ export type BorrowingNFTCollectionDataType = {
     nft_name: string;
     nft_logo: string;
     nft_pool: string;
-    nft_best_offer?: string;
-    nft_intrest?: string;
-    nft_apy?: string;
+    nft_best_offer: string;
+    nft_intrest: string;
+    nft_apy: string;
     nft_duration: string;
+    nft_floor_price: string;
 }
 
 type CollectionType = {
@@ -212,7 +213,6 @@ export default function P2PBorrowingButton({ row }: { row: { original: Borrowing
                         </AccordionItem>
                         <AccordionItem value='Return'>
                             <AccordionTrigger className='hover:no-underline text-left font-semibold tracking-wide'>
-                                {/* @ts-ignore */}
                                 Repay {(parseFloat(order.nft_best_offer) + ((parseFloat(order.nft_intrest) / 100) * parseFloat(order.nft_best_offer))).toFixed(4)} SOL within {(order.nft_duration)}
                             </AccordionTrigger>
                             <AccordionContent>
@@ -222,7 +222,6 @@ export default function P2PBorrowingButton({ row }: { row: { original: Borrowing
                                 </div>
                                 <div className='flex flex-row items-center justify-between text-sm md:text-lg'>
                                     <h1>Interest</h1>
-                                    {/* @ts-ignore */}
                                     <h1>{order.nft_intrest} ~ {((parseFloat(order.nft_intrest) / 100) * parseFloat(order.nft_best_offer)).toFixed(4)} SOL</h1>
                                 </div>
                                 <div className='flex flex-row items-center justify-between text-sm md:text-lg'>

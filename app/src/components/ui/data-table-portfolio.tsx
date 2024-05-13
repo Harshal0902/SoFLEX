@@ -121,7 +121,7 @@ export function DataTable<TData, TValue>({
                         ))}
                     </TableHeader>
                     <TableBody>
-                        {table.getRowModel().rows?.length ? (
+                        {table.getRowModel().rows.length ? (
                             table.getRowModel().rows.map((row) => (
                                 <TableRow
                                     key={row.id}
@@ -131,7 +131,7 @@ export function DataTable<TData, TValue>({
                                         <TableCell key={cell.id}>
                                             {cell.id === `${row.id}_borrowing_due_by` ? (
                                                 <>
-                                                    {formatDate((flexRender(cell.column.columnDef.cell, cell.getContext()) as React.ReactElement<any>).props.cell?.renderValue())}
+                                                    {formatDate((flexRender(cell.column.columnDef.cell, cell.getContext()) as React.ReactElement<any>).props.cell.renderValue())}
                                                 </>
                                             ) : (
                                                 <>

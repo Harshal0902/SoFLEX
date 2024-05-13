@@ -66,7 +66,7 @@ const FAQsCard: React.FC<FAQType> = ({ value, question, answer }) => (
 export default function Page() {
     return (
         <Suspense fallback={<Preloader />}>
-            <MaxWidthWrapper>
+            <MaxWidthWrapper className='md:my-4'>
                 <div className='flex items-center pb-4 justify-center'>
                     <h1 className='text-3xl md:text-4xl font-semibold tracking-wide text-center'>Frequently Asked Questions</h1>
                 </div>
