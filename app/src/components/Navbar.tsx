@@ -19,7 +19,7 @@ import ModeToggle from './ModeToggle'
 export default function Navbar() {
     const [isHidden, setIsHidden] = useState(false);
     const [prevScrollPos, setPrevScrollPos] = useState(0);
-    const [solBalance, setSolBalance] = useState<string>('0');
+    const [solBalance, setSolBalance] = useState<string>('');
     const [open, setOpen] = useState<boolean>(false);
     const [isMoreOption, setIsMoreOption] = useState<boolean>(false);
 
@@ -72,7 +72,7 @@ export default function Navbar() {
 
         fetchSolBalance();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [connection]);
+    }, [wallet.publicKey]);
 
     const handleWalletSelect = async (walletName: any) => {
         if (walletName) {

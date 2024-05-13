@@ -39,7 +39,7 @@ const notifications: Notification[] = [
 
 export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
     const [isOpen, setIsOpen] = useState(false);
-    const [solBalance, setSolBalance] = useState<string>('0');
+    const [solBalance, setSolBalance] = useState<string>('');
     const [open, setOpen] = useState<boolean>(false);
     const [isMoreOption, setIsMoreOption] = useState<boolean>(false);
     const [dropdownVisible, setDropdownVisible] = useState<DropdownState>({ notification: false, profile: false });
@@ -82,7 +82,7 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
 
         fetchSolBalance();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [connection]);
+    }, [wallet.publicKey]);
 
     const handleWalletSelect = async (walletName: any) => {
         if (walletName) {
