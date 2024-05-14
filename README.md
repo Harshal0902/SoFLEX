@@ -32,6 +32,7 @@ At SoFLEX, we envision a future where anyone can unlock the full potential of th
 - Anchor
 - Rust
 - TypeScript
+- Drizzle
 
 ## 💻 Features
 
