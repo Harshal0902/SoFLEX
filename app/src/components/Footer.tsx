@@ -108,7 +108,7 @@ export default function Footer() {
                 if (result === 'Error adding user to waitlist') {
                     toast.info('User already added to the newsletter.');
                 } else {
-                    toast.success('User added to newslette.');
+                    toast.success('User added to newsletter successfully!');
                     form.reset();
                 }
             }

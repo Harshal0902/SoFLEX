@@ -44,7 +44,7 @@ export default function P2PBorrowingButton({ row }: { row: { original: Borrowing
             const metadata = await response.json();
             return metadata.image;
         } catch (error) {
-            toast.error(`Error fetching NFT data: ${error}`);
+            toast.error(`An error occurred while fetching NFT data. Please try again!`);
             return null;
         }
     };
@@ -89,8 +89,8 @@ export default function P2PBorrowingButton({ row }: { row: { original: Borrowing
 
                 try {
                     const response = await fetch(`https://api.shyft.to/sol/v1/wallet/collections?network=mainnet-beta&wallet_address=${wallet.publicKey?.toString()}`, requestOptions);
-                    const data = await response.json();
-                    const collections: CollectionType[] = data.result.collections;
+                    const result = await response.json();
+                    const collections: CollectionType[] = result.result.collections;
                     let filteredCollections;
                     if (order.nft_name === 'Degods') {
                         filteredCollections = collections.filter(collection => collection.nfts.some(nft => nft.name.includes('DeGod')));
@@ -127,7 +127,7 @@ export default function P2PBorrowingButton({ row }: { row: { original: Borrowing
                     const images = await Promise.all(imagesPromises);
                     setNftImages(images);
                 } catch (error) {
-                    toast.error(`Error fetching NFT collections: ${error}`);
+                    toast.error(`An error occurred while fetching NFT data. Please try again!`);
                 } finally {
                     setNFTLoading(false);
                 }

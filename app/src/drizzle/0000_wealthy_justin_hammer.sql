@@ -26,6 +26,12 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
+ CREATE TYPE "auth"."one_time_token_type" AS ENUM('confirmation_token', 'reauthentication_token', 'recovery_token', 'email_change_token_new', 'email_change_token_current', 'phone_change_token');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
  CREATE TYPE "pgsodium"."key_status" AS ENUM('default', 'valid', 'invalid', 'expired');
 EXCEPTION
  WHEN duplicate_object THEN null;
@@ -33,6 +39,60 @@ END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  CREATE TYPE "pgsodium"."key_type" AS ENUM('aead-ietf', 'aead-det', 'hmacsha512', 'hmacsha256', 'auth', 'shorthash', 'generichash', 'kdf', 'secretbox', 'secretstream', 'stream_xchacha20');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ CREATE TYPE "public"."aal_level" AS ENUM('aal1', 'aal2', 'aal3');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ CREATE TYPE "public"."action" AS ENUM('INSERT', 'UPDATE', 'DELETE', 'TRUNCATE', 'ERROR');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ CREATE TYPE "public"."code_challenge_method" AS ENUM('s256', 'plain');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ CREATE TYPE "public"."equality_op" AS ENUM('eq', 'neq', 'lt', 'lte', 'gt', 'gte', 'in');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ CREATE TYPE "public"."factor_status" AS ENUM('unverified', 'verified');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ CREATE TYPE "public"."factor_type" AS ENUM('totp', 'webauthn');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ CREATE TYPE "public"."key_status" AS ENUM('default', 'valid', 'invalid', 'expired');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ CREATE TYPE "public"."key_type" AS ENUM('aead-ietf', 'aead-det', 'hmacsha512', 'hmacsha256', 'auth', 'shorthash', 'generichash', 'kdf', 'secretbox', 'secretstream', 'stream_xchacha20');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ CREATE TYPE "public"."one_time_token_type" AS ENUM('confirmation_token', 'reauthentication_token', 'recovery_token', 'email_change_token_new', 'email_change_token_current', 'phone_change_token');
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -98,6 +158,7 @@ CREATE TABLE IF NOT EXISTS "defi_borrowing" (
 	"borrowing_due_by" timestamp with time zone NOT NULL,
 	"borrowing_total" text NOT NULL,
 	"transaction_signature" text,
+	"borrowing_repayed_on" timestamp with time zone,
 	CONSTRAINT "defi_borrowing_borrow_id_key" UNIQUE("borrow_id"),
 	CONSTRAINT "defi_borrowing_transaction_signature_key" UNIQUE("transaction_signature")
 );
@@ -144,37 +205,37 @@ CREATE TABLE IF NOT EXISTS "users" (
 );
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "defi_lending" ADD CONSTRAINT "defi_lending_lending_token_fkey" FOREIGN KEY ("lending_token") REFERENCES "public"."asset_details"("asset_symbol") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "defi_lending" ADD CONSTRAINT "defi_lending_lending_token_asset_details_asset_symbol_fk" FOREIGN KEY ("lending_token") REFERENCES "public"."asset_details"("asset_symbol") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "defi_lending" ADD CONSTRAINT "public_defi_lending_user_address_fkey" FOREIGN KEY ("user_address") REFERENCES "public"."users"("user_address") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "defi_lending" ADD CONSTRAINT "defi_lending_user_address_users_user_address_fk" FOREIGN KEY ("user_address") REFERENCES "public"."users"("user_address") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "defi_borrowing" ADD CONSTRAINT "defi_borrowing_borrowing_token_fkey" FOREIGN KEY ("borrowing_token") REFERENCES "public"."asset_details"("asset_symbol") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "defi_borrowing" ADD CONSTRAINT "defi_borrowing_borrowing_token_asset_details_asset_symbol_fk" FOREIGN KEY ("borrowing_token") REFERENCES "public"."asset_details"("asset_symbol") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "defi_borrowing" ADD CONSTRAINT "public_defi_borrowing_user_address_fkey" FOREIGN KEY ("user_address") REFERENCES "public"."users"("user_address") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "defi_borrowing" ADD CONSTRAINT "defi_borrowing_user_address_users_user_address_fk" FOREIGN KEY ("user_address") REFERENCES "public"."users"("user_address") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "new_asset_or_collection_request" ADD CONSTRAINT "public_new_asset_or_collection_request_user_address_fkey" FOREIGN KEY ("user_address") REFERENCES "public"."users"("user_address") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "new_asset_or_collection_request" ADD CONSTRAINT "new_asset_or_collection_request_user_address_users_user_address" FOREIGN KEY ("user_address") REFERENCES "public"."users"("user_address") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "te_user_stats" ADD CONSTRAINT "public_te_user_stats_user_address_fkey" FOREIGN KEY ("user_address") REFERENCES "public"."users"("user_address") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "te_user_stats" ADD CONSTRAINT "te_user_stats_user_address_users_user_address_fk" FOREIGN KEY ("user_address") REFERENCES "public"."users"("user_address") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

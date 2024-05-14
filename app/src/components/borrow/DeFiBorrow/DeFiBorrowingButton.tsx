@@ -141,10 +141,10 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                         }));
                         setcNFTResult(formattedResult);
                     } else {
-                        toast.error('No cNFT(s) found for the wallet.');
+                        toast.error('An error occurred while fetching cNFT(s) for the wallet. Please try again!');
                     }
                 } catch (error) {
-                    toast.error(`Got error: ${error}`);
+                    toast.error(`An error occurred while fetching cNFT(s) for the wallet. Please try again!`);
                 } finally {
                     setcNFTLoading(false);
                 }
@@ -181,10 +181,10 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                         }));
                         setNFTResult(formattedResult);
                     } else {
-                        toast.error('No NFT(s) found for the wallet.');
+                        toast.error('An error occurred while fetching NFT(s) for the wallet. Please try again!');
                     }
                 } catch (error) {
-                    toast.error(`Got error: ${error}`);
+                    toast.error(`An error occurred while fetching NFT(s) for the wallet. Please try again!`);
                 } finally {
                     setNFTLoading(false);
                 }
@@ -257,12 +257,12 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                 requestOptions
             );
 
-            const data = await response.json();
+            const result = await response.json();
 
             let sentTransactions = 0;
             let receivedTransactions = 0;
 
-            data.result.forEach((transaction: Transaction) => {
+            result.result.forEach((transaction: Transaction) => {
                 if (transaction.actions.length > 0 && transaction.actions[0].info.sender === wallet.publicKey?.toString()) {
                     sentTransactions++;
                 } else {
@@ -277,7 +277,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
             const transactionHistoryScore = ((sentPercentage - receivedPercentage) / 100).toFixed(2);
             calculateCreditScore(transactionHistoryScore);
         } catch (error) {
-            toast.error('An error occurred while fetching data.');
+            toast.error('An error occurred while fetching transaction history. Please try again!');
         } finally {
             setLoading(false);
         }
@@ -288,10 +288,13 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
         setCreditScore(parseFloat(creditScoreValue.toFixed(2)));
         calculateInterestRate(creditScoreValue.toFixed(2));
         if (wallet.publicKey) {
-            await updateUserCreditScore({
+            const result = await updateUserCreditScore({
                 walletAddress: wallet.publicKey.toString(),
                 creditScore: parseFloat(creditScoreValue.toFixed(2)),
             });
+            if (result === 'Error updating user credit score') {
+                toast.error('An error occurred while updating credit score. Please try again!');
+            }
         }
     };
 
@@ -334,7 +337,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
     async function onSubmit(values: z.infer<typeof FormSchema>) {
         try {
             if (wallet.publicKey && interestRate) {
-                const data = await newDeFiBorrowing({
+                const result = await newDeFiBorrowing({
                     walletAddress: wallet.publicKey.toString(),
                     borrowingAmount: `${values.borrowing_amount} ${order.asset_symbol}`,
                     borrowingToken: order.asset_symbol,
@@ -347,17 +350,19 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
 
                 setIsSubmitting(true);
                 setCurrentSection(1);
-                if (data) {
+                if (result === 'Request for new DeFi Borrowing sent successfully') {
                     setIsSubmitting(false);
                     setOpen(false);
                     toast.success('Borrowing successful! Assets will be credited to your wallet shortly.');
                     form.reset();
                 } else {
-                    toast.error('Error completing the process. Please try again!');
+                    setCurrentSection(2);
+                    setIsSubmitting(false);
+                    toast.error('An error occurred while borrowing. Please try again!');
                 }
             }
         } catch (error) {
-            toast.error('Error completing the process. Please try again!');
+            toast.error('An error occurred while borrowing. Please try again!');
         }
     }
 

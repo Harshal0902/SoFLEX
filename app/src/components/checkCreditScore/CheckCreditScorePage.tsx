@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { updateUserCreditScore } from '@/actions/dbActions'
 import { toast } from 'sonner'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Loader2 } from 'lucide-react'
 
@@ -40,12 +40,12 @@ export default function CheckCreditScorePage({ walletAddress }: { walletAddress:
                 requestOptions
             );
 
-            const data = await response.json();
+            const result = await response.json();
 
             let sentTransactions = 0;
             let receivedTransactions = 0;
 
-            data.result.forEach((transaction: Transaction) => {
+            result.result.forEach((transaction: Transaction) => {
                 if (transaction.actions.length > 0 && transaction.actions[0].info.sender === wallet.publicKey?.toString()) {
                     sentTransactions++;
                 } else {
@@ -60,7 +60,7 @@ export default function CheckCreditScorePage({ walletAddress }: { walletAddress:
             const transactionHistoryScore = ((sentPercentage - receivedPercentage) / 100).toFixed(2);
             calculateCreditScore(transactionHistoryScore);
         } catch (error) {
-            toast.error('An error occurred while fetching data.');
+            toast.error('An error occurred while fetching transaction history. Please try again!');
         } finally {
             setLoading(false);
         }
@@ -69,16 +69,20 @@ export default function CheckCreditScorePage({ walletAddress }: { walletAddress:
     const calculateCreditScore = async (transactionHistoryScore: string) => {
         const creditScoreValue = 0.55 * 80 + 0.33 * (parseFloat(transactionHistoryScore) + 20) + 30;
         setCreditScore(parseFloat(creditScoreValue.toFixed(2)));
-        await updateUserCreditScore({
+        const result = await updateUserCreditScore({
             walletAddress: walletAddress,
             creditScore: parseFloat(creditScoreValue.toFixed(2)),
         });
+        if(result === 'Error updating user credit score'){
+            toast.error('An error occurred while updating credit score. Please try again!');
+        }
     };
 
     return (
         <Card className='md:my-4'>
             <CardHeader>
-                <div className='text-center md:text-start text-2xl md:text-4xl'>My On-Chain Credit Score</div>
+                <CardTitle className='text-center md:text-start text-2xl md:text-4xl tracking-normal'>My On-Chain Credit Score</CardTitle>
+                <CardDescription className='text-center md:text-start'>Check your On-Chain Credit Score</CardDescription>
             </CardHeader>
             <CardContent>
                 <div className='flex flex-col space-y-2'>

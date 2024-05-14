@@ -43,12 +43,15 @@ export default function Navbar() {
         const addUserToDB = async () => {
             if (wallet.publicKey) {
                 try {
-                    await addNewUser({
+                    const result = await addNewUser({
                         walletAddress: wallet.publicKey.toString(),
                     });
+                    if (result === 'Error adding new user') {
+                        toast.error('An error occurred while setting up your account. Please try again!.');
+                    }
                     // toast.success('Wallet connected successfully!');
                 } catch (error) {
-                    toast.error('An error occurred while setting up your account. Please try again later.');
+                    toast.error('An error occurred while setting up your account. Please try again!.');
                 }
             }
         };
@@ -66,7 +69,7 @@ export default function Navbar() {
                     setSolBalance((balance / 10 ** 9).toFixed(4));
                 }
             } catch (error) {
-                toast.error('An error occurred while fetching your balance. Please try again later.');
+                toast.error('An error occurred while fetching your balance. Please try again!.');
             }
         };
 
@@ -80,7 +83,7 @@ export default function Navbar() {
                 select(walletName);
                 setOpen(false);
             } catch (error) {
-                toast.error('An error occurred while connecting your wallet. Please try again later.');
+                toast.error('An error occurred while connecting your wallet. Please try again!.');
             }
         }
     };

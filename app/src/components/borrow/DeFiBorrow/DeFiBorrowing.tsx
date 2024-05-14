@@ -37,7 +37,7 @@ export default function DeFiBorrowing() {
       if (Array.isArray(result)) {
         setBorrowingAssetData(result);
       } else {
-        toast.error('Unexpected result format.');
+        toast.error('An error occurred while fetching asset data. Please try again!');
       }
       setLoadingData(false);
     };
@@ -51,13 +51,13 @@ export default function DeFiBorrowing() {
       for (const token of tokens) {
         try {
           const response = await fetch(`https://api.coinbase.com/v2/prices/${token}-USD/buy`);
-          const data = await response.json();
+          const result = await response.json();
           setAssetPrices(prevState => ({
             ...prevState,
-            [token]: data.data.amount
+            [token]: result.data.amount
           }));
         } catch (error) {
-          toast.error(`Error fetching price for ${token}: ${error}`);
+          toast.error(`An error occurred while fetching ${token} price. Please try again!`);
         }
       }
     };
@@ -81,13 +81,12 @@ export default function DeFiBorrowing() {
 
     if (assetName && wallet.publicKey) {
       const result = await newAssetOrCollectionRequest({ walletAddress: wallet.publicKey.toString(), requestedAssetOrCollectionName: assetName, assetOrCollection: 'Asset' });
-
-      if (result) {
+      if (result === 'Request for new Asset or Collection sent successfully') {
         toast.success('Request sent successfully!');
         setOpen(false);
         form.reset();
       } else {
-        toast.error('Error requesting new NFT Collection.');
+        toast.error('An error occurred while sending request. Please try again!');
       }
     }
   }

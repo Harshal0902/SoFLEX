@@ -36,7 +36,7 @@ export default function P2PLending() {
             if (Array.isArray(result)) {
                 setLendingNFTCollectionData(result);
             } else {
-                toast.error('Unexpected result format.');
+                toast.error('An error occurred while fetching NFT Collection data. Please try again!');
             }
             setLoadingData(false);
         };
@@ -56,12 +56,12 @@ export default function P2PLending() {
 
         if (nftCollectionName && wallet.publicKey) {
             const result = await newAssetOrCollectionRequest({ walletAddress: wallet.publicKey.toString(), requestedAssetOrCollectionName: nftCollectionName, assetOrCollection: 'NFT Collectiion' });
-            if (result) {
+            if (result === 'Request for new Asset or Collection sent successfully') {
                 toast.success('Request sent successfully!');
                 setOpen(false);
                 form.reset();
             } else {
-                toast.error('Error requesting new NFT Collection.');
+                toast.error('An error occurred while sending request. Please try again!');
             }
         }
     }

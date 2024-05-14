@@ -59,7 +59,7 @@ export default function Page() {
                 form.reset();
             })
             .catch((error) => {
-                toast.error('Uh oh! Something went wrong. Please try again.');
+                toast.error('An error occurred while submitting the form. Please try again!');
             })
             .finally(() => {
                 setIsSubmitting(false);

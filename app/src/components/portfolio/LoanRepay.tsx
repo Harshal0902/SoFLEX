@@ -170,26 +170,26 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
             }
 
             if (sig && wallet.publicKey) {
-                const data = await updateUserBorrowStatus({
+                const result = await updateUserBorrowStatus({
                     borrowId: order.borrow_id,
                     borrowStatus: 'Repaid',
                     transactionSignature: sig
                 });
 
-                if (data) {
+                if (result === 'User borrow status updated') {
                     setOpen(false);
                     setTrigger(true);
                     onTrigger();
                     toast.success('Loan repaid successfully!');
                 } else {
-                    toast.error('Error completing the process. Please try again!');
+                    toast.error('An error occurred while updating the loan status. Please try again!');
                 }
             }
         } catch (error) {
             if (error == 'TokenAccountNotFoundError') {
-                toast.error('Insufficient tokens found in wallet!');
+                toast.error('Insufficient balance in your wallet.');
             } else {
-                toast.error('Error completing the process. Please try again!');
+                toast.error('An error occurred while repaying the loan. Please try again!');
             }
         } finally {
             setIsSubmitting(false);

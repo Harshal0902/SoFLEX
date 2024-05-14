@@ -54,7 +54,7 @@ export default function BetaModal() {
                     toast.info('User already added to the newsletter.');
                     handleClose();
                 } else {
-                    toast.success('User added to newslette.');
+                    toast.success('User added to newsletter successfully!');
                     form.reset();
                     handleClose();
                 }

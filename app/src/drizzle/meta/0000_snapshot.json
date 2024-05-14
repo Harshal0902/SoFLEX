@@ -120,8 +120,8 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "defi_lending_lending_token_fkey": {
-          "name": "defi_lending_lending_token_fkey",
+        "defi_lending_lending_token_asset_details_asset_symbol_fk": {
+          "name": "defi_lending_lending_token_asset_details_asset_symbol_fk",
           "tableFrom": "defi_lending",
           "tableTo": "asset_details",
           "schemaTo": "public",
@@ -134,8 +134,8 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "public_defi_lending_user_address_fkey": {
-          "name": "public_defi_lending_user_address_fkey",
+        "defi_lending_user_address_users_user_address_fk": {
+          "name": "defi_lending_user_address_users_user_address_fk",
           "tableFrom": "defi_lending",
           "tableTo": "users",
           "schemaTo": "public",
@@ -308,12 +308,18 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "borrowing_repayed_on": {
+          "name": "borrowing_repayed_on",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
       "foreignKeys": {
-        "defi_borrowing_borrowing_token_fkey": {
-          "name": "defi_borrowing_borrowing_token_fkey",
+        "defi_borrowing_borrowing_token_asset_details_asset_symbol_fk": {
+          "name": "defi_borrowing_borrowing_token_asset_details_asset_symbol_fk",
           "tableFrom": "defi_borrowing",
           "tableTo": "asset_details",
           "schemaTo": "public",
@@ -326,8 +332,8 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "public_defi_borrowing_user_address_fkey": {
-          "name": "public_defi_borrowing_user_address_fkey",
+        "defi_borrowing_user_address_users_user_address_fk": {
+          "name": "defi_borrowing_user_address_users_user_address_fk",
           "tableFrom": "defi_borrowing",
           "tableTo": "users",
           "schemaTo": "public",
@@ -390,8 +396,8 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "public_new_asset_or_collection_request_user_address_fkey": {
-          "name": "public_new_asset_or_collection_request_user_address_fkey",
+        "new_asset_or_collection_request_user_address_users_user_address": {
+          "name": "new_asset_or_collection_request_user_address_users_user_address",
           "tableFrom": "new_asset_or_collection_request",
           "tableTo": "users",
           "schemaTo": "public",
@@ -489,8 +495,8 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "public_te_user_stats_user_address_fkey": {
-          "name": "public_te_user_stats_user_address_fkey",
+        "te_user_stats_user_address_users_user_address_fk": {
+          "name": "te_user_stats_user_address_users_user_address_fk",
           "tableFrom": "te_user_stats",
           "tableTo": "users",
           "schemaTo": "public",
@@ -648,6 +654,18 @@
       ],
       "schema": "auth"
     },
+    "auth.one_time_token_type": {
+      "name": "one_time_token_type",
+      "values": [
+        "confirmation_token",
+        "reauthentication_token",
+        "recovery_token",
+        "email_change_token_new",
+        "email_change_token_current",
+        "phone_change_token"
+      ],
+      "schema": "auth"
+    },
     "pgsodium.key_status": {
       "name": "key_status",
       "values": [
@@ -674,6 +692,102 @@
         "stream_xchacha20"
       ],
       "schema": "pgsodium"
+    },
+    "public.aal_level": {
+      "name": "aal_level",
+      "values": [
+        "aal1",
+        "aal2",
+        "aal3"
+      ],
+      "schema": "public"
+    },
+    "public.action": {
+      "name": "action",
+      "values": [
+        "INSERT",
+        "UPDATE",
+        "DELETE",
+        "TRUNCATE",
+        "ERROR"
+      ],
+      "schema": "public"
+    },
+    "public.code_challenge_method": {
+      "name": "code_challenge_method",
+      "values": [
+        "s256",
+        "plain"
+      ],
+      "schema": "public"
+    },
+    "public.equality_op": {
+      "name": "equality_op",
+      "values": [
+        "eq",
+        "neq",
+        "lt",
+        "lte",
+        "gt",
+        "gte",
+        "in"
+      ],
+      "schema": "public"
+    },
+    "public.factor_status": {
+      "name": "factor_status",
+      "values": [
+        "unverified",
+        "verified"
+      ],
+      "schema": "public"
+    },
+    "public.factor_type": {
+      "name": "factor_type",
+      "values": [
+        "totp",
+        "webauthn"
+      ],
+      "schema": "public"
+    },
+    "public.key_status": {
+      "name": "key_status",
+      "values": [
+        "default",
+        "valid",
+        "invalid",
+        "expired"
+      ],
+      "schema": "public"
+    },
+    "public.key_type": {
+      "name": "key_type",
+      "values": [
+        "aead-ietf",
+        "aead-det",
+        "hmacsha512",
+        "hmacsha256",
+        "auth",
+        "shorthash",
+        "generichash",
+        "kdf",
+        "secretbox",
+        "secretstream",
+        "stream_xchacha20"
+      ],
+      "schema": "public"
+    },
+    "public.one_time_token_type": {
+      "name": "one_time_token_type",
+      "values": [
+        "confirmation_token",
+        "reauthentication_token",
+        "recovery_token",
+        "email_change_token_new",
+        "email_change_token_current",
+        "phone_change_token"
+      ],
+      "schema": "public"
     },
     "realtime.action": {
       "name": "action",

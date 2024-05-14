@@ -173,25 +173,25 @@ export default function DeFiLendingButton({ row }: { row: { original: LendingAss
             }
 
             if (sig && wallet.publicKey) {
-                const data = await newDeFiLending({
+                const result = await newDeFiLending({
                     walletAddress: wallet.publicKey.toString(),
                     lendingAmount: values.lending_amount,
                     lendingToken: order.asset_symbol,
                     transactionSignature: sig
                 });
 
-                if (data) {
+                if (result === 'Request for new DeFi Lending sent successfully') {
                     setOpen(false);
                     toast.success('Lending successful! Interest starts accruing.');
                 } else {
-                    toast.error('Error completing the process. Please try again!');
+                    toast.error('An error occurred while lending. Please try again!');
                 }
             }
         } catch (error) {
             if (error == 'TokenAccountNotFoundError') {
-                toast.error('Insufficient tokens found in wallet!');
+                toast.error('Insufficient balance in your wallet.');
             } else {
-                toast.error('Error completing the process. Please try again!');
+                toast.error('An error occurred while lending. Please try again!');
             }
         } finally {
             setIsSubmitting(false);

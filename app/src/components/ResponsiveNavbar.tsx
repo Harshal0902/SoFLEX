@@ -76,7 +76,7 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
                     setSolBalance((balance / 10 ** 9).toFixed(4));
                 }
             } catch (error) {
-                toast.error('An error occurred while fetching your balance. Please try again later.');
+                toast.error('An error occurred while fetching your balance. Please try again!.');
             }
         };
 
@@ -91,7 +91,7 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
                 setOpen(false);
                 setIsOpen(false);
             } catch (error) {
-                toast.error('An error occurred while connecting your wallet. Please try again later.');
+                toast.error('An error occurred while connecting your wallet. Please try again!.');
             }
         }
     };

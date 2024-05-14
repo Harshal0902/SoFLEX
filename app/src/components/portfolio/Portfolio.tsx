@@ -62,29 +62,38 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
     const [userPortfolio, setUserPortfolio] = useState<UserType[]>([]);
     const [saveData, setSaveData] = useState(false);
     const [userStats, setUserStats] = useState<UserStatsType[]>([]);
+    const [loadingLoanHistory, setLoadingLoanHistory] = useState(true);
     const [loanHistoryData, setLoanHistoryData] = useState<LoanDataType[]>([]);
 
-    const fetchUserPortfolio = async () => {
-        try {
-            const userPortfolioData = await userPortfolioDetails({ walletAddress: walletAddress });
-            setUserPortfolio(userPortfolioData as UserType[]);
-            setLoading(false);
-        } catch (error) {
-            toast.error('Error fetching user portfolio. Please try again.');
-            setLoading(false);
-        }
-    };
-
     useEffect(() => {
+        const fetchUserPortfolio = async () => {
+            try {
+                const result = await userPortfolioDetails({ walletAddress: walletAddress });
+                setUserPortfolio(result as UserType[]);
+                setLoading(false);
+                if (result === 'Error fetching user portfolio details') {
+                    toast.error('An error occurred while fetching user portfolio. Please try again!');
+                    setLoading(false);
+                }
+            } catch (error) {
+                toast.error('An error occurred while fetching user portfolio. Please try again!');
+                setLoading(false);
+            }
+        };
+
         fetchUserPortfolio();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
         const fetchUserStatsData = async () => {
-            const data = await teUserStatsDetails({ walletAddress: walletAddress });
-            setUserStats(data as UserStatsType[]);
+            const result = await teUserStatsDetails({ walletAddress: walletAddress });
+            setUserStats(result as UserStatsType[]);
             setLoading(false);
+            if (result === 'Error fetching user stats') {
+                toast.error('An error occurred while fetching user stats. Please try again!');
+                setLoading(false);
+            }
         };
 
         fetchUserStatsData();
@@ -101,7 +110,11 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
     const fetchLoanHistoryData = async () => {
         const result = await userLoanDetails({ walletAddress: walletAddress });
         setLoanHistoryData(result as LoanDataType[]);
-        setLoading(false);
+        setLoadingLoanHistory(false);
+        if (result === 'Error fetching user loan details') {
+            toast.error('An error occurred while fetching user loan details. Please try again!');
+            setLoadingLoanHistory(false);
+        }
     };
 
     useEffect(() => {
@@ -116,16 +129,20 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
     const onSubmitUpdateUserData = async (data: z.infer<typeof FormSchema>) => {
         setSaveData(true);
         try {
-            await updateUserData({
+            const result = await updateUserData({
                 walletAddress: walletAddress,
                 name: data.name,
                 email: data.email,
             });
-            setSaveData(false);
-            toast.success('Portfolio updated successfully!');
-            await fetchUserPortfolio();
+            if (result === 'User data updated') {
+                setSaveData(false);
+                toast.success('Portfolio updated successfully!');
+            } else {
+                setSaveData(false);
+                toast.error('An error occurred while updating portfolio. Please try again!');
+            }
         } catch (error) {
-            toast.error('Error updating portfolio. Please try again.');
+            toast.error('An error occurred while updating portfolio. Please try again!');
         }
     };
 
@@ -268,15 +285,20 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
                                     ))}
                                 </div>
                             )}
+
                             <div className='pt-2'>
                                 <h1 className='text-xl py-2'>Loan History</h1>
-                                <DataTable
-                                    columns={loanColumns(onTrigger)}
-                                    data={loanHistoryData}
-                                    userSearchColumn='borrowing_amount'
-                                    inputPlaceHolder='Search by borrowed Token Name'
-                                    noResultsMessage='No loan found.'
-                                />
+                                {loadingLoanHistory ? (
+                                    <Loading />
+                                ) : (
+                                    <DataTable
+                                        columns={loanColumns(onTrigger)}
+                                        data={loanHistoryData}
+                                        userSearchColumn='borrowing_amount'
+                                        inputPlaceHolder='Search by borrowed Token Name'
+                                        noResultsMessage='No loan found.'
+                                    />
+                                )}
                             </div>
                         </CardContent>
                     </TooltipProvider>

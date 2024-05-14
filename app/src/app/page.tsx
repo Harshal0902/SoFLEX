@@ -81,32 +81,31 @@ export default function Page() {
     <Suspense fallback={<Preloader />}>
       <MaxWidthWrapper>
 
-        <div className='flex flex-wrap-reverse items-center justify-center md:grid md:grid-cols-2 md:pt-4 pb-12 md:px-24 px-4'>
+        <div className='flex flex-wrap-reverse items-center justify-center lg:grid lg:grid-cols-2 lg:pt-4 pb-12 lg:px-24 px-4'>
 
-          <div className='md:flex md:flex-col md:justify-center'>
-            <h2 className='mb-4 font-semibold tracking-wider text-3xl md:text-4xl' aria-label={selectedMyService}>
+          <div className='lg:flex lg:flex-col lg:justify-center'>
+            <h2 className='mb-4 font-semibold tracking-wider text-3xl lg:text-4xl' aria-label={selectedMyService}>
               SoFLEX: Lend and Borrow <br /> <span className='text-primary hidden md:block'>{typedMyService}<span className='animate-pulse'>|</span></span> <span className='text-primary md:hidden block'>Adventures Take Off</span>
             </h2>
-            <p className='self-center text-lg md:text-xl tracking-wide text-left md:text-justify py-2'>
+            <p className='self-center text-lg lg:text-xl tracking-wide text-left lg:text-justify py-2'>
               SoFLEX introduces a comprehensive solution for lending and borrowing compressed NFTs and synthetic assets within the Solana ecosystem, addressing the increasing demand for liquidity and financial flexibility while empowering users to leverage assets efficiently and securely.
             </p>
-            <div className='flex flex-col items-center justify-start md:flex-row space-y-2 md:space-y-0 space-x-0 md:space-x-4'>
+            <div className='grid grid-rows-1 md:grid-cols-2 items-center gap-2'>
               <a href='https://gitbook.soflex.fi/' target='_blank' rel='noreferrer noopener'>
-                <Button className='px-14 text-white tracking-wider'>
+                <Button className='text-white tracking-wider w-full'>
                   Read GitBook <ExternalLink className='ml-2 h-4 w-4' />
                 </Button>
               </a>
 
               <Button variant='outline' className='tracking-wider' asChild>
                 <Link href='/check-credit-score'>
-                  Check On-Chain Credit Score
+                  Check Credit Score
                 </Link>
               </Button>
-
             </div>
           </div>
 
-          <div className='md:flex justify-center w-full pb-8 md:pb-0 hidden'>
+          <div className='lg:flex justify-center w-full pb-8 lg:pb-0 hidden'>
             <Image src='/assets/home/hero.svg' height={400} width={400} quality={100} alt='Hero Image' priority={true} />
           </div>
 
@@ -124,7 +123,7 @@ export default function Page() {
         </div>
 
         <div className='flex items-center justify-center pb-8'>
-          <div className='grid grid-cols-1 gap-12 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4'>
+          <div className='grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
             {features.map((feature, index) => (
               <FeatureCard key={index} {...feature} />
             ))}

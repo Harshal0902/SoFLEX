@@ -84,6 +84,7 @@ export const addNewUser = async ({ walletAddress }: { walletAddress: string }) =
 export const updateUserCreditScore = async ({ walletAddress, creditScore }: { walletAddress: string, creditScore: number }) => {
     try {
         await db.update(users).set({ on_chain_credit_score: creditScore }).where(eq(users.user_address, walletAddress));
+        return 'User credit score updated';
     } catch (error) {
         return 'Error updating user credit score';
     }
@@ -189,6 +190,7 @@ export const updateUserData = async ({ walletAddress, name, email }: UserType) =
             name: name,
             email: email
         }).where(eq(users.user_address, walletAddress));
+        return 'User data updated';
     } catch (error) {
         return 'Error updating user data';
     }
@@ -229,7 +231,8 @@ export const updateUserBorrowStatus = async ({ borrowId, borrowStatus, transacti
     try {
         await db.update(defi_borrowing).set({
             borrowing_status: borrowStatus,
-            transaction_signature: transactionSignature
+            transaction_signature: transactionSignature,
+            borrowing_repayed_on: new Date().toISOString()
         }).where(eq(defi_borrowing.borrow_id, borrowId));
         return 'User borrow status updated';
     } catch (error) {
