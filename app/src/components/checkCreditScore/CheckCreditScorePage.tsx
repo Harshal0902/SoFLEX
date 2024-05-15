@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { updateUserCreditScore } from '@/actions/dbActions'
 import { toast } from 'sonner'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Loader2 } from 'lucide-react'
 
@@ -73,7 +73,7 @@ export default function CheckCreditScorePage({ walletAddress }: { walletAddress:
             walletAddress: walletAddress,
             creditScore: parseFloat(creditScoreValue.toFixed(2)),
         });
-        if(result === 'Error updating user credit score'){
+        if (result === 'Error updating user credit score') {
             toast.error('An error occurred while updating credit score. Please try again!');
         }
     };
@@ -81,8 +81,9 @@ export default function CheckCreditScorePage({ walletAddress }: { walletAddress:
     return (
         <Card className='md:my-4'>
             <CardHeader>
-                <CardTitle className='text-center md:text-start text-2xl md:text-4xl tracking-normal'>My On-Chain Credit Score</CardTitle>
-                <CardDescription className='text-center md:text-start'>Check your On-Chain Credit Score</CardDescription>
+                <div>
+                    <div className='text-center md:text-start text-2xl md:text-4xl'>My On-Chain Credit Score</div>
+                </div>
             </CardHeader>
             <CardContent>
                 <div className='flex flex-col space-y-2'>

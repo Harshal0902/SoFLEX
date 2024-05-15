@@ -52,7 +52,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     <Card className='max-w-[95vw]'>
                         <CardHeader>
                             <CardTitle>Enter Password for Authorized Access</CardTitle>
-                            <CardDescription>To access this restricted area, please enter the correct password below.</CardDescription>
+                            <CardDescription>To access this restricted page, please enter the correct password below.</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <form>

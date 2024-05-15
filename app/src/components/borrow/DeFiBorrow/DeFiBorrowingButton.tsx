@@ -766,10 +766,12 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
 
                                 {!loading &&
                                     <div className='flex flex-col md:flex-row items-center justify-between md:pt-2 space-y-2 md:space-y-0 px-2'>
-                                        <div className='group border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded cursor-pointer text-sm py-2.5 px-4 w-full md:w-auto flex flex-row items-center justify-center' onClick={handleNFTSection}>
-                                            <ChevronLeft className='w-4 h-4 mr-1 group-hover:-translate-x-1 duration-300 ease-in-out' />
-                                            Edit borrow details
-                                        </div>
+                                        {!isSubmitting &&
+                                            <div className='group border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded cursor-pointer text-sm py-2.5 px-4 w-full md:w-auto flex flex-row items-center justify-center' onClick={handleNFTSection}>
+                                                <ChevronLeft className='w-4 h-4 mr-1 group-hover:-translate-x-1 duration-300 ease-in-out' />
+                                                Edit borrow details
+                                            </div>
+                                        }
                                         <Button type='submit' className='text-white px-16 w-full md:w-auto' disabled={isSubmitting || loading}>
                                             {isSubmitting && <Loader2 className='animate-spin mr-2' size={15} />}
                                             {isSubmitting ? 'Borrowing...' : 'Borrow'}

@@ -62,6 +62,7 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
     const [userPortfolio, setUserPortfolio] = useState<UserType[]>([]);
     const [saveData, setSaveData] = useState(false);
     const [userStats, setUserStats] = useState<UserStatsType[]>([]);
+    const [loadingUserStats, setLoadingUserStats] = useState(true);
     const [loadingLoanHistory, setLoadingLoanHistory] = useState(true);
     const [loanHistoryData, setLoanHistoryData] = useState<LoanDataType[]>([]);
 
@@ -89,10 +90,10 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
         const fetchUserStatsData = async () => {
             const result = await teUserStatsDetails({ walletAddress: walletAddress });
             setUserStats(result as UserStatsType[]);
-            setLoading(false);
+            setLoadingUserStats(false);
             if (result === 'Error fetching user stats') {
                 toast.error('An error occurred while fetching user stats. Please try again!');
-                setLoading(false);
+                setLoadingUserStats(false);
             }
         };
 
@@ -195,7 +196,7 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
 
     return (
         <div>
-            {loading ? (
+            {loading && loadingUserStats ? (
                 <Loading />
             ) : (
                 <Card className='md:my-4'>

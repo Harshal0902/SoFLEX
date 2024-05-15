@@ -83,12 +83,12 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
     async function onRepay() {
         try {
             if (!connection || !publicKey) {
-                return 'Error connecting to Solana network';
+                return toast.error('Wallet not connected. Please connect your wallet and try again!');
             }
 
             setIsSubmitting(true);
 
-            let sig;
+            let sig: string | undefined;
 
             const recipientPubKey = new PublicKey('Cq6JPmEspG6oNcUC47WHuEJWU1K4knsLzHYHSfvpnDHk');
             let tokenAddress;
@@ -184,6 +184,14 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
                 } else {
                     toast.error('An error occurred while updating the loan status. Please try again!');
                 }
+                // setTimeout(async () => {
+                //     const transaction = await connection.getParsedTransaction(
+                //         sig,
+                //         // '3wWpNKLTvLiWg11rgKxGyJ4vxLicKwwJVEgxTJ3ihuRxoALpu5Vh19vh2n3dg5APYEqJv4nCZxuULUdLoxKEg8KG' // failed
+                //         // '3jeVZPQKpPcyvCPSbPjndBs1EUT5iE7iprrr6wypXYwSmaJBK5hSYW948XYi98decBWWrVyAhBfVjZEgmPVz3P5f'
+                //         );
+                //     console.log('transaction-f', sig, transaction, transaction?.meta?.err);
+                // }, 6000);
             }
         } catch (error) {
             if (error == 'TokenAccountNotFoundError') {
