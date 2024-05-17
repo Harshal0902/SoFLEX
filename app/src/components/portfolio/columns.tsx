@@ -6,6 +6,7 @@ import LoanRepay from './LoanRepay'
 
 export type LoanDataType = {
     borrow_id: string;
+    borrow_user_address: string;
     borrowing_amount: string;
     borrowing_total: string;
     borrowing_due_by: Date | string;

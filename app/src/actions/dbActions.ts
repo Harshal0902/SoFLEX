@@ -209,6 +209,7 @@ export const userLoanDetails = async ({ walletAddress }: { walletAddress: string
     try {
         const data = await db.select({
             borrow_id: defi_borrowing.borrow_id,
+            borrow_user_address: defi_borrowing.user_address,
             borrowing_amount: defi_borrowing.borrowing_amount,
             borrowing_submitted_at: defi_borrowing.borrowing_submitted_at,
             borrowing_token: defi_borrowing.borrowing_token,

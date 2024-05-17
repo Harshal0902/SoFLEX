@@ -14,6 +14,7 @@ import Image from 'next/image'
 
 export type LoanDataType = {
     borrow_id: string;
+    borrow_user_address: string;
     borrowing_amount: string;
     borrowing_total: string;
     borrowing_due_by: Date | string;
@@ -47,6 +48,7 @@ export const configureAndSendCurrentTransaction = async (
 export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDataType }, onTrigger: () => void }) {
     const [open, setOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [sigValidation, setSigValidation] = useState<boolean>(false);
     const [trigger, setTrigger] = useState<boolean>(false);
 
     const order = row.original;
@@ -90,6 +92,7 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
 
             let sig: string | undefined;
 
+            const userAddress = new PublicKey(order.borrow_user_address);
             const recipientPubKey = new PublicKey('Cq6JPmEspG6oNcUC47WHuEJWU1K4knsLzHYHSfvpnDHk');
             let tokenAddress;
 
@@ -98,7 +101,7 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
                 amount = parseFloat(amount.toFixed(6));
                 const transaction = new Transaction();
                 const sendSolInstruction = SystemProgram.transfer({
-                    fromPubkey: publicKey,
+                    fromPubkey: userAddress,
                     toPubkey: recipientPubKey,
                     lamports: amount
                 });
@@ -134,7 +137,7 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
                     const transactionInstructions: TransactionInstruction[] = [];
                     const associatedTokenFrom = await getAssociatedTokenAddress(
                         tokenAddress,
-                        publicKey
+                        userAddress
                     );
                     const fromAccount = await getAccount(connection, associatedTokenFrom);
                     const associatedTokenTo = await getAssociatedTokenAddress(
@@ -144,7 +147,7 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
                     if (!(await connection.getAccountInfo(associatedTokenTo))) {
                         transactionInstructions.push(
                             createAssociatedTokenAccountInstruction(
-                                publicKey,
+                                userAddress,
                                 associatedTokenTo,
                                 recipientPubKey,
                                 tokenAddress
@@ -170,36 +173,45 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
             }
 
             if (sig && wallet.publicKey) {
-                const result = await updateUserBorrowStatus({
-                    borrowId: order.borrow_id,
-                    borrowStatus: 'Repaid',
-                    transactionSignature: sig
-                });
+                setSigValidation(true);
 
-                if (result === 'User borrow status updated') {
-                    setOpen(false);
-                    setTrigger(true);
-                    onTrigger();
-                    toast.success('Loan repaid successfully!');
-                } else {
-                    toast.error('An error occurred while updating the loan status. Please try again!');
-                }
-                // setTimeout(async () => {
-                //     const transaction = await connection.getParsedTransaction(
-                //         sig,
-                //         // '3wWpNKLTvLiWg11rgKxGyJ4vxLicKwwJVEgxTJ3ihuRxoALpu5Vh19vh2n3dg5APYEqJv4nCZxuULUdLoxKEg8KG' // failed
-                //         // '3jeVZPQKpPcyvCPSbPjndBs1EUT5iE7iprrr6wypXYwSmaJBK5hSYW948XYi98decBWWrVyAhBfVjZEgmPVz3P5f'
-                //         );
-                //     console.log('transaction-f', sig, transaction, transaction?.meta?.err);
-                // }, 6000);
+                setTimeout(async () => {
+                    if (!sig) {
+                        return toast.error('Transaction failed. Please try again!');
+                    }
+
+                    const transaction = await connection.getParsedTransaction(sig);
+
+                    if (transaction?.meta?.err === null) {
+                        const result = await updateUserBorrowStatus({
+                            borrowId: order.borrow_id,
+                            borrowStatus: 'Repaid',
+                            transactionSignature: sig
+                        });
+                        if (result === 'User borrow status updated') {
+                            setOpen(false);
+                            setTrigger(true);
+                            setSigValidation(true);
+                            onTrigger();
+                            toast.success('Loan repaid successfully!');
+                        } else {
+                            toast.error('An error occurred while updating the loan status. Please try again!');
+                        }
+                    } else {
+                        setIsSubmitting(false);
+                        setSigValidation(false);
+                        toast.error('Invalid transaction. Please try again!');
+                    }
+                }, 8000);
             }
         } catch (error) {
             if (error == 'TokenAccountNotFoundError') {
                 toast.error('Insufficient balance in your wallet.');
+            } else if (error == 'WalletSendTransactionError: invalid account') {
+                toast.error('Invalid wallet account. Please try again!');
             } else {
                 toast.error('An error occurred while repaying the loan. Please try again!');
             }
-        } finally {
             setIsSubmitting(false);
         }
     }
@@ -371,9 +383,17 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
                         </Accordion>
                     </div>
 
-                    <div className='text-center px-2'>
-                        {isSubmitting && 'Transaction in progress. Please avoid refreshing or closing the tab.'}
-                    </div>
+                    {isSubmitting && !sigValidation &&
+                        <div className={`text-center px-2 ${isSubmitting ? 'animate-fade-in-up-short' : ''}`}>
+                            Transaction in progress. Please avoid refreshing or closing this tab.
+                        </div>
+                    }
+
+                    {sigValidation &&
+                        <div className={`text-center px-2 ${sigValidation ? 'animate-fade-in-up-short' : ''}`}>
+                            Validating transaction. Please avoid refreshing or closing this tab.
+                        </div>
+                    }
 
                     <Button className='text-white mx-2' disabled={order.borrowing_status !== 'Active' || isSubmitting} onClick={onRepay}>
                         {isSubmitting && <Loader2 className='animate-spin mr-2' size={15} />}

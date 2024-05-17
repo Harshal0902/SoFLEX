@@ -44,9 +44,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     return (
         <MaxWidthWrapper>
             {showContent ? (
-                <main>
+                <div>
                     {children}
-                </main>
+                </div>
             ) : (
                 <div className='flex justify-center items-center py-[25vh]'>
                     <Card className='max-w-[95vw]'>
