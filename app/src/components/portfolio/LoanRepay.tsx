@@ -90,11 +90,10 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
 
             setIsSubmitting(true);
 
-            let sig: string | undefined;
-
             const userAddress = new PublicKey(order.borrow_user_address);
             const recipientPubKey = new PublicKey('Cq6JPmEspG6oNcUC47WHuEJWU1K4knsLzHYHSfvpnDHk');
             let tokenAddress;
+            let sig: string | undefined;
 
             if (order.borrowing_token === 'SOL') {
                 let amount = LAMPORTS_PER_SOL * parseFloat(order.borrowing_total);
@@ -207,7 +206,12 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
                         clearInterval(polling);
                         setIsSubmitting(false);
                         setSigValidation(false);
-                        toast.error('Transaction timed out. Please try again!');
+                        toast.error('Invalid transaction. Please try again!');
+                    } else {
+                        clearInterval(polling);
+                        setIsSubmitting(false);
+                        setSigValidation(false);
+                        toast.error('Invalid transaction. Please try again!');
                     }
                 }, interval);
             }

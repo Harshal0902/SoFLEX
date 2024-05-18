@@ -296,7 +296,7 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
                                         columns={loanColumns(onTrigger)}
                                         data={loanHistoryData}
                                         userSearchColumn='borrowing_amount'
-                                        inputPlaceHolder='Search by borrowed Token Name'
+                                        inputPlaceHolder='Search by borrowed token'
                                         noResultsMessage='No loan found.'
                                     />
                                 )}

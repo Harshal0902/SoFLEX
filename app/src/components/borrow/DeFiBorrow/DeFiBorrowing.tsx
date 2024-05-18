@@ -154,8 +154,8 @@ export default function DeFiBorrowing() {
                 ...asset,
                 asset_price: assetPrices[asset.asset_symbol] ? formatPrice(assetPrices[asset.asset_symbol]) : asset.asset_price
               }))}
-              userSearchColumn='asset_name'
-              inputPlaceHolder='Search for assets'
+              userSearchColumn='asset_total_supply'
+              inputPlaceHolder='Search by token'
               noResultsMessage='No assets found'
             />
           )}

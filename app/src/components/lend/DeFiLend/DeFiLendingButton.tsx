@@ -70,6 +70,7 @@ export const configureAndSendCurrentTransaction = async (
 
 export default function DeFiLendingButton({ row }: { row: { original: LendingAssetDataType } }) {
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [sigValidation, setSigValidation] = useState<boolean>(false);
     const [open, setOpen] = useState(false);
 
     const order = row.original;
@@ -87,15 +88,14 @@ export default function DeFiLendingButton({ row }: { row: { original: LendingAss
     async function onSubmit(values: z.infer<typeof FormSchema>) {
         try {
             if (!connection || !publicKey) {
-                return 'Error connecting to Solana network';
+                return toast.error('Wallet not connected. Please connect your wallet and try again!');
             }
 
             setIsSubmitting(true);
 
-            let sig;
-
             const recipientPubKey = new PublicKey('Cq6JPmEspG6oNcUC47WHuEJWU1K4knsLzHYHSfvpnDHk');
             let tokenAddress;
+            let sig: string | undefined;
 
             if (order.asset_symbol === 'SOL') {
                 let amount = LAMPORTS_PER_SOL * parseFloat(values.lending_amount);
@@ -172,28 +172,56 @@ export default function DeFiLendingButton({ row }: { row: { original: LendingAss
                 }
             }
 
-            if (sig && wallet.publicKey) {
-                const result = await newDeFiLending({
-                    walletAddress: wallet.publicKey.toString(),
-                    lendingAmount: values.lending_amount,
-                    lendingToken: order.asset_symbol,
-                    transactionSignature: sig
-                });
+            const timeout = 8000;
+            const interval = 1000;
+            const start = Date.now();
 
-                if (result === 'Request for new DeFi Lending sent successfully') {
-                    setOpen(false);
-                    toast.success('Lending successful! Interest starts accruing.');
-                } else {
-                    toast.error('An error occurred while lending. Please try again!');
-                }
+            if (sig && wallet.publicKey) {
+                setSigValidation(true);
+
+                const polling = setInterval(async () => {
+                    if (!sig || !wallet.publicKey) {
+                        clearInterval(polling);
+                        return toast.error('Transaction failed. Please try again!');
+                    }
+
+                    const transaction = await connection.getParsedTransaction(sig);
+
+                    if (transaction?.meta?.err === null) {
+                        clearInterval(polling);
+                        const result = await newDeFiLending({
+                            walletAddress: wallet.publicKey.toString(),
+                            lendingAmount: values.lending_amount,
+                            lendingToken: order.asset_symbol,
+                            transactionSignature: sig
+                        });
+
+                        if (result === 'Request for new DeFi Lending sent successfully') {
+                            setOpen(false);
+                            setSigValidation(true);
+                            toast.success('Lending successful! Interest starts accruing.');
+                        } else {
+                            toast.error('An error occurred while lending. Please try again!');
+                        }
+                    } else if (Date.now() - start > timeout) {
+                        clearInterval(polling);
+                        setIsSubmitting(false);
+                        setSigValidation(false);
+                        toast.error('Invalid transaction. Please try again!');
+                    } else {
+                        clearInterval(polling);
+                        setIsSubmitting(false);
+                        setSigValidation(false);
+                        toast.error('Invalid transaction. Please try again!');
+                    }
+                }, interval);
             }
         } catch (error) {
             if (error == 'TokenAccountNotFoundError') {
                 toast.error('Insufficient balance in your wallet.');
             } else {
-                toast.error('An error occurred while lending. Please try again!');
+                toast.error('An error occurred while repaying the loan. Please try again!');
             }
-        } finally {
             setIsSubmitting(false);
         }
     }
@@ -270,9 +298,17 @@ export default function DeFiLendingButton({ row }: { row: { original: LendingAss
                                 </div>
                             </div>
 
-                            <div className='text-center px-2'>
-                                {isSubmitting && 'Transaction in progress. Please avoid refreshing or closing the tab.'}
-                            </div>
+                            {isSubmitting && !sigValidation &&
+                                <div className={`text-center px-2 ${isSubmitting ? 'animate-fade-in-up-short' : ''}`}>
+                                    Transaction in progress. Please avoid refreshing or closing this tab.
+                                </div>
+                            }
+
+                            {sigValidation &&
+                                <div className={`text-center px-2 ${sigValidation ? 'animate-fade-in-up-short' : ''}`}>
+                                    Validating transaction. Please avoid refreshing or closing this tab.
+                                </div>
+                            }
 
                             <Button type='submit' className='text-white w-full mt-4' disabled={isSubmitting}>
                                 {isSubmitting && <Loader2 className='animate-spin mr-2' size={15} />}
