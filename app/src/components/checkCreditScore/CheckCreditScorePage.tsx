@@ -67,7 +67,13 @@ export default function CheckCreditScorePage({ walletAddress }: { walletAddress:
     };
 
     const calculateCreditScore = async (transactionHistoryScore: string) => {
-        const creditScoreValue = 0.55 * 80 + 0.33 * (parseFloat(transactionHistoryScore) + 20) + 30;
+        let newTransactionHistoryScore;
+        if (transactionHistoryScore === 'NaN') {
+            newTransactionHistoryScore = '0';
+        } else {
+            newTransactionHistoryScore = transactionHistoryScore;
+        }
+        const creditScoreValue = 0.55 * 80 + 0.33 * (parseFloat(newTransactionHistoryScore) + 20) + 30;
         setCreditScore(parseFloat(creditScoreValue.toFixed(2)));
         const result = await updateUserCreditScore({
             walletAddress: walletAddress,

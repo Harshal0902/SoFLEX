@@ -111,6 +111,34 @@ export default function Page() {
 
         </div>
 
+        {/* <div className='flex items-center justify-center lg:pt-4 pb-12 lg:px-24 px-4'>
+
+          <div className='flex flex-col space-y-4 max-w-4xl'>
+
+            <h2 className='font-semibold tracking-wider text-3xl lg:text-4xl text-center' aria-label={selectedMyService}>
+              SoFLEX: Lend and Borrow <br /> <span className='text-primary hidden md:block'>{typedMyService}<span className='animate-pulse'>|</span></span> <span className='text-primary md:hidden block'>Adventures Take Off</span>
+            </h2>
+
+            <p className='self-center text-lg lg:text-xl tracking-wide text-center'>
+              SoFLEX introduces a comprehensive solution for lending and borrowing compressed NFTs and synthetic assets within the Solana ecosystem, addressing the increasing demand for liquidity and financial flexibility while empowering users to leverage assets efficiently and securely.
+            </p>
+
+            <div className='grid grid-rows-1 md:grid-cols-2 items-center gap-2'>
+              <a href='https://gitbook.soflex.fi/' target='_blank' rel='noreferrer noopener'>
+                <Button className='text-white tracking-wider w-full'>
+                  Read GitBook <ExternalLink className='ml-2 h-4 w-4' />
+                </Button>
+              </a>
+              <Button variant='outline' className='tracking-wider' asChild>
+                <Link href='/check-credit-score'>
+                  Check Credit Score
+                </Link>
+              </Button>
+            </div>
+          </div>
+
+        </div> */}
+
         <div className='mb-12 md:mb-20 text-center relative'>
           <h1 className='mb-4 text-4xl font-bold leading-10 sm:text-5xl sm:leading-none md:text-6xl'>Why Choose Us?</h1>
           <div className='flex justify-center mt-2'>

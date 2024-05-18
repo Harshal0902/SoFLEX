@@ -172,17 +172,23 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
                 }
             }
 
+            const timeout = 8000;
+            const interval = 1000;
+            const start = Date.now();
+
             if (sig && wallet.publicKey) {
                 setSigValidation(true);
 
-                setTimeout(async () => {
+                const polling = setInterval(async () => {
                     if (!sig) {
+                        clearInterval(polling);
                         return toast.error('Transaction failed. Please try again!');
                     }
 
                     const transaction = await connection.getParsedTransaction(sig);
 
                     if (transaction?.meta?.err === null) {
+                        clearInterval(polling);
                         const result = await updateUserBorrowStatus({
                             borrowId: order.borrow_id,
                             borrowStatus: 'Repaid',
@@ -197,12 +203,13 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
                         } else {
                             toast.error('An error occurred while updating the loan status. Please try again!');
                         }
-                    } else {
+                    } else if (Date.now() - start > timeout) {
+                        clearInterval(polling);
                         setIsSubmitting(false);
                         setSigValidation(false);
-                        toast.error('Invalid transaction. Please try again!');
+                        toast.error('Transaction timed out. Please try again!');
                     }
-                }, 8000);
+                }, interval);
             }
         } catch (error) {
             if (error == 'TokenAccountNotFoundError') {
