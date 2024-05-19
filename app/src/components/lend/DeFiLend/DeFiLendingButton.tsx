@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { SignerWalletAdapterProps } from '@solana/wallet-adapter-base'
 import { createTransferInstruction, createAssociatedTokenAccountInstruction, getAssociatedTokenAddress, getAccount } from '@solana/spl-token'
@@ -70,6 +70,7 @@ export const configureAndSendCurrentTransaction = async (
 
 export default function DeFiLendingButton({ row }: { row: { original: LendingAssetDataType } }) {
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [tokenBalance, setTokenBalance] = useState<string>('0');
     const [sigValidation, setSigValidation] = useState<boolean>(false);
     const [open, setOpen] = useState(false);
 
@@ -84,6 +85,68 @@ export default function DeFiLendingButton({ row }: { row: { original: LendingAss
             lending_amount: ''
         },
     });
+
+    useEffect(() => {
+        const fetchTokenAccounts = async () => {
+            if (open === true && publicKey) {
+                try {
+                    let tokenAddress;
+                    let decimalPlaces;
+                    if (order.asset_symbol === 'SOL') {
+                        const walletAddress = publicKey;
+                        const balance = await connection.getBalance(walletAddress);
+                        setTokenBalance(((balance / 10 ** 9).toFixed(4)).toString());
+                    } else {
+                        if (order.asset_symbol === 'USDC') {
+                            // tokenAddress = new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'); // USDC token address on solana mainnet-beta
+                            tokenAddress = new PublicKey('4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU'); // USDC token address on solana devnet
+                            decimalPlaces = 6;
+                        } else if (order.asset_symbol === 'USDT') {
+                            // tokenAddress = new PublicKey('Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB'); // USDT token address on solana mainnet-beta
+                            tokenAddress = new PublicKey('EJwZgeZrdC8TXTQbQBoL6bfuAnFUUy1PVCMB4DYPzVaS'); // USDT token address on solana devnet
+                            decimalPlaces = 6;
+                        } else if (order.asset_symbol === 'JUP') {
+                            tokenAddress = new PublicKey('JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN'); // JUP token address on solana mainnet-beta
+                            decimalPlaces = 6;
+                        } else if (order.asset_symbol === 'PYTH') {
+                            tokenAddress = new PublicKey('HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3RKwX8eACQBCt3'); // PYTH token address on solana mainnet-beta
+                            decimalPlaces = 6;
+                        } else if (order.asset_symbol === 'JTO') {
+                            tokenAddress = new PublicKey('jtojtomepa8beP8AuQc6eXt5FriJwfFMwQx2v2f9mCL'); // JTO token address on solana mainnet-beta
+                            decimalPlaces = 9;
+                        } else if (order.asset_symbol === 'RAY') {
+                            tokenAddress = new PublicKey('4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R'); // RAY token address on solana mainnet-beta
+                            decimalPlaces = 6;
+                        } else if (order.asset_symbol === 'BLZE') {
+                            tokenAddress = new PublicKey('BLZEEuZUBVqFhj8adcCFPJvPVCiCyVmh3hkJMrU8KuJA'); // BLZE token address on solana mainnet-beta
+                            decimalPlaces = 9;
+                        } else if (order.asset_symbol === 'tBTC') {
+                            tokenAddress = new PublicKey('6DNSN2BJsaPFdFFc1zP37kkeNe4Usc1Sqkzr9C9vPWcU'); // tBTC token address on solana mainnet-beta
+                            decimalPlaces = 8;
+                        } else if (order.asset_symbol === 'mSOL') {
+                            tokenAddress = new PublicKey('mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So'); // mSOLO token address on solana mainnet-beta
+                            decimalPlaces = 9;
+                        }
+                        if (tokenAddress && decimalPlaces) {
+                            const associatedTokenFrom = await getAssociatedTokenAddress(
+                                tokenAddress,
+                                publicKey
+                            );
+                            const fromAccount = await getAccount(connection, associatedTokenFrom);
+                            setTokenBalance(((parseFloat(fromAccount.amount.toString()) / 10 ** decimalPlaces).toFixed(4)).toString());
+                        }
+                    }
+                } catch (error) { 
+                    if (error == 'TokenAccountNotFoundError') {
+                        setTokenBalance('0');
+                    }
+                }
+            }
+        }
+
+        fetchTokenAccounts();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [open, connection]);
 
     async function onSubmit(values: z.infer<typeof FormSchema>) {
         try {
@@ -296,6 +359,22 @@ export default function DeFiLendingButton({ row }: { row: { original: LendingAss
                                     </div>
                                     <div>{order.asset_yield}</div>
                                 </div>
+                                <div className='flex flex-row items-center justify-between hover:bg-accent hover:rounded px-2'>
+                                    <div className='flex flex-row items-center space-x-1'>
+                                        <h1 className='font-semibold tracking-wide'>Token balance</h1>
+                                        <TooltipProvider>
+                                            <Tooltip delayDuration={300}>
+                                                <TooltipTrigger asChild>
+                                                    <span><Info className='h-4 w-4 ml-1 cursor-pointer' /></span>
+                                                </TooltipTrigger>
+                                                <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
+                                                    The amount of the asset you have in your wallet.
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
+                                    </div>
+                                    <div>{tokenBalance} {order.asset_symbol}</div>
+                                </div>
                             </div>
 
                             {isSubmitting && !sigValidation &&
@@ -310,10 +389,16 @@ export default function DeFiLendingButton({ row }: { row: { original: LendingAss
                                 </div>
                             }
 
-                            <Button type='submit' className='text-white w-full mt-4' disabled={isSubmitting}>
-                                {isSubmitting && <Loader2 className='animate-spin mr-2' size={15} />}
-                                {isSubmitting ? 'Lending...' : 'Lend'}
-                            </Button>
+                            {parseFloat(tokenBalance) >= parseFloat(form.watch('lending_amount')) && parseFloat(tokenBalance) > 0 ? (
+                                <Button type='submit' className='text-white w-full mt-4' disabled={isSubmitting}>
+                                    {isSubmitting && <Loader2 className='animate-spin mr-2' size={15} />}
+                                    {isSubmitting ? 'Lending...' : 'Lend'}
+                                </Button>
+                            ) : (
+                                <Button className='text-white w-full mt-4' disabled>
+                                    {parseFloat(tokenBalance) <= 0 || parseFloat(tokenBalance) < parseFloat(form.watch('lending_amount')) ? 'Insufficient Balance' : 'Lend'}
+                                </Button>
+                            )}
                         </form>
                     </Form>
                 </div>

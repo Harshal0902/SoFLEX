@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { SignerWalletAdapterProps } from '@solana/wallet-adapter-base'
 import { createTransferInstruction, createAssociatedTokenAccountInstruction, getAssociatedTokenAddress, getAccount } from '@solana/spl-token'
 import { LAMPORTS_PER_SOL, PublicKey, Transaction, Connection, TransactionInstruction, SystemProgram } from '@solana/web3.js'
@@ -48,6 +48,7 @@ export const configureAndSendCurrentTransaction = async (
 export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDataType }, onTrigger: () => void }) {
     const [open, setOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [tokenBalance, setTokenBalance] = useState<string>('0');
     const [sigValidation, setSigValidation] = useState<boolean>(false);
     const [trigger, setTrigger] = useState<boolean>(false);
 
@@ -55,6 +56,68 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
     const { publicKey, sendTransaction, signTransaction } = useWallet();
     const { connection } = useConnection();
     const wallet = useWallet();
+
+    useEffect(() => {
+        const fetchTokenAccounts = async () => {
+            if (open === true && publicKey) {
+                try {
+                    let tokenAddress;
+                    let decimalPlaces;
+                    if (order.borrowing_token === 'SOL') {
+                        const walletAddress = publicKey;
+                        const balance = await connection.getBalance(walletAddress);
+                        setTokenBalance(((balance / 10 ** 9).toFixed(4)).toString());
+                    } else {
+                        if (order.borrowing_token === 'USDC') {
+                            // tokenAddress = new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'); // USDC token address on solana mainnet-beta
+                            tokenAddress = new PublicKey('4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU'); // USDC token address on solana devnet
+                            decimalPlaces = 6;
+                        } else if (order.borrowing_token === 'USDT') {
+                            // tokenAddress = new PublicKey('Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB'); // USDT token address on solana mainnet-beta
+                            tokenAddress = new PublicKey('EJwZgeZrdC8TXTQbQBoL6bfuAnFUUy1PVCMB4DYPzVaS'); // USDT token address on solana devnet
+                            decimalPlaces = 6;
+                        } else if (order.borrowing_token === 'JUP') {
+                            tokenAddress = new PublicKey('JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN'); // JUP token address on solana mainnet-beta
+                            decimalPlaces = 6;
+                        } else if (order.borrowing_token === 'PYTH') {
+                            tokenAddress = new PublicKey('HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3RKwX8eACQBCt3'); // PYTH token address on solana mainnet-beta
+                            decimalPlaces = 6;
+                        } else if (order.borrowing_token === 'JTO') {
+                            tokenAddress = new PublicKey('jtojtomepa8beP8AuQc6eXt5FriJwfFMwQx2v2f9mCL'); // JTO token address on solana mainnet-beta
+                            decimalPlaces = 9;
+                        } else if (order.borrowing_token === 'RAY') {
+                            tokenAddress = new PublicKey('4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R'); // RAY token address on solana mainnet-beta
+                            decimalPlaces = 6;
+                        } else if (order.borrowing_token === 'BLZE') {
+                            tokenAddress = new PublicKey('BLZEEuZUBVqFhj8adcCFPJvPVCiCyVmh3hkJMrU8KuJA'); // BLZE token address on solana mainnet-beta
+                            decimalPlaces = 9;
+                        } else if (order.borrowing_token === 'tBTC') {
+                            tokenAddress = new PublicKey('6DNSN2BJsaPFdFFc1zP37kkeNe4Usc1Sqkzr9C9vPWcU'); // tBTC token address on solana mainnet-beta
+                            decimalPlaces = 8;
+                        } else if (order.borrowing_token === 'mSOL') {
+                            tokenAddress = new PublicKey('mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So'); // mSOLO token address on solana mainnet-beta
+                            decimalPlaces = 9;
+                        }
+                        if (tokenAddress && decimalPlaces) {
+                            const associatedTokenFrom = await getAssociatedTokenAddress(
+                                tokenAddress,
+                                publicKey
+                            );
+                            const fromAccount = await getAccount(connection, associatedTokenFrom);
+                            setTokenBalance(((parseFloat(fromAccount.amount.toString()) / 10 ** decimalPlaces).toFixed(4)).toString());
+                        }
+                    }
+                } catch (error) {
+                    if (error == 'TokenAccountNotFoundError') {
+                        setTokenBalance('0');
+                    }
+                }
+            }
+        }
+
+        fetchTokenAccounts();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [open, connection]);
 
     const formatDate = (dateString: string): string => {
         const date = new Date(dateString);
@@ -406,10 +469,16 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
                         </div>
                     }
 
-                    <Button className='text-white mx-2' disabled={order.borrowing_status !== 'Active' || isSubmitting} onClick={onRepay}>
-                        {isSubmitting && <Loader2 className='animate-spin mr-2' size={15} />}
-                        {order.borrowing_status === 'Active' ? 'Repay' : order.borrowing_status}
-                    </Button>
+                    {parseFloat(tokenBalance) >= parseFloat(order.borrowing_total) && parseFloat(tokenBalance) > 0 && order.borrowing_status || order.borrowing_status !== 'Active' ? (
+                        <Button className='text-white mx-2' disabled={order.borrowing_status !== 'Active' || isSubmitting} onClick={onRepay}>
+                            {isSubmitting && <Loader2 className='animate-spin mr-2' size={15} />}
+                            {order.borrowing_status === 'Active' ? 'Repay' : order.borrowing_status}
+                        </Button>
+                    ) : (
+                        <Button className='text-white w-full mt-4' disabled>
+                            {parseFloat(tokenBalance) <= 0 || parseFloat(tokenBalance) < parseFloat(order.borrowing_total) ? 'Insufficient Balance' : order.borrowing_status === 'Active' ? 'Repay' : order.borrowing_status}
+                        </Button>
+                    )}
                 </div>
             </DialogContent>
         </Dialog>
