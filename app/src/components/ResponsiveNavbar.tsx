@@ -38,7 +38,8 @@ const notifications: Notification[] = [
 ]
 
 export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
-    const [isOpen, setIsOpen] = useState(false);
+    const [isOpen, setIsOpen] = useState<boolean>(false);
+    const [isClosing, setIsClosing] = useState<boolean>(false);
     const [solBalance, setSolBalance] = useState<string>('');
     const [open, setOpen] = useState<boolean>(false);
     const [isMoreOption, setIsMoreOption] = useState<boolean>(false);
@@ -48,7 +49,17 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
     const toggleDropdownNotification = () => toggleDropdown('notification');
     const toggleDropdownProfile = () => toggleDropdown('profile');
 
-    const toggleOpen = () => setIsOpen((prev) => !prev);
+    const toggleOpen = () => {
+        if (isOpen) {
+            setIsClosing(true);
+            setTimeout(() => {
+                setIsOpen(false);
+                setIsClosing(false);
+            }, 300);
+        } else {
+            setIsOpen(true);
+        }
+    };
 
     const pathname = usePathname();
 
@@ -113,9 +124,9 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
                 <Menu className='h-7 w-7' aria-hidden='false' />
             </button>
 
-            {isOpen ? (
+            {isOpen && (
                 <div>
-                    <div className='animate-fade-in-down flex overflow-x-hidden mx-2 -mt-2 h-screen overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none lg:hidden transition-all duration-300'>
+                    <div className={`flex overflow-x-hidden mx-2 -mt-2 h-screen overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none lg:hidden transition-all duration-300 ${isClosing ? 'animate-fade-out-up' : 'animate-fade-in-down'}`}>
                         <div className='relative my-4 mx-auto w-screen'>
                             <div className='border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-background outline-none focus:outline-none'>
                                 <div className='flex items-start justify-between p-5 border-solid rounded-t'>
@@ -282,7 +293,7 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
                                                                 </div>
                                                             </div>
                                                         )}
-                                                        <div className={`flex flex-col space-y-2 transition-all overflow-hidden ${isMoreOption ? 'max-h-screen transition-height duration-500' : 'max-h-0'}`}>
+                                                        <div className={`flex flex-col space-y-2 transition-all overflow-hidden ${isMoreOption ? 'max-h-screen duration-500' : 'max-h-0 duration-300'}`}>
                                                             {wallets
                                                                 .filter((wallet) => wallet.readyState !== 'Installed')
                                                                 .map((wallet) => (
@@ -313,9 +324,9 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
                         </div>
                     </div>
 
-                    <div className='opacity-25 fixed inset-0 z-40 h-screen bg-black md:hidden'></div>
+                    <div className='opacity-25 fixed inset-0 z-40 h-[200vh] bg-black md:hidden'></div>
                 </div>
-            ) : null}
+            )}
 
         </div>
     )

@@ -204,7 +204,7 @@ export default function Navbar() {
                                                 </div>
                                             </div>
                                         )}
-                                        <div className={`flex flex-col space-y-2 transition-all overflow-hidden ${isMoreOption ? 'max-h-screen transition-height duration-500' : 'max-h-0'}`}>
+                                        <div className={`flex flex-col space-y-2 transition-all overflow-hidden ${isMoreOption ? 'max-h-screen duration-500' : 'max-h-0 duration-300'}`}>
                                             {wallets
                                                 .filter((wallet) => wallet.readyState !== 'Installed')
                                                 .map((wallet) => (

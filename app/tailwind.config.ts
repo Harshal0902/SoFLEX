@@ -75,6 +75,10 @@ const config = {
           from: { opacity: '0', transform: 'translateY(-20px)' },
           to: { opacity: '1', transform: 'translateY(0)' },
         },
+        'fade-out-up': {
+          from: { opacity: '1', transform: 'translateY(0)' },
+          to: { opacity: '0', transform: 'translateY(-20px)' },
+        },
         'fade-bottom-up': {
           from: { opacity: '0', transform: 'translateY(80px)' },
           to: { opacity: '1', transform: 'translateY(0)' },
@@ -156,7 +160,8 @@ const config = {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         'spin-slow': 'spin 3s linear infinite',
-        'fade-in-down': 'fade-in-down 0.2s ease-out',
+        'fade-in-down': 'fade-in-down 0.3s forwards',
+        'fade-out-up': 'fade-out-up 0.3s forwards',
         'fade-in-down-nav': 'fade-in-down 0.1s ease-out',
         'fade-in-up-short': 'fade-bottom-up-short 0.5s ease-out',
         'fade-bottom-up': 'fade-bottom-up 0.2s ease-out',
