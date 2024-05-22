@@ -98,7 +98,7 @@ export default function Navbar() {
     };
 
     return (
-        <div className={`backdrop-blur-3xl fixed top-0 z-50 w-full transition-all duration-300 ${isHidden ? '-translate-y-full' : 'translate-y-0'}`}>
+        <div className={`backdrop-blur-3xl fixed top-0 z-50 w-full transition-all duration-200 ${isHidden ? '-translate-y-full' : 'translate-y-0'}`}>
             <nav className='flex items-center py-2 flex-wrap px-2.5 md:px-12 tracking-wider justify-between'>
                 <Link href='/' passHref>
                     <div className='inline-flex items-center justify-center text-2xl md:text-5xl cursor-pointer'>
@@ -204,7 +204,7 @@ export default function Navbar() {
                                                 </div>
                                             </div>
                                         )}
-                                        <div className={`flex flex-col space-y-2 transition-all overflow-hidden ${isMoreOption ? 'max-h-screen duration-500' : 'max-h-0 duration-300'}`}>
+                                        <div className={`flex flex-col space-y-2 transition-all overflow-hidden ${isMoreOption ? 'max-h-screen duration-200' : 'max-h-0 duration-200'}`}>
                                             {wallets
                                                 .filter((wallet) => wallet.readyState !== 'Installed')
                                                 .map((wallet) => (
@@ -219,8 +219,8 @@ export default function Navbar() {
                                         <div className='flex justify-end px-2'>
                                             <div className='flex flex-row space-x-2 items-center cursor-pointer px-2' onClick={toggleMoreOption}>
                                                 <h1>{isMoreOption ? 'Less' : 'More'} option</h1>
-                                                <Triangle fill={`text-foreground`} className={`dark:hidden h-3 w-3 transform transition-transform duration-300 ${isMoreOption ? '' : 'rotate-180'}`} />
-                                                <Triangle fill={`white`} className={`hidden dark:block h-3 w-3 transform transition-transform duration-300 ${isMoreOption ? '' : 'rotate-180'}`} />
+                                                <Triangle fill={`text-foreground`} className={`dark:hidden h-3 w-3 transform transition-transform duration-200 ${isMoreOption ? '' : 'rotate-180'}`} />
+                                                <Triangle fill={`white`} className={`hidden dark:block h-3 w-3 transform transition-transform duration-200 ${isMoreOption ? '' : 'rotate-180'}`} />
                                             </div>
                                         </div>
                                     </div>

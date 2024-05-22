@@ -126,7 +126,7 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
 
             {isOpen && (
                 <div>
-                    <div className={`flex overflow-x-hidden mx-2 -mt-2 h-screen overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none lg:hidden transition-all duration-300 ${isClosing ? 'animate-fade-out-up' : 'animate-fade-in-down'}`}>
+                    <div className={`flex overflow-x-hidden mx-2 -mt-2 h-screen overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none lg:hidden transition-all duration-200 ${isClosing ? 'animate-fade-out-up' : 'animate-fade-in-down'}`}>
                         <div className='relative my-4 mx-auto w-screen'>
                             <div className='border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-background outline-none focus:outline-none'>
                                 <div className='flex items-start justify-between p-5 border-solid rounded-t'>
@@ -293,7 +293,7 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
                                                                 </div>
                                                             </div>
                                                         )}
-                                                        <div className={`flex flex-col space-y-2 transition-all overflow-hidden ${isMoreOption ? 'max-h-screen duration-500' : 'max-h-0 duration-300'}`}>
+                                                        <div className={`flex flex-col space-y-2 transition-all overflow-hidden ${isMoreOption ? 'max-h-screen duration-200' : 'max-h-0 duration-200'}`}>
                                                             {wallets
                                                                 .filter((wallet) => wallet.readyState !== 'Installed')
                                                                 .map((wallet) => (
@@ -308,8 +308,8 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
                                                         <div className='flex justify-end px-2'>
                                                             <div className='flex flex-row space-x-2 items-center cursor-pointer px-2' onClick={toggleMoreOption}>
                                                                 <h1>{isMoreOption ? 'Less' : 'More'} option</h1>
-                                                                <Triangle fill={`text-foreground`} className={`dark:hidden h-3 w-3 transform transition-transform duration-300 ${isMoreOption ? '' : 'rotate-180'}`} />
-                                                                <Triangle fill={`white`} className={`hidden dark:block h-3 w-3 transform transition-transform duration-300 ${isMoreOption ? '' : 'rotate-180'}`} />
+                                                                <Triangle fill={`text-foreground`} className={`dark:hidden h-3 w-3 transform transition-transform duration-200 ${isMoreOption ? '' : 'rotate-180'}`} />
+                                                                <Triangle fill={`white`} className={`hidden dark:block h-3 w-3 transform transition-transform duration-200 ${isMoreOption ? '' : 'rotate-180'}`} />
                                                             </div>
                                                         </div>
                                                     </div>

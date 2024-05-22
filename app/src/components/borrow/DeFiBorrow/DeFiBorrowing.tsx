@@ -64,7 +64,7 @@ export default function DeFiBorrowing() {
 
     fetchData();
 
-    // const intervalId = setInterval(fetchData, 10000);
+    // const intervalId = setInterval(fetchData, 30000);
 
     // return () => clearInterval(intervalId);
   }, []);
