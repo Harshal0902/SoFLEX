@@ -63,7 +63,7 @@ const companySocial: SocialLinkType[] = [
         imageName: 'discord.svg',
     },
     {
-        link: 'https://youtu.be/XMD9lENO4fQ',
+        link: 'https://youtu.be/ckxBAakVReI',
         imageName: 'youtube.svg',
     },
     // {
