@@ -11,7 +11,7 @@ import * as z from 'zod'
 import { toast } from 'sonner'
 import { Form, FormLabel, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import Loading from '@/components/Loading'
+import { Skeleton } from '@/components/ui/skeleton'
 import { DataTable } from '@/components/ui/data-table-defi'
 
 const FormSchema = z.object({
@@ -146,7 +146,11 @@ export default function DeFiLending() {
                 </CardHeader>
                 <CardContent>
                     {loadingData ? (
-                        <Loading />
+                        <div className="flex flex-col h-full space-y-2">
+                            {['h-9 md:w-1/3', 'h-10', 'h-12', 'h-12', 'h-12', 'h-12'].map((classes, index) => (
+                                <Skeleton key={index} className={classes} />
+                            ))}
+                        </div>
                     ) : (
                         <DataTable
                             columns={lendingAssetColumns}

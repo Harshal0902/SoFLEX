@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
 import { toast } from 'sonner'
-import Loading from '@/components/Loading'
+import { Skeleton } from '@/components/ui/skeleton'
 import { icons, Loader2 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
@@ -196,8 +196,19 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
 
     return (
         <div>
-            {loading && loadingUserStats ? (
-                <Loading />
+            {loading ? (
+                <Card className='md:my-4'>
+                    <CardHeader>
+                        <Skeleton className='self-center md:self-start h-8 md:h-16 w-3/4' />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="flex flex-col h-full space-y-2">
+                            {['h-24 w-full', 'h-8 w-1/2', 'h-8 w-1/4', 'h-8 w-3/4'].map((classes, index) => (
+                                <Skeleton key={index} className={classes} />
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
             ) : (
                 <Card className='md:my-4'>
                     <TooltipProvider>
@@ -258,31 +269,41 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
                             {userStats && (
                                 <div className='grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-5 lg:grid-flow-row lg:grid-rows-auto lg:align-content-start'>
                                     {cardData.map((card: CardData, index: number) => (
-                                        <Tooltip delayDuration={300} key={index}>
-                                            <TooltipTrigger>
-                                                <Card className='flex flex-col h-full'>
-                                                    <CardHeader className='flex flex-row items-center justify-between pb-2'>
-                                                        <CardTitle className='text-sm font-medium flex flex-1 flex-row items-center space-x-1 text-start'>
-                                                            <p>{card.title}</p>
-                                                        </CardTitle>
-                                                        {renderIcon({ name: card.icon })}
-                                                    </CardHeader>
-                                                    <CardContent className='text-start'>
-                                                        <p className='text-2xl font-bold'>
-                                                            {card.currentData !== undefined ? card.currentData : 'No data available'}
-                                                        </p>
-                                                        {card.lastMonthData !== undefined &&
-                                                            <p className='text-muted-foreground'>
-                                                                {card.lastMonthData} from last month
-                                                            </p>
-                                                        }
-                                                    </CardContent>
-                                                </Card>
-                                            </TooltipTrigger>
-                                            <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
-                                                {card.tooltipContent}
-                                            </TooltipContent>
-                                        </Tooltip>
+                                        <>
+                                            {loadingUserStats ? (
+                                                <div className="flex flex-col h-full space-y-2">
+                                                    {['h-24', 'h-3', 'h-3 w-3/4'].map((classes, index) => (
+                                                        <Skeleton key={index} className={classes} />
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <Tooltip delayDuration={300} key={index}>
+                                                    <TooltipTrigger>
+                                                        <Card className='flex flex-col h-full'>
+                                                            <CardHeader className='flex flex-row items-center justify-between pb-2'>
+                                                                <CardTitle className='text-sm font-medium flex flex-1 flex-row items-center space-x-1 text-start'>
+                                                                    <p>{card.title}</p>
+                                                                </CardTitle>
+                                                                {renderIcon({ name: card.icon })}
+                                                            </CardHeader>
+                                                            <CardContent className='text-start'>
+                                                                <p className='text-2xl font-bold'>
+                                                                    {card.currentData !== undefined ? card.currentData : 'No data available'}
+                                                                </p>
+                                                                {card.lastMonthData !== undefined &&
+                                                                    <p className='text-muted-foreground'>
+                                                                        {card.lastMonthData} from last month
+                                                                    </p>
+                                                                }
+                                                            </CardContent>
+                                                        </Card>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
+                                                        {card.tooltipContent}
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            )}
+                                        </>
                                     ))}
                                 </div>
                             )}
@@ -290,7 +311,11 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
                             <div className='pt-2'>
                                 <h1 className='text-xl py-2'>Loan History</h1>
                                 {loadingLoanHistory ? (
-                                    <Loading />
+                                    <div className="flex flex-col h-full space-y-2">
+                                        {['h-9 md:w-1/3', 'h-10', 'h-12', 'h-12', 'h-12', 'h-12'].map((classes, index) => (
+                                            <Skeleton key={index} className={classes} />
+                                        ))}
+                                    </div>
                                 ) : (
                                     <DataTable
                                         columns={loanColumns(onTrigger)}

@@ -1,10 +1,10 @@
 import React, { Suspense } from 'react'
-import Loading from '@/components/Loading'
+import Preloader from '@/components/Preloader'
 import BorrowPage from '@/components/borrow/BorrowPage'
 
 export default function Page() {
     return (
-        <Suspense fallback={<Loading />}>
+        <Suspense fallback={<Preloader />}>
             <BorrowPage />
         </Suspense>
     )

@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Form, FormControl, FormField, FormItem, FormLabel, FormDescription, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
-import Loading from '@/components/Loading'
+import Preloader from '@/components/Preloader'
 import Image from 'next/image'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -435,7 +435,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                         <AccordionItem value='cNFT'>
                                             <AccordionTrigger className='hover:no-underline text-left font-semibold tracking-wide'>Select cNFT(s) or Synthetic Asset(s) for Collateral</AccordionTrigger>
                                             <AccordionContent>
-                                                {cNFTLoading ? <Loading /> : (
+                                                {cNFTLoading ? <h1>Loading...</h1> : (
                                                     <div className='flex flex-row space-x-2 flex-wrap justify-evenly'>
                                                         {cNFTResult.length ? (
                                                             cNFTResult.map((nft, index) => (
@@ -478,7 +478,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                         <AccordionItem value='NFT'>
                                             <AccordionTrigger className='hover:no-underline text-left font-semibold tracking-wide'>Select NFT(s) for Collateral</AccordionTrigger>
                                             <AccordionContent>
-                                                {NFTLoading ? <Loading /> : (
+                                                {NFTLoading ? <h1>Loading...</h1> : (
                                                     <div className='flex flex-row space-x-2 flex-wrap justify-evenly'>
                                                         {NFTResult.length ? (
                                                             NFTResult.map((nft, index) => (
@@ -572,12 +572,12 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                 </div>
 
                                 {/* {((parseFloat(formatAsset_price(totalCNFTPrice + totalNFTPrice)) + (0.4 * parseFloat(formatAsset_price(totalCNFTPrice + totalNFTPrice)))) > parseFloat(form.watch('borrowing_amount'))) && form.watch('borrowing_duration') && */}
-                                    <div className='flex flex-col items-end justify-center px-2'>
-                                        <div className='group border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded cursor-pointer text-sm py-2.5 px-4 w-full md:w-auto flex flex-row items-center justify-center' onClick={handleSubmitSection}>
-                                            Calculate Interest Rate
-                                            <ChevronRight className='w-4 h-4 ml-1 group-hover:transform group-hover:translate-x-1 duration-300 ease-in-out' />
-                                        </div>
+                                <div className='flex flex-col items-end justify-center px-2'>
+                                    <div className='group border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded cursor-pointer text-sm py-2.5 px-4 w-full md:w-auto flex flex-row items-center justify-center' onClick={handleSubmitSection}>
+                                        Calculate Interest Rate
+                                        <ChevronRight className='w-4 h-4 ml-1 group-hover:transform group-hover:translate-x-1 duration-300 ease-in-out' />
                                     </div>
+                                </div>
                                 {/* } */}
                             </div>
                         )}
@@ -767,7 +767,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                         </div>
                                     </>
                                 ) : (
-                                    <Loading />
+                                    <h1>Loading...</h1>
                                 )}
 
                                 {!loading &&

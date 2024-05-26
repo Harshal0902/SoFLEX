@@ -7,7 +7,7 @@ import InfoButton from '@/components/InfoButton'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
-import Loading from '@/components/Loading'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export type BorrowingNFTCollectionDataType = {
     nft_name: string;
@@ -183,7 +183,17 @@ export default function P2PBorrowingButton({ row }: { row: { original: Borrowing
                         <AccordionItem value='NFT'>
                             <AccordionTrigger className='hover:no-underline text-left font-semibold tracking-wide'>Select NFT(s) for Collateral</AccordionTrigger>
                             <AccordionContent>
-                                {NFTLoading ? <Loading /> : (
+                                {NFTLoading ? (
+                                    <div className='flex flex-row space-x-2 flex-wrap justify-evenly'>
+                                        {[...Array(3)].map((_, i) => (
+                                            <div key={i} className='border rounded mt-4 p-2 flex flex-col items-center space-y-2'>
+                                                {['h-44 w-36', 'h-3 w-1/2', 'h-3 w-3/4'].map((classes, index) => (
+                                                    <Skeleton key={index} className={classes} />
+                                                ))}
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
                                     <div className='flex flex-row space-x-2 flex-wrap justify-evenly'>
                                         {filteredCollections.length ? (
                                             filteredCollections.map((collection, index) => (

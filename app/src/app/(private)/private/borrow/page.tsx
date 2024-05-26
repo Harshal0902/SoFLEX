@@ -13,7 +13,7 @@ import * as z from 'zod'
 import { toast } from 'sonner'
 import { Form, FormLabel, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import Loading from '@/components/Loading'
+import Preloader from '@/components/Preloader'
 import { DataTable } from '@/components/ui/data-table-defi'
 
 const FormSchema = z.object({
@@ -148,7 +148,7 @@ export default function DeFiBorrowing() {
                 </CardHeader>
                 <CardContent>
                     {loadingData ? (
-                        <Loading />
+                        <Preloader />
                     ) : (
                         <DataTable
                             columns={borrowingAssetColumns}

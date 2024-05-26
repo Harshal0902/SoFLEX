@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Form, FormControl, FormField, FormItem, FormLabel, FormDescription, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
-import Loading from '@/components/Loading'
+import { Skeleton } from '@/components/ui/skeleton'
 import Image from 'next/image'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -435,7 +435,17 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                         <AccordionItem value='cNFT'>
                                             <AccordionTrigger className='hover:no-underline text-left font-semibold tracking-wide'>Select cNFT(s) or Synthetic Asset(s) for Collateral</AccordionTrigger>
                                             <AccordionContent>
-                                                {cNFTLoading ? <Loading /> : (
+                                                {cNFTLoading ? (
+                                                    <div className='flex flex-row space-x-2 flex-wrap justify-evenly'>
+                                                        {[...Array(3)].map((_, i) => (
+                                                            <div key={i} className='border rounded mt-4 p-2 flex flex-col items-center space-y-2'>
+                                                                {['h-44 w-36', 'h-3 w-1/2', 'h-3 w-3/4'].map((classes, index) => (
+                                                                    <Skeleton key={index} className={classes} />
+                                                                ))}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                ) : (
                                                     <div className='flex flex-row space-x-2 flex-wrap justify-evenly'>
                                                         {cNFTResult.length ? (
                                                             cNFTResult.map((nft, index) => (
@@ -478,7 +488,17 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                         <AccordionItem value='NFT'>
                                             <AccordionTrigger className='hover:no-underline text-left font-semibold tracking-wide'>Select NFT(s) for Collateral</AccordionTrigger>
                                             <AccordionContent>
-                                                {NFTLoading ? <Loading /> : (
+                                                {NFTLoading ? (
+                                                    <div className='flex flex-row space-x-2 flex-wrap justify-evenly'>
+                                                        {[...Array(3)].map((_, i) => (
+                                                            <div key={i} className='border rounded mt-4 p-2 flex flex-col items-center space-y-2'>
+                                                                {['h-44 w-36', 'h-3 w-1/2', 'h-3 w-3/4'].map((classes, index) => (
+                                                                    <Skeleton key={index} className={classes} />
+                                                                ))}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                ) : (
                                                     <div className='flex flex-row space-x-2 flex-wrap justify-evenly'>
                                                         {NFTResult.length ? (
                                                             NFTResult.map((nft, index) => (
@@ -767,7 +787,10 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                         </div>
                                     </>
                                 ) : (
-                                    <Loading />
+                                    <div className='flex flex-row items-center justify-center py-16 text-xl'>
+                                        <Loader2 className='text-xl mr-2 mt-0.5 font-extrabold animate-spin' />
+                                        Loading...
+                                    </div>
                                 )}
 
                                 {!loading &&
