@@ -47,7 +47,7 @@ export default function DeFiLending() {
 
     useEffect(() => {
         const fetchData = async () => {
-            const tokens = ['SOL', 'USDC', 'USDT', 'JLP', 'JTO', 'RAY', 'tBTC', 'mSOL'];
+            const tokens = ['SOL', 'USDC', 'USDT', 'JTO', 'RAY', 'tBTC', 'mSOL'];
             for (const token of tokens) {
                 try {
                     const response = await fetch(`https://api.coinbase.com/v2/prices/${token}-USD/buy`);
