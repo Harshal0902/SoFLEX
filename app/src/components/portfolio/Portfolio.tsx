@@ -118,7 +118,7 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
 
     useEffect(() => {
         const fetchUserStatsData = async () => {
-            const result = await teUserStatsDetails({ walletAddress: 'BZ4caKRLYAVSdMdCfziY7gzCcG1XWmYy39xb7ubu8jAm' });
+            const result = await teUserStatsDetails({ walletAddress: walletAddress });
             setUserStats(result as UserStatsType[]);
             setLoadingUserStats(false);
             if (result === 'Error fetching user stats') {
