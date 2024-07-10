@@ -8,6 +8,8 @@ import * as z from 'zod'
 import { toast } from 'sonner'
 import { Skeleton } from '@/components/ui/skeleton'
 import { icons, Loader2 } from 'lucide-react'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormDescription, FormMessage } from '@/components/ui/form'
@@ -57,9 +59,37 @@ const FormSchema = z.object({
     }).optional().nullable().or(z.literal(''))
 })
 
+const WithdrawTokenSchema = z.object({
+    tokenName: z.string({
+        required_error: 'Token name is required.',
+    }).min(2, {
+        message: 'Token name is required.',
+    }).optional().nullable().or(z.literal('')),
+    tokenAmount: z.string()
+        .refine(value => !isNaN(Number(value)), {
+            message: 'Amount must be a number.',
+        })
+        .refine(value => Number(value) > 0, {
+            message: 'Amount must be a positive number.',
+        })
+        .refine(value => {
+            const stringValue = String(value);
+            const [integerPart, decimalPart] = stringValue.split('.');
+
+            if (integerPart.length > 7 || (decimalPart && decimalPart.length > 6)) {
+                return false;
+            }
+
+            return true;
+        }, {
+            message: 'Amount must have up to 7 digits before the decimal point and up to 6 digits after the decimal point.',
+        }),
+})
+
 export default function Portfolio({ walletAddress }: { walletAddress: string }) {
     const [loading, setLoading] = useState(true);
     const [userPortfolio, setUserPortfolio] = useState<UserType[]>([]);
+    const [withdrawToken, setWithdrawToken] = useState(false);
     const [saveData, setSaveData] = useState(false);
     const [userStats, setUserStats] = useState<UserStatsType[]>([]);
     const [loadingUserStats, setLoadingUserStats] = useState(true);
@@ -123,9 +153,46 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    const withdrawForm = useForm<z.infer<typeof WithdrawTokenSchema>>({
+        resolver: zodResolver(WithdrawTokenSchema),
+        defaultValues: {
+            tokenName: 'SOL',
+            tokenAmount: ''
+        },
+    });
+
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema)
-    })
+    });
+
+    const onSubmitWithdrawTokens = async (data: z.infer<typeof WithdrawTokenSchema>) => {
+        setWithdrawToken(true);
+        console.log(data);
+        const values = {
+            user_address: walletAddress,
+            token_name: data.tokenName,
+            tokne_amount: data.tokenAmount,
+        }
+        try {
+            fetch('/withdraw-email-api', {
+                method: 'POST',
+                body: JSON.stringify(values),
+            })
+                .then((res) => res.json())
+                .then((response) => {
+                    toast.success('Request sent successfully! It can take up to 12 hours to process.');
+                    form.reset();
+                })
+                .catch((error) => {
+                    toast.error('An error occurred while sending withdraw request. Please try again!');
+                })
+                .finally(() => {
+                    setWithdrawToken(false);
+                });
+        } catch (error) {
+            toast.error('An error occurred while sending withdraw request. Please try again!');
+        }
+    };
 
     const onSubmitUpdateUserData = async (data: z.infer<typeof FormSchema>) => {
         setSaveData(true);
@@ -202,7 +269,7 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
                         <Skeleton className='self-center md:self-start h-8 md:h-16 w-3/4' />
                     </CardHeader>
                     <CardContent>
-                        <div className="flex flex-col h-full space-y-2">
+                        <div className='flex flex-col h-full space-y-2'>
                             {['h-24 w-full', 'h-8 w-1/2', 'h-8 w-1/4', 'h-8 w-3/4'].map((classes, index) => (
                                 <Skeleton key={index} className={classes} />
                             ))}
@@ -216,9 +283,73 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
                             <div className='flex flex-col md:flex-row justify-between md:items-center space-y-2 md:space-y-0'>
                                 <div className='text-center md:text-start text-2xl md:text-4xl'>My Portfolio</div>
                                 {cardData[0].currentData !== undefined && typeof cardData[0].currentData === 'string' && parseFloat(cardData[0].currentData) > 0 &&
-                                    <div className='w-full md:w-auto'>
-                                        <Button className='text-white w-full md:w-auto'>Withdraw Token</Button>
-                                    </div>
+                                    <Dialog>
+                                        <div className='w-full md:w-auto'>
+                                            <DialogTrigger asChild>
+                                                <Button className='text-white w-full md:w-auto'>Withdraw Token</Button>
+                                            </DialogTrigger>
+                                        </div>
+                                        <DialogContent className='max-w-[90vw] md:max-w-[425px]'>
+                                            <DialogHeader>
+                                                <DialogTitle>How much tokens you want to withdraw?</DialogTitle>
+                                                <DialogDescription>
+                                                    Include how much tokens you want to withdraw from your active lending portfolio.
+                                                </DialogDescription>
+                                            </DialogHeader>
+                                            <div className='grid gap-1'>
+                                                <Form {...withdrawForm}>
+                                                    <form onSubmit={withdrawForm.handleSubmit(onSubmitWithdrawTokens)} className='w-full space-y-2'>
+                                                        <FormField
+                                                            control={withdrawForm.control}
+                                                            name='tokenName'
+                                                            render={({ field }) => (
+                                                                <FormItem>
+                                                                    <FormLabel>Token Name</FormLabel>
+                                                                    <Select onValueChange={field.onChange} defaultValue={'SOL'}>
+                                                                        <FormControl>
+                                                                            <SelectTrigger>
+                                                                                <SelectValue placeholder='Select token name' />
+                                                                            </SelectTrigger>
+                                                                        </FormControl>
+                                                                        <SelectContent>
+                                                                            <SelectItem value='SOL'>SOL</SelectItem>
+                                                                            <SelectItem value='USDT'>USDT</SelectItem>
+                                                                        </SelectContent>
+                                                                    </Select>
+                                                                    <FormDescription>
+                                                                        Select the token you want to withdraw.
+                                                                    </FormDescription>
+                                                                    <FormMessage />
+                                                                </FormItem>
+                                                            )}
+                                                        />
+
+                                                        <FormField
+                                                            control={withdrawForm.control}
+                                                            name='tokenAmount'
+                                                            render={({ field }) => (
+                                                                <FormItem className='w-full'>
+                                                                    <FormLabel>Withdraw Amount</FormLabel>
+                                                                    <FormControl>
+                                                                        <Input placeholder='Token withdraw amount' {...field} value={field.value || ''} />
+                                                                    </FormControl>
+                                                                    <FormDescription>
+                                                                        Enter the amount of tokens you want to withdraw.
+                                                                    </FormDescription>
+                                                                    <FormMessage />
+                                                                </FormItem>
+                                                            )}
+                                                        />
+
+                                                        <Button type='submit' className='w-full text-white' disabled={withdrawToken}>
+                                                            {withdrawToken && <Loader2 className='mr-2 h-4 w-4 animate-spin' size={20} />}
+                                                            {withdrawToken ? 'Requesting...' : 'Withdraw token'}
+                                                        </Button>
+                                                    </form>
+                                                </Form>
+                                            </div>
+                                        </DialogContent>
+                                    </Dialog>
                                 }
                             </div>
                             <Form {...form}>
@@ -257,7 +388,7 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
                                                 </FormItem>
                                             )}
                                         />
-                                        <Button type='submit' className='bg-success hover:bg-green-800 w-full md:w-1/2 text-white'>
+                                        <Button type='submit' className='bg-success hover:bg-green-800 w-full md:w-1/2 text-white' disabled={saveData}>
                                             {saveData && <Loader2 className='mr-2 h-4 w-4 animate-spin' size={20} />}
                                             {saveData ? 'Saving...' : 'Save Details'}
                                         </Button>
@@ -271,7 +402,7 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
                                     {cardData.map((card: CardData, index: number) => (
                                         <>
                                             {loadingUserStats ? (
-                                                <div className="flex flex-col h-full space-y-2">
+                                                <div className='flex flex-col h-full space-y-2'>
                                                     {['h-24', 'h-3', 'h-3 w-3/4'].map((classes, index) => (
                                                         <Skeleton key={index} className={classes} />
                                                     ))}
@@ -311,7 +442,7 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
                             <div className='pt-2'>
                                 <h1 className='text-xl py-2'>Loan History</h1>
                                 {loadingLoanHistory ? (
-                                    <div className="flex flex-col h-full space-y-2">
+                                    <div className='flex flex-col h-full space-y-2'>
                                         {['h-9 md:w-1/3', 'h-10', 'h-12', 'h-12', 'h-12', 'h-12'].map((classes, index) => (
                                             <Skeleton key={index} className={classes} />
                                         ))}

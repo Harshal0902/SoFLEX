@@ -136,7 +136,7 @@ export default function DeFiLendingButton({ row }: { row: { original: LendingAss
                             setTokenBalance(((parseFloat(fromAccount.amount.toString()) / 10 ** decimalPlaces).toFixed(4)).toString());
                         }
                     }
-                } catch (error) { 
+                } catch (error) {
                     if (error == 'TokenAccountNotFoundError') {
                         setTokenBalance('0');
                     }

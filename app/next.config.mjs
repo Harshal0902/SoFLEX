@@ -4,7 +4,11 @@ const nextConfig = {
         return [
             {
                 source: '/email-api/:slug*',
-                destination: `/api/email/:slug*`,
+                destination: '/api/email/:slug*',
+            },
+            {
+                source: '/withdraw-email-api/:slug*',
+                destination: '/api/withdraw-email/:slug*',
             },
             {
                 source: '/ingest/:path*',
