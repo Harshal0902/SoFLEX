@@ -313,7 +313,7 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
                                                                         </FormControl>
                                                                         <SelectContent>
                                                                             <SelectItem value='SOL'>SOL</SelectItem>
-                                                                            <SelectItem value='USDT'>USDT</SelectItem>
+                                                                            <SelectItem value='USDC'>USDC</SelectItem>
                                                                         </SelectContent>
                                                                     </Select>
                                                                     <FormDescription>
