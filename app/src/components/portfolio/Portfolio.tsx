@@ -118,7 +118,7 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
 
     useEffect(() => {
         const fetchUserStatsData = async () => {
-            const result = await teUserStatsDetails({ walletAddress: walletAddress });
+            const result = await teUserStatsDetails({ walletAddress: 'BZ4caKRLYAVSdMdCfziY7gzCcG1XWmYy39xb7ubu8jAm' });
             setUserStats(result as UserStatsType[]);
             setLoadingUserStats(false);
             if (result === 'Error fetching user stats') {
@@ -282,7 +282,7 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
                         <CardHeader>
                             <div className='flex flex-col md:flex-row justify-between md:items-center space-y-2 md:space-y-0'>
                                 <div className='text-center md:text-start text-2xl md:text-4xl'>My Portfolio</div>
-                                {cardData[0].currentData !== undefined && typeof cardData[0].currentData === 'string' && parseFloat(cardData[0].currentData) > 0 &&
+                                {/* {cardData[0].currentData !== undefined && typeof cardData[0].currentData === 'string' && parseFloat(cardData[0].currentData) > 0 && */}
                                     <Dialog>
                                         <div className='w-full md:w-auto'>
                                             <DialogTrigger asChild>
@@ -350,7 +350,7 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
                                             </div>
                                         </DialogContent>
                                     </Dialog>
-                                }
+                                {/* } */}
                             </div>
                             <Form {...form}>
                                 <form onSubmit={form.handleSubmit(onSubmitUpdateUserData)} autoComplete='off'>
