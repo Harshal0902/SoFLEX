@@ -3,7 +3,7 @@
 import { db } from '@/db/db'
 import { waitlist, users, new_asset_or_collection_request, asset_details, nft_collection_details, defi_borrowing, defi_lending, te_user_stats } from '@/db/schema'
 import crypto from 'crypto'
-import { eq, desc } from 'drizzle-orm'
+import { eq, count, and, desc } from 'drizzle-orm'
 
 interface AssetOrCollectionType {
     walletAddress: string;
@@ -196,10 +196,43 @@ export const updateUserData = async ({ walletAddress, name, email }: UserType) =
     }
 }
 
-export const teUserStatsDetails = async ({ walletAddress }: { walletAddress: string }) => {
+export const userStatsDetails = async ({ walletAddress }: { walletAddress: string }) => {
     try {
-        const data = await db.select().from(te_user_stats).where(eq(te_user_stats.user_address, walletAddress));
-        return data;
+        const activeLendingingValue = await db.select({
+            lending_amount: defi_lending.lending_amount,
+            lending_token: defi_lending.lending_token
+        })
+            .from(defi_lending)
+            .where(eq(defi_lending.user_address, walletAddress));
+
+        const completedLoans = await db.select({ count: count() }).from(defi_borrowing)
+            .where(
+                and(
+                    eq(defi_borrowing.user_address, walletAddress),
+                    eq(defi_borrowing.borrowing_status, 'Repaid')
+                )
+            );
+
+        const activeLoans = await db.select({ count: count() }).from(defi_borrowing)
+            .where(
+                and(
+                    eq(defi_borrowing.user_address, walletAddress),
+                    eq(defi_borrowing.borrowing_status, 'Active')
+                )
+            );
+
+        const activeBorrowingValue = await db.select({
+            borrowing_total: defi_borrowing.borrowing_total
+        })
+            .from(defi_borrowing)
+            .where(
+                and(
+                    eq(defi_borrowing.user_address, walletAddress),
+                    eq(defi_borrowing.borrowing_status, 'Active')
+                )
+            );
+
+        return { activeLendingingValue, completedLoans, activeLoans, activeBorrowingValue };
     } catch (error) {
         return 'Error fetching user stats';
     }

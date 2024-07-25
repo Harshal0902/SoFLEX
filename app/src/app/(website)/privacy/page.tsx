@@ -76,7 +76,7 @@ const PrivacySection: React.FC<PrivacyContentType> = ({ title, content }) => (
 export default function Page() {
     return (
         <Suspense fallback={<Preloader />}>
-            <MaxWidthWrapper className='md:my-4'>
+            <MaxWidthWrapper className='my-4'>
                 <div className='flex items-center pb-4 justify-center'>
                     <h1 className='text-3xl md:text-4xl font-semibold tracking-wide'>Privacy Policy</h1>
                 </div>

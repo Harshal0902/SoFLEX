@@ -136,7 +136,7 @@ export default function DeFiBorrowing() {
                                                 )}
                                             />
 
-                                            <Button type='submit' className='text-white bg-primary hover:bg-primary/90'>
+                                            <Button type='submit'>
                                                 Submit Request
                                             </Button>
                                         </form>

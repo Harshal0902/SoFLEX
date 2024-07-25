@@ -68,9 +68,8 @@ export default function Page() {
 
     return (
         <Suspense fallback={<Preloader />}>
-            <MaxWidthWrapper className='md:px-36'>
+            <MaxWidthWrapper className='py-4 md:px-36'>
                 <Card className='animate-fade-in-down grid md:grid-cols-2 p-4 md:p-10 shadow-2xl gap-6'>
-
                     <div className='flex flex-col justify-between'>
                         <div>
                             <CardTitle className='text-2xl font-semibold leading-tight tracking-wider lg:text-3xl'>Let&apos;s talk about everything!</CardTitle>
@@ -134,13 +133,12 @@ export default function Page() {
                                     </FormItem>
                                 )}
                             />
-                            <Button type='submit' className='text-white w-full' disabled={isSubmitting}>
+                            <Button type='submit' className='flex flex-row items-center justify-center w-full' disabled={isSubmitting}>
                                 {isSubmitting && <Loader2 className='mr-2 h-4 w-4 animate-spin' size={20} />}
                                 {isSubmitting ? 'Submitting...' : 'Send'}
                             </Button>
                         </form>
                     </Form>
-
                 </Card>
             </MaxWidthWrapper>
         </Suspense>

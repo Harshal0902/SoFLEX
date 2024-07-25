@@ -97,7 +97,7 @@ const TermSection: React.FC<TermContentType> = ({ title, content }) => (
 export default function Page() {
     return (
         <Suspense fallback={<Preloader />}>
-            <MaxWidthWrapper className='md:my-4'>
+            <MaxWidthWrapper className='my-4'>
                 <div className='flex items-center pb-4 justify-center'>
                     <h1 className='text-3xl md:text-4xl font-semibold tracking-wide'>Terms of Service</h1>
                 </div>

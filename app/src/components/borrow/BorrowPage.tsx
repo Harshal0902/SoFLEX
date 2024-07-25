@@ -30,8 +30,8 @@ export default function BorrowPage() {
     };
 
     return (
-        <MaxWidthWrapper>
-            <div className='mx-auto my-4'>
+        <MaxWidthWrapper className='my-4'>
+            <div className='mx-auto'>
                 <h1 className='text-2xl font-bold text-center lg:text-4xl animate-fade-bottom-up'>
                     Explore Borrowing Options on SoFLEX
                 </h1>
@@ -39,7 +39,7 @@ export default function BorrowPage() {
                     Discover flexible borrowing solutions tailored to your needs on SoFLEX. Access decentralized finance (DeFi) borrowing for peer-to-pool opportunities or dive into peer-to-peer (P2P) borrowing. Whether you&apos;re seeking direct lending from peers or exploring DeFi protocols, SoFLEX offers a seamless experience for accessing funds against your compressed NFTs and synthetic assets within the Solana ecosystem.                </p>
             </div>
 
-            <div className='grid place-items-center'>
+            <div className='grid place-items-center py-4'>
                 <div className='flex flex-row items-center justify-center bg-accent rounded-full py-2 px-8 md:px-12 space-x-4 md:space-x-12'>
                     <div onClick={() => handleTabClick('defi')} className={`px-4 py-1 rounded-full cursor-pointer text-center ${activeTab === 'defi' ? 'bg-primary text-white' : 'bg-gray-200 text-black'}`}>DeFi Borrowing</div>
                     <div onClick={() => handleTabClick('p2p')} className={`px-4 py-1 rounded-full cursor-pointer text-center ${activeTab === 'p2p' ? 'bg-primary text-white' : 'bg-gray-200 text-black'}`}>P2P Borrowing</div>
@@ -48,7 +48,6 @@ export default function BorrowPage() {
 
             {activeTab === 'defi' && <DeFiBorrowing />}
             {activeTab === 'p2p' && <P2PBorrowing />}
-
         </MaxWidthWrapper>
     )
 }

@@ -134,7 +134,7 @@ export default function DeFiLending() {
                                                 )}
                                             />
 
-                                            <Button type='submit' className='text-white bg-primary hover:bg-primary/90'>
+                                            <Button type='submit'>
                                                 Submit Request
                                             </Button>
                                         </form>

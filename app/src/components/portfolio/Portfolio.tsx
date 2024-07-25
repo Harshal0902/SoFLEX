@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from 'react'
-import { userPortfolioDetails, updateUserData, teUserStatsDetails, userLoanDetails } from '@/actions/dbActions'
+import { userPortfolioDetails, updateUserData, userStatsDetails, userLoanDetails } from '@/actions/dbActions'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
@@ -24,18 +24,24 @@ interface UserType {
     email: string;
 }
 
+interface LoanCount {
+    count: number;
+}
+
+interface BorrowingTotal {
+    borrowing_total: string;
+}
+
+interface LendingAmount {
+    lending_amount: string;
+    lending_token: string;
+}
+
 interface UserStatsType {
-    user_address: string,
-    interestearned: string;
-    interestearnedlastmonth: string;
-    completedloans: string;
-    completedloanslastmonth: string;
-    activeloans: string;
-    activeloanslastmonth: string;
-    activeborrowingsvalue: string;
-    activeborrowingsvaluelastmonth: string;
-    activelendingvalue: string;
-    activelendingvaluelastmonth: string;
+    completedLoans: LoanCount[];
+    activeLoans: LoanCount[];
+    activeBorrowingValue: BorrowingTotal[];
+    activeLendingingValue: LendingAmount[];
 }
 
 interface CardData {
@@ -44,6 +50,7 @@ interface CardData {
     icon: string;
     currentData?: string | number;
     lastMonthData?: string | number;
+    extraTooltipContent?: string;
 }
 
 const FormSchema = z.object({
@@ -91,10 +98,17 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
     const [userPortfolio, setUserPortfolio] = useState<UserType[]>([]);
     const [withdrawToken, setWithdrawToken] = useState(false);
     const [saveData, setSaveData] = useState(false);
-    const [userStats, setUserStats] = useState<UserStatsType[]>([]);
+    const [userStats, setUserStats] = useState<UserStatsType | null>(null);
     const [loadingUserStats, setLoadingUserStats] = useState(true);
+    const [maxBorrowing, setMaxBorrowing] = useState<string>('');
+    const [otherBorrowings, setOtherBorrowings] = useState<{ token: string; total: number }[]>([]);
+    const [maxLending, setMaxLending] = useState<string>('');
+    const [otherLendings, setOtherLendings] = useState<{ token: string; total: number }[]>([]);
+    const [maxInterest, setMaxInterest] = useState<string>('');
+    const [otherInterests, setOtherInterests] = useState<{ token: string; total: number }[]>([]);
     const [loadingLoanHistory, setLoadingLoanHistory] = useState(true);
     const [loanHistoryData, setLoanHistoryData] = useState<LoanDataType[]>([]);
+
 
     useEffect(() => {
         const fetchUserPortfolio = async () => {
@@ -116,18 +130,116 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    useEffect(() => {
-        const fetchUserStatsData = async () => {
-            const result = await teUserStatsDetails({ walletAddress: walletAddress });
-            setUserStats(result as UserStatsType[]);
-            setLoadingUserStats(false);
-            if (result === 'Error fetching user stats') {
-                toast.error('An error occurred while fetching user stats. Please try again!');
-                setLoadingUserStats(false);
+    const fetchUserStatsData = async () => {
+        try {
+            const result = await userStatsDetails({ walletAddress });
+            if (typeof result === 'string') {
+                throw new Error(result);
             }
-        };
+            setUserStats(result);
 
+            // Aggregate activeBorrowingValue
+            const borrowingAggregation: { [key: string]: number[] } = {};
+            result.activeBorrowingValue.forEach(({ borrowing_total }) => {
+                const [amount, token] = borrowing_total.split(' ');
+                const numericAmount = parseFloat(amount);
+                if (borrowingAggregation[token]) {
+                    borrowingAggregation[token].push(numericAmount);
+                } else {
+                    borrowingAggregation[token] = [numericAmount];
+                }
+            });
+
+            const aggregatedBorrowingArray = Object.entries(borrowingAggregation).map(([token, amounts]) => {
+                const sortedAmounts = amounts.sort((a, b) => b - a);
+                const maxBorrowing = `${sortedAmounts[0]} ${token}`;
+                const totalOtherAmounts = sortedAmounts.slice(1).reduce((acc, amount) => acc + amount, 0);
+                return {
+                    token,
+                    maxBorrowing,
+                    totalOtherAmounts,
+                };
+            });
+
+            if (aggregatedBorrowingArray.length > 0) {
+                const firstBorrowing = aggregatedBorrowingArray[0];
+                setMaxBorrowing(firstBorrowing.maxBorrowing);
+                setOtherBorrowings(aggregatedBorrowingArray.slice(1).map(({ token, totalOtherAmounts }) => ({
+                    token,
+                    total: totalOtherAmounts,
+                })));
+            }
+
+            // Aggregate activeLendingingValue
+            const lendingAggregation: { [key: string]: number[] } = {};
+            const interestAggregation: { [key: string]: number[] } = {};
+            result.activeLendingingValue.forEach(({ lending_amount, lending_token }) => {
+                const numericAmount = parseFloat(lending_amount);
+                if (lendingAggregation[lending_token]) {
+                    lendingAggregation[lending_token].push(numericAmount);
+                } else {
+                    lendingAggregation[lending_token] = [numericAmount];
+                }
+
+                // Calculate 10% interest
+                const interestAmount = numericAmount * 0.1;
+                if (interestAggregation[lending_token]) {
+                    interestAggregation[lending_token].push(interestAmount);
+                } else {
+                    interestAggregation[lending_token] = [interestAmount];
+                }
+            });
+
+            const aggregatedLendingArray = Object.entries(lendingAggregation).map(([token, amounts]) => {
+                const sortedAmounts = amounts.sort((a, b) => b - a);
+                const maxLending = `${sortedAmounts[0]} ${token}`;
+                const totalOtherAmounts = sortedAmounts.slice(1).reduce((acc, amount) => acc + amount, 0);
+                return {
+                    token,
+                    maxLending,
+                    totalOtherAmounts,
+                };
+            });
+
+            if (aggregatedLendingArray.length > 0) {
+                const firstLending = aggregatedLendingArray[0];
+                setMaxLending(firstLending.maxLending);
+                setOtherLendings(aggregatedLendingArray.slice(1).map(({ token, totalOtherAmounts }) => ({
+                    token,
+                    total: totalOtherAmounts,
+                })));
+            }
+
+            const aggregatedInterestArray = Object.entries(interestAggregation).map(([token, amounts]) => {
+                const sortedAmounts = amounts.sort((a, b) => b - a);
+                const maxInterest = `${sortedAmounts[0]} ${token}`;
+                const totalOtherAmounts = sortedAmounts.slice(1).reduce((acc, amount) => acc + amount, 0);
+                return {
+                    token,
+                    maxInterest,
+                    totalOtherAmounts,
+                };
+            });
+
+            if (aggregatedInterestArray.length > 0) {
+                const firstInterest = aggregatedInterestArray[0];
+                setMaxInterest(firstInterest.maxInterest);
+                setOtherInterests(aggregatedInterestArray.slice(1).map(({ token, totalOtherAmounts }) => ({
+                    token,
+                    total: totalOtherAmounts,
+                })));
+            }
+
+        } catch (error) {
+            toast.error('An error occurred while fetching user stats. Please try again!');
+        } finally {
+            setLoadingUserStats(false);
+        }
+    };
+
+    useEffect(() => {
         fetchUserStatsData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [walletAddress]);
 
     useEffect(() => {
@@ -180,7 +292,7 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
             })
                 .then((res) => res.json())
                 .then((response) => {
-                    toast.success('Request sent successfully! It can take up to 12 hours to process.');
+                    toast.success('Request sent successfully! Tokens will be credited to your wallet shortly.');
                     form.reset();
                 })
                 .catch((error) => {
@@ -215,6 +327,7 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
     };
 
     const onTrigger = () => {
+        fetchUserStatsData();
         fetchLoanHistoryData();
     };
 
@@ -226,45 +339,43 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
     const cardData: CardData[] = [
         {
             title: 'Active Lending Value',
-            tooltipContent: 'See the SOL value of your active lending portfolio.',
+            tooltipContent: 'See the value of your active lending portfolio.',
             icon: 'Activity',
-            currentData: userStats[0]?.activelendingvalue,
-            lastMonthData: userStats[0]?.activelendingvaluelastmonth
+            currentData: maxLending,
+            extraTooltipContent: otherLendings.map(b => `${b.total.toFixed(4)} ${b.token}`).join(', '),
         },
         {
             title: 'Interest Earned',
-            tooltipContent: 'Track your net SOL interest earned from completed loans.',
+            tooltipContent: 'Track your net interest earned from completed loans.',
             icon: 'DollarSign',
-            currentData: userStats[0]?.interestearned,
-            lastMonthData: userStats[0]?.interestearnedlastmonth
+            currentData: maxInterest,
+            extraTooltipContent: otherInterests.map(b => `${b.total.toFixed(4)} ${b.token}`).join(', '),
         },
         {
             title: 'Completed Loans',
             tooltipContent: 'Monitor the number of loans successfully repaid or liquidated.',
             icon: 'Landmark',
-            currentData: userStats[0]?.completedloans,
-            lastMonthData: userStats[0]?.completedloanslastmonth
+            currentData: userStats?.completedLoans[0]?.count ?? 'No data available',
         },
         {
             title: 'Active Loans',
             tooltipContent: 'Stay updated on the number of ongoing active loans and borrowings.',
             icon: 'BriefcaseBusiness',
-            currentData: userStats[0]?.activeloans,
-            lastMonthData: userStats[0]?.activeloanslastmonth
+            currentData: userStats?.activeLoans[0]?.count ?? 'No data available',
         },
         {
             title: 'Active Borrowings Value',
-            tooltipContent: 'View the SOL value of all your current active borrowings.',
+            tooltipContent: 'View the value of all your current active borrowings.',
             icon: 'Banknote',
-            currentData: userStats[0]?.activeborrowingsvalue,
-            lastMonthData: userStats[0]?.activeborrowingsvaluelastmonth
+            currentData: maxBorrowing,
+            extraTooltipContent: otherBorrowings.map(b => `${b.total.toFixed(4)} ${b.token}`).join(', '),
         },
     ];
 
     return (
-        <div>
+        <div className='my-4'>
             {loading ? (
-                <Card className='md:my-4'>
+                <Card>
                     <CardHeader>
                         <Skeleton className='self-center md:self-start h-8 md:h-16 w-3/4' />
                     </CardHeader>
@@ -277,79 +388,79 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
                     </CardContent>
                 </Card>
             ) : (
-                <Card className='md:my-4'>
+                <Card>
                     <TooltipProvider>
                         <CardHeader>
                             <div className='flex flex-col md:flex-row justify-between md:items-center space-y-2 md:space-y-0'>
                                 <div className='text-center md:text-start text-2xl md:text-4xl'>My Portfolio</div>
                                 {/* {cardData[0].currentData !== undefined && typeof cardData[0].currentData === 'string' && parseFloat(cardData[0].currentData) > 0 && */}
-                                    <Dialog>
-                                        <div className='w-full md:w-auto'>
-                                            <DialogTrigger asChild>
-                                                <Button className='text-white w-full md:w-auto'>Withdraw Token</Button>
-                                            </DialogTrigger>
-                                        </div>
-                                        <DialogContent className='max-w-[90vw] md:max-w-[425px]'>
-                                            <DialogHeader>
-                                                <DialogTitle>How much tokens you want to withdraw?</DialogTitle>
-                                                <DialogDescription>
-                                                    Include how much tokens you want to withdraw from your active lending portfolio.
-                                                </DialogDescription>
-                                            </DialogHeader>
-                                            <div className='grid gap-1'>
-                                                <Form {...withdrawForm}>
-                                                    <form onSubmit={withdrawForm.handleSubmit(onSubmitWithdrawTokens)} className='w-full space-y-2'>
-                                                        <FormField
-                                                            control={withdrawForm.control}
-                                                            name='tokenName'
-                                                            render={({ field }) => (
-                                                                <FormItem>
-                                                                    <FormLabel>Token Name</FormLabel>
-                                                                    <Select onValueChange={field.onChange} defaultValue={'SOL'}>
-                                                                        <FormControl>
-                                                                            <SelectTrigger>
-                                                                                <SelectValue placeholder='Select token name' />
-                                                                            </SelectTrigger>
-                                                                        </FormControl>
-                                                                        <SelectContent>
-                                                                            <SelectItem value='SOL'>SOL</SelectItem>
-                                                                            <SelectItem value='USDC'>USDC</SelectItem>
-                                                                        </SelectContent>
-                                                                    </Select>
-                                                                    <FormDescription>
-                                                                        Select the token you want to withdraw.
-                                                                    </FormDescription>
-                                                                    <FormMessage />
-                                                                </FormItem>
-                                                            )}
-                                                        />
-
-                                                        <FormField
-                                                            control={withdrawForm.control}
-                                                            name='tokenAmount'
-                                                            render={({ field }) => (
-                                                                <FormItem className='w-full'>
-                                                                    <FormLabel>Withdraw Amount</FormLabel>
+                                <Dialog>
+                                    <div className='w-full md:w-auto'>
+                                        <DialogTrigger asChild>
+                                            <Button className='w-full md:w-auto'>Withdraw Token</Button>
+                                        </DialogTrigger>
+                                    </div>
+                                    <DialogContent className='max-w-[90vw] md:max-w-[425px]'>
+                                        <DialogHeader>
+                                            <DialogTitle>How much tokens you want to withdraw?</DialogTitle>
+                                            <DialogDescription>
+                                                Include how much tokens you want to withdraw from your active lending portfolio.
+                                            </DialogDescription>
+                                        </DialogHeader>
+                                        <div className='grid gap-1'>
+                                            <Form {...withdrawForm}>
+                                                <form onSubmit={withdrawForm.handleSubmit(onSubmitWithdrawTokens)} className='w-full space-y-2'>
+                                                    <FormField
+                                                        control={withdrawForm.control}
+                                                        name='tokenName'
+                                                        render={({ field }) => (
+                                                            <FormItem>
+                                                                <FormLabel>Token Name</FormLabel>
+                                                                <Select onValueChange={field.onChange} defaultValue={'SOL'}>
                                                                     <FormControl>
-                                                                        <Input placeholder='Token withdraw amount' {...field} value={field.value || ''} />
+                                                                        <SelectTrigger>
+                                                                            <SelectValue placeholder='Select token name' />
+                                                                        </SelectTrigger>
                                                                     </FormControl>
-                                                                    <FormDescription>
-                                                                        Enter the amount of tokens you want to withdraw.
-                                                                    </FormDescription>
-                                                                    <FormMessage />
-                                                                </FormItem>
-                                                            )}
-                                                        />
+                                                                    <SelectContent>
+                                                                        <SelectItem value='SOL'>SOL</SelectItem>
+                                                                        <SelectItem value='USDC'>USDC</SelectItem>
+                                                                    </SelectContent>
+                                                                </Select>
+                                                                <FormDescription>
+                                                                    Select the token you want to withdraw.
+                                                                </FormDescription>
+                                                                <FormMessage />
+                                                            </FormItem>
+                                                        )}
+                                                    />
 
-                                                        <Button type='submit' className='w-full text-white' disabled={withdrawToken}>
-                                                            {withdrawToken && <Loader2 className='mr-2 h-4 w-4 animate-spin' size={20} />}
-                                                            {withdrawToken ? 'Requesting...' : 'Withdraw token'}
-                                                        </Button>
-                                                    </form>
-                                                </Form>
-                                            </div>
-                                        </DialogContent>
-                                    </Dialog>
+                                                    <FormField
+                                                        control={withdrawForm.control}
+                                                        name='tokenAmount'
+                                                        render={({ field }) => (
+                                                            <FormItem className='w-full'>
+                                                                <FormLabel>Withdraw Amount</FormLabel>
+                                                                <FormControl>
+                                                                    <Input placeholder='Token withdraw amount' {...field} value={field.value || ''} />
+                                                                </FormControl>
+                                                                <FormDescription>
+                                                                    Enter the amount of tokens you want to withdraw.
+                                                                </FormDescription>
+                                                                <FormMessage />
+                                                            </FormItem>
+                                                        )}
+                                                    />
+
+                                                    <Button type='submit' className='w-full' disabled={withdrawToken}>
+                                                        {withdrawToken && <Loader2 className='mr-2 h-4 w-4 animate-spin' size={20} />}
+                                                        {withdrawToken ? 'Requesting...' : 'Withdraw token'}
+                                                    </Button>
+                                                </form>
+                                            </Form>
+                                        </div>
+                                    </DialogContent>
+                                </Dialog>
                                 {/* } */}
                             </div>
                             <Form {...form}>
@@ -388,7 +499,7 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
                                                 </FormItem>
                                             )}
                                         />
-                                        <Button type='submit' className='bg-success hover:bg-green-800 w-full md:w-1/2 text-white' disabled={saveData}>
+                                        <Button type='submit' className='bg-success hover:bg-green-800 w-full md:w-1/2' disabled={saveData}>
                                             {saveData && <Loader2 className='mr-2 h-4 w-4 animate-spin' size={20} />}
                                             {saveData ? 'Saving...' : 'Save Details'}
                                         </Button>
@@ -400,7 +511,7 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
                             {userStats && (
                                 <div className='grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-5 lg:grid-flow-row lg:grid-rows-auto lg:align-content-start'>
                                     {cardData.map((card: CardData, index: number) => (
-                                        <>
+                                        <React.Fragment key={index}>
                                             {loadingUserStats ? (
                                                 <div className='flex flex-col h-full space-y-2'>
                                                     {['h-24', 'h-3', 'h-3 w-3/4'].map((classes, index) => (
@@ -408,7 +519,7 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
                                                     ))}
                                                 </div>
                                             ) : (
-                                                <Tooltip delayDuration={300} key={index}>
+                                                <Tooltip delayDuration={300}>
                                                     <TooltipTrigger>
                                                         <Card className='flex flex-col h-full'>
                                                             <CardHeader className='flex flex-row items-center justify-between pb-2'>
@@ -419,22 +530,40 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
                                                             </CardHeader>
                                                             <CardContent className='text-start'>
                                                                 <p className='text-2xl font-bold'>
-                                                                    {card.currentData !== undefined ? card.currentData : 'No data available'}
+                                                                    {card.currentData !== '' && card.currentData !== 0 ? card.currentData : 'No data available'}
                                                                 </p>
-                                                                {card.lastMonthData !== undefined &&
+                                                                {(card.title === 'Active Borrowings Value' && otherBorrowings.length > 0) ||
+                                                                    (card.title === 'Active Lending Value' && otherLendings.length > 0) ||
+                                                                    (card.title === 'Interest Earned' && otherInterests.length > 0) ? (
                                                                     <p className='text-muted-foreground'>
-                                                                        {card.lastMonthData} from last month
+                                                                        +{card.title === 'Active Borrowings Value' ? otherBorrowings.length
+                                                                            : card.title === 'Active Lending Value' ? otherLendings.length
+                                                                                : card.title === 'Interest Earned' ? otherInterests.length
+                                                                                    : 0} other{(card.title === 'Active Borrowings Value' ? otherBorrowings.length
+                                                                                        : card.title === 'Active Lending Value' ? otherLendings.length
+                                                                                            : card.title === 'Interest Earned' ? otherInterests.length
+                                                                                                : 0) > 1 ? 's' : ''}
                                                                     </p>
-                                                                }
+                                                                ) : null}
                                                             </CardContent>
                                                         </Card>
                                                     </TooltipTrigger>
                                                     <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
                                                         {card.tooltipContent}
+                                                        {card.extraTooltipContent && (
+                                                            <div className='flex flex-col space-y-2 pt-2'>
+                                                                <div className='text-left font-semibold tracking-wide'>Other tokens:</div>
+                                                                <div className='grid grid-cols-2 gap-1 justify-center'>
+                                                                    {card.extraTooltipContent.split(', ').map((item, idx) => (
+                                                                        <div className='text-left' key={idx}>{item}</div>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        )}
                                                     </TooltipContent>
                                                 </Tooltip>
                                             )}
-                                        </>
+                                        </React.Fragment>
                                     ))}
                                 </div>
                             )}

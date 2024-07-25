@@ -2,10 +2,9 @@
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useWallet, useConnection } from '@solana/wallet-adapter-react'
+import { useWallet } from '@solana/wallet-adapter-react'
 import { addNewUser } from '@/actions/dbActions'
 import { toast } from 'sonner'
-import { PublicKey } from '@solana/web3.js'
 import ResponsiveNavbar from './ResponsiveNavbar'
 import { Button } from './ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -19,13 +18,11 @@ import ModeToggle from './ModeToggle'
 export default function Navbar() {
     const [isHidden, setIsHidden] = useState(false);
     const [prevScrollPos, setPrevScrollPos] = useState(0);
-    const [solBalance, setSolBalance] = useState<string>('');
     const [open, setOpen] = useState<boolean>(false);
     const [isMoreOption, setIsMoreOption] = useState<boolean>(false);
 
     const { select, wallets, publicKey, disconnect, connected } = useWallet();
     const wallet = useWallet();
-    const { connection } = useConnection();
 
     useEffect(() => {
         const handleScroll = () => {
@@ -60,22 +57,14 @@ export default function Navbar() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [publicKey]);
 
-    useEffect(() => {
-        const fetchSolBalance = async () => {
-            try {
-                if (wallet.publicKey) {
-                    const walletAddress = new PublicKey(wallet.publicKey);
-                    const balance = await connection.getBalance(walletAddress);
-                    setSolBalance((balance / 10 ** 9).toFixed(4));
-                }
-            } catch (error) {
-                toast.error('An error occurred while fetching your balance. Please try again!.');
-            }
-        };
-
-        fetchSolBalance();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [wallet.publicKey]);
+    const formatWalletAddress = (address: string | undefined): string => {
+        if (!address || address.length <= 8) {
+            return address || '';
+        }
+        const start = address.substring(0, 6);
+        const end = address.substring(address.length - 6);
+        return `${start}.....${end}`;
+    };
 
     const handleWalletSelect = async (walletName: any) => {
         if (walletName) {
@@ -103,7 +92,7 @@ export default function Navbar() {
                 <Link href='/' passHref>
                     <div className='inline-flex items-center justify-center text-2xl md:text-5xl cursor-pointer'>
                         SoFLEX
-                        <Badge variant='outline' className='ml-2 text-primary border-primary'>Beta</Badge>
+                        <Badge variant='outline' className='ml-2 text-primary border-primary'>Devnet Beta</Badge>
                     </div>
                 </Link>
 
@@ -137,13 +126,8 @@ export default function Navbar() {
                                         <User className='hover:text-primary' />
                                     </PopoverTrigger>
                                     <PopoverContent align='end' className='mt-2 hidden lg:block max-w-[12rem]'>
-                                        <div className='flex flex-row pb-2 space-x-1'>
-                                            <div>
-                                                Balance: {solBalance}
-                                            </div>
-                                            <div className='text-slate-600'>
-                                                SOL
-                                            </div>
+                                        <div className='flex flex-row pb-2 space-x-1 font-semibold tracking-wider'>
+                                            {formatWalletAddress(wallet?.publicKey?.toString())}
                                         </div>
                                         <Link href='/portfolio' passHref>
                                             <div className='pb-[0.4rem] pr-1 hover:text-primary text-[0.95rem]' >
@@ -167,7 +151,7 @@ export default function Navbar() {
                         ) : (
                             <Dialog open={open} onOpenChange={setOpen}>
                                 <DialogTrigger asChild>
-                                    <Button className='text-white text-md'>
+                                    <Button className=' text-md'>
                                         Connect Wallet
                                     </Button>
                                 </DialogTrigger>
@@ -199,7 +183,7 @@ export default function Navbar() {
                                                 </div>
                                                 <div className='flex flex-row justify-center py-2'>
                                                     <a href='https://phantom.app' target='_blank'>
-                                                        <Button className='w-full px-20 text-white'>Get Wallet</Button>
+                                                        <Button className='w-full px-20'>Get Wallet</Button>
                                                     </a>
                                                 </div>
                                             </div>

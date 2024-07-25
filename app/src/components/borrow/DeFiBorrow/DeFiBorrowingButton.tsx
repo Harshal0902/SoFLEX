@@ -375,7 +375,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button className='text-white' disabled={!publicKey}>
+                <Button disabled={!publicKey}>
                     {publicKey ? 'Borrow' : 'Connect Wallet'}
                 </Button>
             </DialogTrigger>
@@ -383,7 +383,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                 <DialogHeader>
                     <DialogTitle className='flex flex-row space-x-1 items-center'>
                         <div>Borrow Token</div>
-                        <InfoButton />
+                        {/* <InfoButton /> */}
                     </DialogTitle>
                     <DialogDescription>
                         Borrow token from the lending pool.
@@ -801,7 +801,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                                 Edit borrow details
                                             </div>
                                         }
-                                        <Button type='submit' className='text-white px-16 w-full md:w-auto' disabled={isSubmitting || loading}>
+                                        <Button type='submit' className='px-16 w-full md:w-auto' disabled={isSubmitting || loading}>
                                             {isSubmitting && <Loader2 className='animate-spin mr-2' size={15} />}
                                             {isSubmitting ? 'Borrowing...' : 'Borrow'}
                                         </Button>

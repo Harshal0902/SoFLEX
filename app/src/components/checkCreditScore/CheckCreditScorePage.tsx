@@ -22,13 +22,13 @@ export default function CheckCreditScorePage({ walletAddress }: { walletAddress:
 
     const wallet = useWallet();
 
-    const shyftAPIKey = process.env.NEXT_PUBLIC_SHYFTAPI!;
+    const NEXT_PUBLIC_SHYFTAPIKey = process.env.NEXT_PUBLIC_SHYFTAPI!;
 
     const knowTransactionHistory = async () => {
         setLoading(true);
         try {
             const myHeaders = new Headers();
-            myHeaders.append('x-api-key', shyftAPIKey);
+            myHeaders.append('x-api-key', NEXT_PUBLIC_SHYFTAPIKey);
 
             const requestOptions = {
                 method: 'GET',
@@ -85,16 +85,16 @@ export default function CheckCreditScorePage({ walletAddress }: { walletAddress:
     };
 
     return (
-        <Card className='md:my-4'>
+        <Card className='my-4'>
             <CardHeader>
                 <div>
-                    <div className='text-center md:text-start text-2xl md:text-4xl'>My On-Chain Credit Score</div>
+                    <div className='text-center font-medium text-2xl md:text-4xl'>My On-Chain Credit Score</div>
                 </div>
             </CardHeader>
             <CardContent>
                 <div className='flex flex-col space-y-2'>
                     <div className='flex items-center justify-center'>
-                        <Button className='bg-primary text-white px-8' onClick={knowTransactionHistory} disabled={loading}>
+                        <Button className='px-8' onClick={knowTransactionHistory} disabled={loading}>
                             {loading && <Loader2 className='animate-spin mr-2' size={15} />}
                             {loading ? 'Calculating...' : 'Check On-Chain Credit Score'}
                         </Button>

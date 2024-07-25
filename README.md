@@ -1,4 +1,4 @@
-# SoFLEX(Solana NFT Flexible Lending Exchange)
+# SoFLEX (Solana Flexible Lending Exchange)
 
 Solana Compressed NFT and Synthetic Asset Lending and Borrowing Platform
 
@@ -11,7 +11,7 @@ Solana Compressed NFT and Synthetic Asset Lending and Borrowing Platform
 
 ## 💡 Inspiration
 
-The inspiration behind SoFLEX stems from the growing demand for liquidity and financial flexibility in the compressed NFT and synthetic asset space within the Solana ecosystem. By recognizing the limitations of existing platforms and the untapped potential in this niche, SoFLEX aims to provide a comprehensive solution that empowers users to leverage their unique assets efficiently, fostering innovation and growth in decentralized finance (DeFi)
+The inspiration behind SoFLEX stems from the growing demand for liquidity and financial flexibility in the compressed NFT and synthetic asset space within the Solana ecosystem. By recognizing the limitations of existing platforms and the untapped potential in this niche, SoFLEX aims to provide a comprehensive solution that empowers users to leverage their unique assets efficiently, fostering innovation and growth in decentralized finance (DeFi).
 
 ## 💻 What it does
 

@@ -293,7 +293,7 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button className='text-white'>
+                <Button>
                     Loan Details
                 </Button>
             </DialogTrigger>
@@ -470,12 +470,12 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
                     }
 
                     {parseFloat(tokenBalance) >= parseFloat(order.borrowing_total) && parseFloat(tokenBalance) > 0 && order.borrowing_status || order.borrowing_status !== 'Active' ? (
-                        <Button className='text-white mx-2' disabled={order.borrowing_status !== 'Active' || isSubmitting} onClick={onRepay}>
+                        <Button className='mx-2' disabled={order.borrowing_status !== 'Active' || isSubmitting} onClick={onRepay}>
                             {isSubmitting && <Loader2 className='animate-spin mr-2' size={15} />}
                             {order.borrowing_status === 'Active' ? 'Repay' : order.borrowing_status}
                         </Button>
                     ) : (
-                        <Button className='text-white w-full mt-4' disabled>
+                        <Button className='w-full mt-4' disabled>
                             {parseFloat(tokenBalance) <= 0 || parseFloat(tokenBalance) < parseFloat(order.borrowing_total) ? 'Insufficient Balance' : order.borrowing_status === 'Active' ? 'Repay' : order.borrowing_status}
                         </Button>
                     )}

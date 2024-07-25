@@ -6,7 +6,7 @@ export default function InformationCard({ message }: { message: string }) {
         <div className='animate-fade-bottom-up flex items-center justify-center w-full min-h-[60vh]'>
             <Card className='w-full md:max-w-96'>
                 <CardHeader className='py-24'>
-                    <CardTitle className='text-center tracking-wide'>{message}</CardTitle>
+                    <CardTitle className='text-center tracking-wide leading-8'>{message}</CardTitle>
                 </CardHeader>
             </Card>
         </div>

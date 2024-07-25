@@ -5,7 +5,7 @@ seeds = false
 skip-lint = false
 
 [programs.localnet]
-soflex = "6J7PCVvgJWDwkUqYPqHATRcKfdTUQsge4dFQ9YMu858f"
+soflex = "71ocAFn8LQ2AaQ9wfjTUiHAv1QqDVVYuKLNrjpf9vkTb"
 
 [registry]
 url = "https://api.apr.dev"

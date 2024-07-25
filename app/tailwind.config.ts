@@ -1,5 +1,7 @@
 import type { Config } from 'tailwindcss'
 
+const { default: flattenColorPalette } = require('tailwindcss/lib/util/flattenColorPalette')
+
 const config = {
   darkMode: ['class'],
   content: [
@@ -71,29 +73,25 @@ const config = {
           from: { height: 'var(--radix-accordion-content-height)' },
           to: { height: '0' },
         },
-        'fade-in-down': {
-          from: { opacity: '0', transform: 'translateY(-20px)' },
-          to: { opacity: '1', transform: 'translateY(0)' },
+        'tick-appear': {
+          '0%': { opacity: '0', transform: 'scale(0.5)' },
+          '100%': { opacity: '1', transform: 'scale(1)' },
         },
         'fade-out-up': {
           from: { opacity: '1', transform: 'translateY(0)' },
           to: { opacity: '0', transform: 'translateY(-20px)' },
         },
+        'fade-in-down': {
+          from: { opacity: '0', transform: 'translateY(-20px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
+        },
+        'spotlight': {
+          '0%': { opacity: '0', transform: 'translate(-72%, -62%) scale(0.5)' },
+          '100%': { opacity: '1', transform: 'translate(-50%,-40%) scale(1)' },
+        },
         'fade-bottom-up': {
           from: { opacity: '0', transform: 'translateY(80px)' },
           to: { opacity: '1', transform: 'translateY(0)' },
-        },
-        'fade-bottom-up-short': {
-          from: { opacity: '0', transform: 'translateY(10px)' },
-          to: { opacity: '1', transform: 'translateY(0)' },
-        },
-        'fade-left': {
-          from: { opacity: '0', transform: 'translateX(-20px)' },
-          to: { opacity: '1', transform: 'translateX(0)' },
-        },
-        'fade-right': {
-          from: { opacity: '0', transform: 'translateX(20px)' },
-          to: { opacity: '1', transform: 'translateX(0)' },
         },
         'round': {
           '0%': { transform: 'rotate(0deg)' },
@@ -159,21 +157,28 @@ const config = {
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        'tick-appear': 'tick-appear 0.2s ease-out',
         'spin-slow': 'spin 3s linear infinite',
-        'fade-in-down': 'fade-in-down 0.2s forwards ease-out',
         'fade-out-up': 'fade-out-up 0.2s forwards ease-out',
-        'fade-in-down-nav': 'fade-in-down 0.2s ease-out',
-        'fade-in-up-short': 'fade-bottom-up-short 0.5s ease-out',
+        'fade-in-down': 'fade-in-down 0.2s forwards ease-out',
+        'preloader': 'round 1.7s infinite ease, load 1.7s infinite ease',
+        'spotlight': 'spotlight 2s ease .75s 1 forwards',
         'fade-bottom-up': 'fade-bottom-up 0.2s ease-out',
-        'fade-left': 'fade-left 0.2s ease-out',
-        'fade-right': 'fade-right 0.2s ease-out',
-        'fade-left-slow': 'fade-left 0.6s ease-out',
-        'fade-right-slow': 'fade-right 0.6s ease-out',
-        'preloader': 'round 1.7s infinite ease, load 1.7s infinite ease'
       },
     },
   },
-  plugins: [require('tailwindcss-animate')],
+  plugins: [require('tailwindcss-animate'), addVariablesForColors],
 } satisfies Config
+
+function addVariablesForColors({ addBase, theme }: any) {
+  let allColors = flattenColorPalette(theme('colors'));
+  let newVars = Object.fromEntries(
+    Object.entries(allColors).map(([key, val]) => [`--${key}`, val])
+  );
+
+  addBase({
+    ':root': newVars,
+  });
+}
 
 export default config

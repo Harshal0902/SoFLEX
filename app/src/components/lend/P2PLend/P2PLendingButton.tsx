@@ -74,7 +74,7 @@ export default function P2PLendingButton({ row }: { row: { original: LendingNFTC
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button className='text-white' disabled={!publicKey}>
+                <Button disabled={!publicKey}>
                     {publicKey ? 'Lend' : 'Connect Wallet'}
                 </Button>
             </DialogTrigger>
@@ -158,8 +158,8 @@ export default function P2PLendingButton({ row }: { row: { original: LendingNFTC
                                 <p className='text-lg'>Your total is {(form.watch('lending_amount') * offerCount).toFixed(4)} SOL</p>
                             </div>
 
-                            {/* <Button type='submit' className='text-white w-full mt-4' disabled={isSubmitting}> */}
-                            <Button type='submit' className='text-white w-full mt-4' disabled>
+                            {/* <Button type='submit' className='w-full mt-4' disabled={isSubmitting}> */}
+                            <Button type='submit' className='w-full mt-4' disabled>
                                 {isSubmitting && <Loader2 className='animate-spin mr-2' size={15} />}
                                 {isSubmitting ? 'Borrowing...' : 'Borrow'}
                             </Button>

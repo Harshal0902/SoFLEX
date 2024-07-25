@@ -96,7 +96,7 @@ export default function BetaModal() {
                                     )}
                                 />
 
-                                <Button type='submit' className='text-white bg-primary hover:bg-primary/90'>
+                                <Button type='submit'>
                                     Subscribe
                                 </Button>
                             </form>

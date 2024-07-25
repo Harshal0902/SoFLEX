@@ -292,7 +292,7 @@ export default function DeFiLendingButton({ row }: { row: { original: LendingAss
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button className='text-white' disabled={!publicKey}>
+                <Button disabled={!publicKey}>
                     {publicKey ? 'Lend' : 'Connect Wallet'}
                 </Button>
             </DialogTrigger>
@@ -390,12 +390,12 @@ export default function DeFiLendingButton({ row }: { row: { original: LendingAss
                             }
 
                             {parseFloat(tokenBalance) >= parseFloat(form.watch('lending_amount')) && parseFloat(tokenBalance) > 0 ? (
-                                <Button type='submit' className='text-white w-full mt-4' disabled={isSubmitting}>
+                                <Button type='submit' className='w-full mt-4' disabled={isSubmitting}>
                                     {isSubmitting && <Loader2 className='animate-spin mr-2' size={15} />}
                                     {isSubmitting ? 'Lending...' : 'Lend'}
                                 </Button>
                             ) : (
-                                <Button className='text-white w-full mt-4' disabled>
+                                <Button className='w-full mt-4' disabled>
                                     {parseFloat(tokenBalance) <= 0 || parseFloat(tokenBalance) < parseFloat(form.watch('lending_amount')) ? 'Insufficient Balance' : 'Lend'}
                                 </Button>
                             )}

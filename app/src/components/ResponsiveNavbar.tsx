@@ -2,9 +2,8 @@
 
 import React, { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
-import { useWallet, useConnection } from '@solana/wallet-adapter-react'
+import { useWallet } from '@solana/wallet-adapter-react'
 import { toast } from 'sonner'
-import { PublicKey } from '@solana/web3.js'
 import { Menu, X, Home, HandCoins, Gem, Triangle, WalletMinimal, Bell, BellRing, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -28,7 +27,7 @@ const notifications: Notification[] = [
         noteficationTime: '1 hour ago'
     },
     {
-        title: 'Welcome to the Beta Version!',
+        title: 'Welcome to the Devnet Beta Version!',
         noteficationTime: '1 hour ago'
     },
     {
@@ -40,7 +39,7 @@ const notifications: Notification[] = [
 export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const [isClosing, setIsClosing] = useState<boolean>(false);
-    const [solBalance, setSolBalance] = useState<string>('');
+    // const [solBalance, setSolBalance] = useState<string>('');
     const [open, setOpen] = useState<boolean>(false);
     const [isMoreOption, setIsMoreOption] = useState<boolean>(false);
     const [dropdownVisible, setDropdownVisible] = useState<DropdownState>({ notification: false, profile: false });
@@ -76,24 +75,15 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
 
     const { select, wallets, disconnect } = useWallet();
     const wallet = useWallet();
-    const { connection } = useConnection();
 
-    useEffect(() => {
-        const fetchSolBalance = async () => {
-            try {
-                if (wallet.publicKey) {
-                    const walletAddress = new PublicKey(wallet.publicKey);
-                    const balance = await connection.getBalance(walletAddress);
-                    setSolBalance((balance / 10 ** 9).toFixed(4));
-                }
-            } catch (error) {
-                toast.error('An error occurred while fetching your balance. Please try again!.');
-            }
-        };
-
-        fetchSolBalance();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [wallet.publicKey]);
+    const formatWalletAddress = (address: string | undefined): string => {
+        if (!address || address.length <= 8) {
+            return address || '';
+        }
+        const start = address.substring(0, 4);
+        const end = address.substring(address.length - 4);
+        return `${start}...${end}`;
+    };
 
     const handleWalletSelect = async (walletName: any) => {
         if (walletName) {
@@ -119,7 +109,6 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
 
     return (
         <div className='lg:hidden'>
-
             <button type='button' onClick={toggleOpen} aria-hidden='false' aria-label='button' className='pt-1'>
                 <Menu className='h-7 w-7' aria-hidden='false' />
             </button>
@@ -214,9 +203,11 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
                                                                 </div>
                                                             ))}
                                                         </div>
-                                                        <Button className='w-full text-white'>
-                                                            Load More Notifications
-                                                        </Button>
+                                                        {/* <Button className='w-full' asChild>
+                                                            <Link href='/notifications'>
+                                                                Load More Notifications
+                                                            </Link>
+                                                        </Button> */}
                                                     </div>
                                                 </div>
                                             </div>
@@ -229,13 +220,8 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
                                                     </div>
                                                 </div>
                                                 <div className={`grid space-y-1 text-lg items-start pl-2 animate-fade-in-down-nav ${dropdownVisible.profile ? 'block' : 'hidden'}`}>
-                                                    <div className='flex flex-row space-x-1'>
-                                                        <div>
-                                                            Balance: {solBalance}
-                                                        </div>
-                                                        <div className='text-slate-600'>
-                                                            SOL
-                                                        </div>
+                                                    <div className='flex flex-row space-x-1 font-semibold tracking-wide'>
+                                                        {formatWalletAddress(wallet?.publicKey?.toString())}
                                                     </div>
                                                     <Link onClick={() => closeOnCurrent('/portfolio')} href='/portfolio' passHref>
                                                         My Portfolio
@@ -256,7 +242,7 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
                                         <div className='border-y-2 w-full p-2'>
                                             <Dialog open={open} onOpenChange={setOpen}>
                                                 <DialogTrigger asChild>
-                                                    <Button className='text-white text-md w-full'>
+                                                    <Button className='text-md w-full'>
                                                         Connect Wallet
                                                     </Button>
                                                 </DialogTrigger>
@@ -288,7 +274,7 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
                                                                 </div>
                                                                 <div className='flex flex-row justify-center py-2'>
                                                                     <a href='https://phantom.app' target='_blank'>
-                                                                        <Button className='w-full px-20 text-white'>Get Wallet</Button>
+                                                                        <Button className='w-full px-20'>Get Wallet</Button>
                                                                     </a>
                                                                 </div>
                                                             </div>
@@ -327,7 +313,6 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
                     <div className='opacity-25 fixed inset-0 z-40 h-[200vh] bg-black md:hidden'></div>
                 </div>
             )}
-
         </div>
     )
 }

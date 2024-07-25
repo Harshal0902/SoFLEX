@@ -16,7 +16,7 @@ const notifications: Notification[] = [
         noteficationTime: '1 hour ago'
     },
     {
-        title: 'Welcome to the Beta Version!',
+        title: 'Welcome to the Devnet Beta Version!',
         noteficationTime: '1 hour ago'
     },
     {
@@ -60,11 +60,11 @@ export default function Notifications({ className, ...props }: CardProps) {
                         </div>
                     ))}
                 </div>
-                <Button className='w-full text-white' asChild>
+                {/* <Button className='w-full' asChild>
                     <Link href='/notifications'>
                         See All Notifications
                     </Link>
-                </Button>
+                </Button> */}
             </div>
         </div>
     )
