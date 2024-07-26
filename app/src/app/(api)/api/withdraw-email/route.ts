@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
     const password = process.env.EMAIL_PASSWORD;
     const email2 = 'singhdivyanshu917@gmail.com';
 
-    const { user_address, token_name, tokne_amount } = await request.json();
+    const { user_address, token_name, token_amount } = await request.json();
 
     const transport = nodemailer.createTransport({
         service: 'gmail',
@@ -19,13 +19,13 @@ export async function POST(request: NextRequest) {
         },
     });
 
-    const emailHtml = render(WithdrawToken({ user_address, token_name, tokne_amount }));
+    const emailHtml = render(WithdrawToken({ user_address, token_name, token_amount }));
 
     const mailOptions: Mail.Options = {
         from: myEmail,
         to: myEmail,
         cc: email2,
-        subject: `Withdraw request from ${user_address} for ${tokne_amount} ${token_name} on SoFLEX Portfolio page`,
+        subject: `Withdraw request from ${user_address} for ${token_amount} ${token_name} on SoFLEX Portfolio page`,
         html: emailHtml
     };
 

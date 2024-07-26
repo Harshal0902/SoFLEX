@@ -83,7 +83,7 @@ export default function Page() {
       <div className='md:h-[30rem] w-full flex md:items-center md:justify-center antialiased bg-grid-white/[0.02] relative overflow-hidden'>
         <Spotlight className='-top-40 -left-10 md:-left-32 md:-top-20 h-screen' fill='white' />
         <Spotlight className='left-80 top-28 h-[80vh] w-[50vw]' fill='blue' />
-        <Spotlight className='h-[80vh] w-[50vw] top-10 left-full' fill='purple' />
+        {/* <Spotlight className='h-[80vh] w-[50vw] top-10 left-full' fill='#ff99ff' /> */}
         <div className='p-4 max-w-7xl mx-auto relative z-10 w-full pt-8 md:pt-0'>
           <h1 className='pb-3 text-4xl md:text-6xl font-bold text-center bg-clip-text dark:text-transparent dark:bg-gradient-to-b dark:from-neutral-50 dark:to-neutral-400 bg-opacity-50' aria-label={selectedMyService}>
             SoFLEX: Lend and Borrow <br /> <span className='italic'><span className='text-primary'>{typedMyService}<span className='animate-pulse'>|</span></span></span>
@@ -109,7 +109,7 @@ export default function Page() {
       <MaxWidthWrapper>
         <div className='flex flex-col space-y-4 py-3 relative'>
           <div className='relative'>
-            <h1 className='mb-4 text-4xl text-center font-bold leading-10 sm:text-5xl sm:leading-none md:text-6xl'>Why Choose Us?</h1>
+            <h1 className='mb-4 text-4xl text-center font-bold leading-10 tracking-wide sm:text-5xl sm:leading-none md:text-6xl'>Why Choose Us?</h1>
             <div className='flex justify-center mt-2'>
               <div className='inline-flex h-1 bg-indigo-500 rounded-full w-52'></div>
             </div>

@@ -83,13 +83,13 @@ const WithdrawTokenSchema = z.object({
             const stringValue = String(value);
             const [integerPart, decimalPart] = stringValue.split('.');
 
-            if (integerPart.length > 7 || (decimalPart && decimalPart.length > 6)) {
+            if (integerPart.length > 26 || (decimalPart && decimalPart.length > 26)) {
                 return false;
             }
 
             return true;
         }, {
-            message: 'Amount must have up to 7 digits before the decimal point and up to 6 digits after the decimal point.',
+            message: 'Amount must have up to 26 digits before the decimal point and up to 26 digits after the decimal point.',
         }),
 })
 
@@ -97,6 +97,9 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
     const [loading, setLoading] = useState(true);
     const [userPortfolio, setUserPortfolio] = useState<UserType[]>([]);
     const [withdrawToken, setWithdrawToken] = useState(false);
+    const [lendingValues, setLendingValues] = useState<{ token: string; total: number }[]>([]);
+    const [selectedToken, setSelectedToken] = useState<string>('');
+    const [tokenBalance, setTokenBalance] = useState<number>(0);
     const [saveData, setSaveData] = useState(false);
     const [userStats, setUserStats] = useState<UserStatsType | null>(null);
     const [loadingUserStats, setLoadingUserStats] = useState(true);
@@ -136,103 +139,124 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
             if (typeof result === 'string') {
                 throw new Error(result);
             }
-            setUserStats(result);
 
-            // Aggregate activeBorrowingValue
-            const borrowingAggregation: { [key: string]: number[] } = {};
-            result.activeBorrowingValue.forEach(({ borrowing_total }) => {
-                const [amount, token] = borrowing_total.split(' ');
-                const numericAmount = parseFloat(amount);
-                if (borrowingAggregation[token]) {
-                    borrowingAggregation[token].push(numericAmount);
-                } else {
-                    borrowingAggregation[token] = [numericAmount];
-                }
-            });
+            if (result) {
+                setUserStats(result);
 
-            const aggregatedBorrowingArray = Object.entries(borrowingAggregation).map(([token, amounts]) => {
-                const sortedAmounts = amounts.sort((a, b) => b - a);
-                const maxBorrowing = `${sortedAmounts[0]} ${token}`;
-                const totalOtherAmounts = sortedAmounts.slice(1).reduce((acc, amount) => acc + amount, 0);
-                return {
-                    token,
-                    maxBorrowing,
-                    totalOtherAmounts,
-                };
-            });
-
-            if (aggregatedBorrowingArray.length > 0) {
-                const firstBorrowing = aggregatedBorrowingArray[0];
-                setMaxBorrowing(firstBorrowing.maxBorrowing);
-                setOtherBorrowings(aggregatedBorrowingArray.slice(1).map(({ token, totalOtherAmounts }) => ({
-                    token,
-                    total: totalOtherAmounts,
-                })));
-            }
-
-            // Aggregate activeLendingingValue
-            const lendingAggregation: { [key: string]: number[] } = {};
-            const interestAggregation: { [key: string]: number[] } = {};
-            result.activeLendingingValue.forEach(({ lending_amount, lending_token }) => {
-                const numericAmount = parseFloat(lending_amount);
-                if (lendingAggregation[lending_token]) {
-                    lendingAggregation[lending_token].push(numericAmount);
-                } else {
-                    lendingAggregation[lending_token] = [numericAmount];
+                // Handle case when activeBorrowingValue or activeLendingingValue is empty
+                const borrowingAggregation: { [key: string]: number[] } = {};
+                if (result.activeBorrowingValue.length > 0) {
+                    result.activeBorrowingValue.forEach(({ borrowing_total }) => {
+                        const [amount, token] = borrowing_total.split(' ');
+                        const numericAmount = parseFloat(amount);
+                        if (borrowingAggregation[token]) {
+                            borrowingAggregation[token].push(numericAmount);
+                        } else {
+                            borrowingAggregation[token] = [numericAmount];
+                        }
+                    });
                 }
 
-                // Calculate 10% interest
-                const interestAmount = numericAmount * 0.1;
-                if (interestAggregation[lending_token]) {
-                    interestAggregation[lending_token].push(interestAmount);
-                } else {
-                    interestAggregation[lending_token] = [interestAmount];
+                const aggregatedBorrowingArray = Object.entries(borrowingAggregation).map(([token, amounts]) => {
+                    const totalAmount = amounts.reduce((acc, amount) => acc + amount, 0);
+                    return {
+                        token,
+                        totalAmount,
+                    };
+                });
+
+                aggregatedBorrowingArray.sort((a, b) => b.totalAmount - a.totalAmount);
+                const highestBorrowing = aggregatedBorrowingArray[0] || { token: '', totalAmount: 0 };
+                const otherBorrowings = aggregatedBorrowingArray.slice(1);
+
+                setMaxBorrowing(`${highestBorrowing.totalAmount.toFixed(4)} ${highestBorrowing.token}`);
+                setOtherBorrowings(otherBorrowings.map(({ token, totalAmount }) => ({
+                    token,
+                    total: totalAmount,
+                })));
+
+                const lendingAggregation: { [key: string]: number[] } = {};
+                const interestAggregation: { [key: string]: number[] } = {};
+                if (result.activeLendingingValue.length > 0) {
+                    result.activeLendingingValue.forEach(({ lending_amount, lending_token }) => {
+                        const numericAmount = parseFloat(lending_amount);
+                        if (lendingAggregation[lending_token]) {
+                            lendingAggregation[lending_token].push(numericAmount);
+                        } else {
+                            lendingAggregation[lending_token] = [numericAmount];
+                        }
+
+                        // Calculate 10% interest
+                        const interestAmount = numericAmount * 0.1;
+                        if (interestAggregation[lending_token]) {
+                            interestAggregation[lending_token].push(interestAmount);
+                        } else {
+                            interestAggregation[lending_token] = [interestAmount];
+                        }
+                    });
                 }
-            });
 
-            const aggregatedLendingArray = Object.entries(lendingAggregation).map(([token, amounts]) => {
-                const sortedAmounts = amounts.sort((a, b) => b - a);
-                const maxLending = `${sortedAmounts[0]} ${token}`;
-                const totalOtherAmounts = sortedAmounts.slice(1).reduce((acc, amount) => acc + amount, 0);
-                return {
-                    token,
-                    maxLending,
-                    totalOtherAmounts,
-                };
-            });
+                const aggregatedLendingArray = Object.entries(lendingAggregation).map(([token, amounts]) => {
+                    const totalAmount = amounts.reduce((acc, amount) => acc + amount, 0);
+                    return {
+                        token,
+                        totalAmount,
+                    };
+                });
 
-            if (aggregatedLendingArray.length > 0) {
-                const firstLending = aggregatedLendingArray[0];
-                setMaxLending(firstLending.maxLending);
-                setOtherLendings(aggregatedLendingArray.slice(1).map(({ token, totalOtherAmounts }) => ({
+                aggregatedLendingArray.sort((a, b) => b.totalAmount - a.totalAmount);
+                const highestLending = aggregatedLendingArray[0] || { token: '', totalAmount: 0 };
+                const otherLendings = aggregatedLendingArray.slice(1);
+
+                setMaxLending(`${highestLending.totalAmount.toFixed(4)} ${highestLending.token}`);
+                setOtherLendings(otherLendings.map(({ token, totalAmount }) => ({
                     token,
-                    total: totalOtherAmounts,
+                    total: totalAmount,
                 })));
-            }
 
-            const aggregatedInterestArray = Object.entries(interestAggregation).map(([token, amounts]) => {
-                const sortedAmounts = amounts.sort((a, b) => b - a);
-                const maxInterest = `${sortedAmounts[0]} ${token}`;
-                const totalOtherAmounts = sortedAmounts.slice(1).reduce((acc, amount) => acc + amount, 0);
-                return {
-                    token,
-                    maxInterest,
-                    totalOtherAmounts,
-                };
-            });
+                const aggregatedInterestArray = Object.entries(interestAggregation).map(([token, amounts]) => {
+                    const totalAmount = amounts.reduce((acc, amount) => acc + amount, 0);
+                    return {
+                        token,
+                        totalAmount,
+                    };
+                });
 
-            if (aggregatedInterestArray.length > 0) {
-                const firstInterest = aggregatedInterestArray[0];
-                setMaxInterest(firstInterest.maxInterest);
-                setOtherInterests(aggregatedInterestArray.slice(1).map(({ token, totalOtherAmounts }) => ({
+                aggregatedInterestArray.sort((a, b) => b.totalAmount - a.totalAmount);
+                const highestInterest = aggregatedInterestArray[0] || { token: '', totalAmount: 0 };
+                const otherInterests = aggregatedInterestArray.slice(1);
+
+
+                // result.activeLendingingValue.forEach(({ lending_amount, lending_token }) => {
+                //     const numericAmount = parseFloat(lending_amount);
+                //     if (lendingAggregation[lending_token]) {
+                //         lendingAggregation[lending_token].push(numericAmount);
+                //     } else {
+                //         lendingAggregation[lending_token] = [numericAmount];
+                //     }
+                // });
+
+                const aggregatedLendingArrayForWithdraw = Object.entries(lendingAggregation).map(([token, amounts]) => {
+                    const totalAmount = amounts.reduce((acc, amount) => acc + amount, 0);
+                    return {
+                        token,
+                        total: totalAmount,
+                    };
+                });
+
+                setLendingValues(aggregatedLendingArrayForWithdraw);
+
+                setMaxInterest(`${highestInterest.totalAmount.toFixed(4)} ${highestInterest.token}`);
+                setOtherInterests(otherInterests.map(({ token, totalAmount }) => ({
                     token,
-                    total: totalOtherAmounts,
+                    total: totalAmount,
                 })));
+            } else {
+                setUserStats(null);
             }
-
+            setLoadingUserStats(false);
         } catch (error) {
-            toast.error('An error occurred while fetching user stats. Please try again!');
-        } finally {
+            toast.error(`An error occurred while fetching user stats. Please try again!, ${error}`);
             setLoadingUserStats(false);
         }
     };
@@ -249,6 +273,13 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [userPortfolio]);
+
+    useEffect(() => {
+        const token = lendingValues.find(t => t.token === selectedToken);
+        if (token) {
+            setTokenBalance(token.total);
+        }
+    }, [selectedToken, lendingValues]);
 
     const fetchLoanHistoryData = async () => {
         const result = await userLoanDetails({ walletAddress: walletAddress });
@@ -268,7 +299,8 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
     const withdrawForm = useForm<z.infer<typeof WithdrawTokenSchema>>({
         resolver: zodResolver(WithdrawTokenSchema),
         defaultValues: {
-            tokenName: 'SOL',
+            // tokenName: lendingValues.length > 0 ? lendingValues[0].token : '',
+            tokenName: '',
             tokenAmount: ''
         },
     });
@@ -279,11 +311,10 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
 
     const onSubmitWithdrawTokens = async (data: z.infer<typeof WithdrawTokenSchema>) => {
         setWithdrawToken(true);
-        console.log(data);
         const values = {
             user_address: walletAddress,
             token_name: data.tokenName,
-            tokne_amount: data.tokenAmount,
+            token_amount: data.tokenAmount,
         }
         try {
             fetch('/withdraw-email-api', {
@@ -355,17 +386,17 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
             title: 'Completed Loans',
             tooltipContent: 'Monitor the number of loans successfully repaid or liquidated.',
             icon: 'Landmark',
-            currentData: userStats?.completedLoans[0]?.count ?? 'No data available',
+            currentData: userStats?.completedLoans[0]?.count ?? '0',
         },
         {
             title: 'Active Loans',
             tooltipContent: 'Stay updated on the number of ongoing active loans and borrowings.',
             icon: 'BriefcaseBusiness',
-            currentData: userStats?.activeLoans[0]?.count ?? 'No data available',
+            currentData: userStats?.activeLoans[0]?.count ?? '0',
         },
         {
             title: 'Active Borrowings Value',
-            tooltipContent: 'View the value of all your current active borrowings.',
+            tooltipContent: 'View the total value of all your current active borrowings, including interest.',
             icon: 'Banknote',
             currentData: maxBorrowing,
             extraTooltipContent: otherBorrowings.map(b => `${b.total.toFixed(4)} ${b.token}`).join(', '),
@@ -402,67 +433,83 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
                                     </div>
                                     <DialogContent className='max-w-[90vw] md:max-w-[425px]'>
                                         <DialogHeader>
-                                            <DialogTitle>How much tokens you want to withdraw?</DialogTitle>
+                                            <DialogTitle className='tracking-wide'>How many tokens do you want to withdraw?</DialogTitle>
                                             <DialogDescription>
-                                                Include how much tokens you want to withdraw from your active lending portfolio.
+                                                Specify the amount of tokens you want to withdraw from your active lending portfolio.
                                             </DialogDescription>
                                         </DialogHeader>
                                         <div className='grid gap-1'>
-                                            <Form {...withdrawForm}>
-                                                <form onSubmit={withdrawForm.handleSubmit(onSubmitWithdrawTokens)} className='w-full space-y-2'>
-                                                    <FormField
-                                                        control={withdrawForm.control}
-                                                        name='tokenName'
-                                                        render={({ field }) => (
-                                                            <FormItem>
-                                                                <FormLabel>Token Name</FormLabel>
-                                                                <Select onValueChange={field.onChange} defaultValue={'SOL'}>
+                                            {lendingValues.length > 0 ? (
+                                                <Form {...withdrawForm}>
+                                                    <form onSubmit={withdrawForm.handleSubmit(onSubmitWithdrawTokens)} className='w-full space-y-2'>
+                                                        <FormField
+                                                            control={withdrawForm.control}
+                                                            name='tokenName'
+                                                            render={({ field }) => (
+                                                                <FormItem>
+                                                                    <FormLabel>Token Name</FormLabel>
+                                                                    <Select
+                                                                        onValueChange={(value) => {
+                                                                            field.onChange(value);
+                                                                            setSelectedToken(value);
+                                                                        }}
+                                                                    // value={field.value || lendingValues[0]?.token}
+                                                                    >
+                                                                        <FormControl>
+                                                                            <SelectTrigger>
+                                                                                <SelectValue placeholder='Select token name' />
+                                                                            </SelectTrigger>
+                                                                        </FormControl>
+                                                                        <SelectContent>
+                                                                            {lendingValues.map(({ token }) => (
+                                                                                <SelectItem key={token} value={token}>
+                                                                                    {token}
+                                                                                </SelectItem>
+                                                                            ))}
+                                                                        </SelectContent>
+                                                                    </Select>
+                                                                    <FormDescription>
+                                                                        Select the token you want to withdraw.
+                                                                    </FormDescription>
+                                                                    <FormMessage />
+                                                                </FormItem>
+                                                            )}
+                                                        />
+
+                                                        <FormField
+                                                            control={withdrawForm.control}
+                                                            name='tokenAmount'
+                                                            render={({ field }) => (
+                                                                <FormItem className='w-full pb-2'>
+                                                                    <FormLabel>Withdraw Amount</FormLabel>
                                                                     <FormControl>
-                                                                        <SelectTrigger>
-                                                                            <SelectValue placeholder='Select token name' />
-                                                                        </SelectTrigger>
+                                                                        <Input placeholder='Token withdraw amount' {...field} value={field.value || ''} type='number' step='any' min='0' max={tokenBalance} />
                                                                     </FormControl>
-                                                                    <SelectContent>
-                                                                        <SelectItem value='SOL'>SOL</SelectItem>
-                                                                        <SelectItem value='USDC'>USDC</SelectItem>
-                                                                    </SelectContent>
-                                                                </Select>
-                                                                <FormDescription>
-                                                                    Select the token you want to withdraw.
-                                                                </FormDescription>
-                                                                <FormMessage />
-                                                            </FormItem>
-                                                        )}
-                                                    />
+                                                                    {tokenBalance > 0 &&
+                                                                        <FormDescription>
+                                                                            Current balance: {tokenBalance} {withdrawForm.watch('tokenName')}
+                                                                        </FormDescription>
+                                                                    }
+                                                                    <FormMessage />
+                                                                </FormItem>
+                                                            )}
+                                                        />
 
-                                                    <FormField
-                                                        control={withdrawForm.control}
-                                                        name='tokenAmount'
-                                                        render={({ field }) => (
-                                                            <FormItem className='w-full'>
-                                                                <FormLabel>Withdraw Amount</FormLabel>
-                                                                <FormControl>
-                                                                    <Input placeholder='Token withdraw amount' {...field} value={field.value || ''} />
-                                                                </FormControl>
-                                                                <FormDescription>
-                                                                    Enter the amount of tokens you want to withdraw.
-                                                                </FormDescription>
-                                                                <FormMessage />
-                                                            </FormItem>
-                                                        )}
-                                                    />
-
-                                                    <Button type='submit' className='w-full' disabled={withdrawToken}>
-                                                        {withdrawToken && <Loader2 className='mr-2 h-4 w-4 animate-spin' size={20} />}
-                                                        {withdrawToken ? 'Requesting...' : 'Withdraw token'}
-                                                    </Button>
-                                                </form>
-                                            </Form>
+                                                        <Button type='submit' className='w-full' disabled={withdrawToken}>
+                                                            {withdrawToken && <Loader2 className='mr-2 h-4 w-4 animate-spin' size={20} />}
+                                                            {withdrawToken ? 'Requesting...' : 'Withdraw token'}
+                                                        </Button>
+                                                    </form>
+                                                </Form>
+                                            ) : (
+                                                <div className='text-center'>No active lending found.</div>
+                                            )}
                                         </div>
                                     </DialogContent>
                                 </Dialog>
                                 {/* } */}
                             </div>
+
                             <Form {...form}>
                                 <form onSubmit={form.handleSubmit(onSubmitUpdateUserData)} autoComplete='off'>
                                     <div className='flex flex-col md:flex-row w-full items-center justify-start space-x-0 md:space-x-4 space-y-4 md:space-y-0 py-2'>
@@ -499,6 +546,7 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
                                                 </FormItem>
                                             )}
                                         />
+
                                         <Button type='submit' className='bg-success hover:bg-green-800 w-full md:w-1/2' disabled={saveData}>
                                             {saveData && <Loader2 className='mr-2 h-4 w-4 animate-spin' size={20} />}
                                             {saveData ? 'Saving...' : 'Save Details'}
@@ -530,7 +578,7 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
                                                             </CardHeader>
                                                             <CardContent className='text-start'>
                                                                 <p className='text-2xl font-bold'>
-                                                                    {card.currentData !== '' && card.currentData !== 0 ? card.currentData : 'No data available'}
+                                                                    {card.currentData !== '' && card.currentData !== 0 ? card.currentData : '0'}
                                                                 </p>
                                                                 {(card.title === 'Active Borrowings Value' && otherBorrowings.length > 0) ||
                                                                     (card.title === 'Active Lending Value' && otherLendings.length > 0) ||

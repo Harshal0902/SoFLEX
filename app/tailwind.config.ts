@@ -93,6 +93,10 @@ const config = {
           from: { opacity: '0', transform: 'translateY(80px)' },
           to: { opacity: '1', transform: 'translateY(0)' },
         },
+        'fade-bottom-up-short': {
+          from: { opacity: '0', transform: 'translateY(10px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
+        },
         'round': {
           '0%': { transform: 'rotate(0deg)' },
           '100%': { transform: 'rotate(360deg)' },
@@ -161,9 +165,11 @@ const config = {
         'spin-slow': 'spin 3s linear infinite',
         'fade-out-up': 'fade-out-up 0.2s forwards ease-out',
         'fade-in-down': 'fade-in-down 0.2s forwards ease-out',
+        'fade-in-down-nav': 'fade-in-down 0.2s ease-out',
         'preloader': 'round 1.7s infinite ease, load 1.7s infinite ease',
         'spotlight': 'spotlight 2s ease .75s 1 forwards',
         'fade-bottom-up': 'fade-bottom-up 0.2s ease-out',
+        'fade-in-up-short': 'fade-bottom-up-short 0.5s ease-out',
       },
     },
   },

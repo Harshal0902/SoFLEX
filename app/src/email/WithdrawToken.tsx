@@ -1,7 +1,7 @@
 import React from 'react'
 import { Tailwind, Body, Container, Head, Heading, Hr, Html, Preview, Section, Text } from '@react-email/components'
 
-export function WithdrawToken({ user_address, token_name, tokne_amount }: { user_address: string, token_name: string, tokne_amount: string }) {
+export function WithdrawToken({ user_address, token_name, token_amount }: { user_address: string, token_name: string, token_amount: string }) {
     return (
         <Html>
             <Head />
@@ -23,7 +23,7 @@ export function WithdrawToken({ user_address, token_name, tokne_amount }: { user
 
                         <Section className='flex flex-col space-y-4 p-4 bg-white rounded-b-md'>
                             <Heading as='h2' className='m-0 mb-3.5 font-bold text-xl text-[#020817]'>
-                                Withdraw request from {user_address} for {tokne_amount} {token_name} on SoFLEX Portfolio page
+                                Withdraw request from {user_address} for {token_amount} {token_name} on SoFLEX Portfolio page
                             </Heading>
 
                             <Hr className='my-5' />
@@ -33,7 +33,7 @@ export function WithdrawToken({ user_address, token_name, tokne_amount }: { user
                             </Text>
 
                             <Text className='text-[17px] leading-[17px] text-[#3c3f44]'>
-                                Withdraw Token: {tokne_amount} {token_name}
+                                Withdraw Token: {token_amount} {token_name}
                             </Text>
 
                             <Hr className='my-5' />
