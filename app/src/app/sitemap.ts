@@ -1,42 +1,23 @@
 import { MetadataRoute } from 'next'
 
+const defaultLocale = 'en' as const;
+const locales = ['en', 'de', 'es', 'zh', 'ko', 'ja'] as const;
+
+const pathnames = ['/', '/privacy', '/tos', '/contact-us', '/faqs', '/profile'];
+const host = 'https://www.soflex.fi';
+
 export default function sitemap(): MetadataRoute.Sitemap {
-    return [
-        {
-            url: 'https://www.soflex.fi',
-            lastModified: new Date(),
-            changeFrequency: 'yearly',
-            priority: 1,
-        },
-        {
-            url: 'https://www.soflex.fi/privacy',
-            lastModified: new Date(),
-            changeFrequency: 'yearly',
-            priority: 0.8,
-        },
-        {
-            url: 'https://www.soflex.fi/tos',
-            lastModified: new Date(),
-            changeFrequency: 'yearly',
-            priority: 0.8,
-        },
-        {
-            url: 'https://www.soflex.fi/contact-us',
-            lastModified: new Date(),
-            changeFrequency: 'yearly',
-            priority: 0.6,
-        },
-        {
-            url: 'https://www.soflex.fi/faqs',
-            lastModified: new Date(),
-            changeFrequency: 'monthly',
-            priority: 0.8,
-        },
-        {
-            url: 'https://www.soflex.fi/profile',
-            lastModified: new Date(),
-            changeFrequency: 'weekly',
-            priority: 0.5,
-        },
-    ]
+    function getUrl(pathname: string, locale: string) {
+        return `${host}/${locale}${pathname === '/' ? '' : pathname}`;
+    }
+
+    return pathnames.map((pathname) => ({
+        url: getUrl(pathname, defaultLocale),
+        lastModified: new Date(),
+        alternates: {
+            languages: Object.fromEntries(
+                locales.map((locale) => [locale, getUrl(pathname, locale)])
+            )
+        }
+    }));
 }

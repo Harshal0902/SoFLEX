@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import { useWallet } from '@solana/wallet-adapter-react'
+import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import { Loader2, ExternalLink } from 'lucide-react'
 import InfoButton from '@/components/InfoButton'
@@ -35,6 +36,7 @@ export default function P2PBorrowingButton({ row }: { row: { original: Borrowing
     const order = row.original;
     const { publicKey } = useWallet();
     const wallet = useWallet();
+    const t = useTranslations('P2PBorrowPage');
 
     const shyft_api_key = process.env.NEXT_PUBLIC_SHYFTAPI!;
 
@@ -44,7 +46,7 @@ export default function P2PBorrowingButton({ row }: { row: { original: Borrowing
             const metadata = await response.json();
             return metadata.image;
         } catch (error) {
-            toast.error(`An error occurred while fetching NFT data. Please try again!`);
+            toast.error(`${t('nftFetchingError')}`);
             return null;
         }
     };
@@ -127,7 +129,7 @@ export default function P2PBorrowingButton({ row }: { row: { original: Borrowing
                     const images = await Promise.all(imagesPromises);
                     setNftImages(images);
                 } catch (error) {
-                    toast.error(`An error occurred while fetching NFT data. Please try again!`);
+                    toast.error(`${t('nftFetchingError')}`);
                 } finally {
                     setNFTLoading(false);
                 }
@@ -142,17 +144,17 @@ export default function P2PBorrowingButton({ row }: { row: { original: Borrowing
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 <Button disabled={!publicKey}>
-                    {publicKey ? 'Borrow' : 'Connect Wallet'}
+                    {publicKey ? `${t('borrow')}` : `${t('connectWallet')}`}
                 </Button>
             </DialogTrigger>
             <DialogContent className='max-w-[90vw] md:max-w-[40vw]'>
                 <DialogHeader>
                     <DialogTitle className='flex flex-row space-x-1 items-center'>
-                        <div>Borrow SOL</div>
+                        <div>{t('borrowSOL')}</div>
                         <InfoButton />
                     </DialogTitle>
                     <DialogDescription>
-                        Borrow SOL against your NFT from Collection.
+                        {t('borrowSOLDesc')}
                     </DialogDescription>
                 </DialogHeader>
                 <div className='max-h-[45vh] md:max-h-[60vh] overflow-y-auto px-2'>
@@ -164,15 +166,15 @@ export default function P2PBorrowingButton({ row }: { row: { original: Borrowing
                             <div className='text-xl tracking-wide break-words'>{order.nft_name}</div>
                             <div className='grid grid-cols-3 gap-x-2 w-full pt-0.5'>
                                 <div className='flex flex-col items-center justify-center py-3 border rounded w-full h-full'>
-                                    <h1 className='text-[0.6rem] lg:text-sm tracking-wider break-words'>Offer</h1>
+                                    <h1 className='text-[0.6rem] lg:text-sm tracking-wider break-words'>{t('offer')}</h1>
                                     <p className='text-[0.5rem] lg:text-sm'>{order.nft_best_offer}</p>
                                 </div>
                                 <div className='flex flex-col items-center justify-center py-3 border rounded w-full h-full'>
-                                    <h1 className='text-[0.6rem] lg:text-sm tracking-wider break-words'>Rate</h1>
+                                    <h1 className='text-[0.6rem] lg:text-sm tracking-wider break-words'>{t('rate')}</h1>
                                     <p className='text-[0.5rem] lg:text-sm'>{order.nft_intrest}</p>
                                 </div>
                                 <div className='flex flex-col items-center justify-center py-3 border rounded w-full h-full'>
-                                    <h1 className='text-[0.6rem] lg:text-sm tracking-wider break-words'>Duration</h1>
+                                    <h1 className='text-[0.6rem] lg:text-sm tracking-wider break-words'>{t('duration')}</h1>
                                     <p className='text-[0.5rem] lg:text-sm'>{order.nft_duration}</p>
                                 </div>
                             </div>
@@ -181,7 +183,7 @@ export default function P2PBorrowingButton({ row }: { row: { original: Borrowing
 
                     <Accordion type='multiple' defaultValue={['NFT']}>
                         <AccordionItem value='NFT'>
-                            <AccordionTrigger className='hover:no-underline text-left font-semibold tracking-wide'>Select NFT(s) for Collateral</AccordionTrigger>
+                            <AccordionTrigger className='hover:no-underline text-left font-semibold tracking-wide'>{t('selectNFT')}</AccordionTrigger>
                             <AccordionContent>
                                 {NFTLoading ? (
                                     <div className='flex flex-row space-x-2 flex-wrap justify-evenly'>
@@ -207,7 +209,7 @@ export default function P2PBorrowingButton({ row }: { row: { original: Borrowing
                                                                 </div>
                                                                 <p className='text-center'>{nft.name}</p>
                                                                 <div className='flex flex-row items-center justify-center space-x-2'>
-                                                                    <a href={`https://solscan.io/token/${nft.mint}`} target='_blank' className='text-primary'>View on Solscan</a>
+                                                                    <a href={`https://solscan.io/token/${nft.mint}`} target='_blank' className='text-primary'>{t('viewOnSolscan')}</a>
                                                                     <ExternalLink className='h-4 w-4' />
                                                                 </div>
                                                             </div>
@@ -215,7 +217,7 @@ export default function P2PBorrowingButton({ row }: { row: { original: Borrowing
                                                 </React.Fragment>
                                             ))
                                         ) : (
-                                            <p>You don&apos;t have any NFT(s) for this collection.</p>
+                                            <p>{t('noNFT')}</p>
                                         )}
                                     </div>
                                 )}
@@ -223,19 +225,19 @@ export default function P2PBorrowingButton({ row }: { row: { original: Borrowing
                         </AccordionItem>
                         <AccordionItem value='Return'>
                             <AccordionTrigger className='hover:no-underline text-left font-semibold tracking-wide'>
-                                Repay {(parseFloat(order.nft_best_offer) + ((parseFloat(order.nft_intrest) / 100) * parseFloat(order.nft_best_offer))).toFixed(4)} SOL within {(order.nft_duration)}
+                                {t('repay')} {(parseFloat(order.nft_best_offer) + ((parseFloat(order.nft_intrest) / 100) * parseFloat(order.nft_best_offer))).toFixed(4)} SOL {t('within')} {(order.nft_duration)}
                             </AccordionTrigger>
                             <AccordionContent>
                                 <div className='flex flex-row items-center justify-between text-sm md:text-lg'>
-                                    <h1>Loan amount</h1>
+                                    <h1>{t('loanAmount')}</h1>
                                     <h1>{order.nft_best_offer}</h1>
                                 </div>
                                 <div className='flex flex-row items-center justify-between text-sm md:text-lg'>
-                                    <h1>Interest</h1>
+                                    <h1>{t('interest')}</h1>
                                     <h1>{order.nft_intrest} ~ {((parseFloat(order.nft_intrest) / 100) * parseFloat(order.nft_best_offer)).toFixed(4)} SOL</h1>
                                 </div>
                                 <div className='flex flex-row items-center justify-between text-sm md:text-lg'>
-                                    <h1>Due by</h1>
+                                    <h1>{t('dueBy')}</h1>
                                     <h1>{dueByDate}</h1>
                                 </div>
                             </AccordionContent>
@@ -244,7 +246,7 @@ export default function P2PBorrowingButton({ row }: { row: { original: Borrowing
                     {/* <Button type='submit' className='w-full mt-4' disabled={isSubmitting || filteredCollections.length === 0}> */}
                     <Button type='submit' className='w-full mt-4' disabled>
                         {isSubmitting && <Loader2 className='animate-spin mr-2' size={15} />}
-                        {isSubmitting ? 'Borrowing...' : 'Borrow'}
+                        {isSubmitting ? `${t('borrowing')}` : `${t('borrow')}`}
                     </Button>
                 </div>
             </DialogContent>

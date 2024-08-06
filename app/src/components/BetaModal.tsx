@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { addUserWaitlist } from '@/actions/dbActions'
+import { useTranslations } from 'next-intl'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
@@ -11,16 +12,18 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { X } from 'lucide-react'
 
-const FormSchema = z.object({
-    email: z.string({
-        required_error: 'Email is required',
-    }).email({
-        message: 'Invalid email format',
-    })
-})
-
 export default function BetaModal() {
     const [showModal, setShowModal] = useState(true);
+
+    const t = useTranslations('BetaModal');
+
+    const FormSchema = z.object({
+        email: z.string({
+            required_error: `${t('emailError')}`,
+        }).email({
+            message: `${t('invalidEmailError')}`,
+        })
+    })
 
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
@@ -51,10 +54,10 @@ export default function BetaModal() {
 
             if (result) {
                 if (result === 'Error adding user to waitlist') {
-                    toast.info('User already added to the newsletter.');
+                    toast.info(`${t('toastInfo')}`);
                     handleClose();
                 } else {
-                    toast.success('User added to newsletter successfully!');
+                    toast.success(`${t('toastSuccess')}`);
                     form.reset();
                     handleClose();
                 }
@@ -73,13 +76,9 @@ export default function BetaModal() {
                         </button>
                     </div>
 
-                    <h1 className='text-2xl md:text-4xl font-semibold text-center'>🎉 Welcome to the Beta Version 🎉</h1>
-                    <p className='md:text-lg text-center'>
-                        We&apos;re thrilled to have you here as part of our beta community. Help us shape the future of our product!
-                    </p>
-                    <p className='text-center mt-2'>
-                        Be the first to know when we release our alpha version. Subscribe to our newsletter for the latest updates, news, and exciting features.
-                    </p>
+                    <h1 className='text-2xl md:text-4xl font-semibold text-center'>🎉 {t('title')} 🎉</h1>
+                    <p className='md:text-lg text-center'>{t('desc1')}</p>
+                    <p className='text-center mt-2'>{t('desc2')}</p>
                     <div className='w-full'>
                         <Form {...form}>
                             <form onSubmit={form.handleSubmit(onSubmit)} autoComplete='off' className='flex flex-row items-start justify-center space-x-2'>
@@ -89,7 +88,7 @@ export default function BetaModal() {
                                     render={({ field }) => (
                                         <FormItem className='w-full'>
                                             <FormControl>
-                                                <Input {...field} className=' bg-white focus:ring-1 border outline-none' placeholder='Enter your email' />
+                                                <Input {...field} className=' bg-white focus:ring-1 border outline-none' placeholder={`${t('emailPlaceholder')}`} />
                                             </FormControl>
                                             <FormMessage className='text-destructive tracking-wide' />
                                         </FormItem>
@@ -97,7 +96,7 @@ export default function BetaModal() {
                                 />
 
                                 <Button type='submit'>
-                                    Subscribe
+                                    {t('subscribe')}
                                 </Button>
                             </form>
                         </Form>

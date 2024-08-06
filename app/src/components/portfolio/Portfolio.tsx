@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { userPortfolioDetails, updateUserData, userStatsDetails, userLoanDetails } from '@/actions/dbActions'
+import { useTranslations } from 'next-intl'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
@@ -53,46 +54,6 @@ interface CardData {
     extraTooltipContent?: string;
 }
 
-const FormSchema = z.object({
-    name: z.string({
-        required_error: 'Name is required.',
-    }).min(2, {
-        message: 'Name must be at least 2 characters.',
-    }).optional().nullable().or(z.literal('')),
-    email: z.string({
-        required_error: 'Email is required.',
-    }).email({
-        message: 'Invalid email address.',
-    }).optional().nullable().or(z.literal(''))
-})
-
-const WithdrawTokenSchema = z.object({
-    tokenName: z.string({
-        required_error: 'Token name is required.',
-    }).min(2, {
-        message: 'Token name is required.',
-    }).optional().nullable().or(z.literal('')),
-    tokenAmount: z.string()
-        .refine(value => !isNaN(Number(value)), {
-            message: 'Amount must be a number.',
-        })
-        .refine(value => Number(value) > 0, {
-            message: 'Amount must be a positive number.',
-        })
-        .refine(value => {
-            const stringValue = String(value);
-            const [integerPart, decimalPart] = stringValue.split('.');
-
-            if (integerPart.length > 26 || (decimalPart && decimalPart.length > 26)) {
-                return false;
-            }
-
-            return true;
-        }, {
-            message: 'Amount must have up to 26 digits before the decimal point and up to 26 digits after the decimal point.',
-        }),
-})
-
 export default function Portfolio({ walletAddress }: { walletAddress: string }) {
     const [loading, setLoading] = useState(true);
     const [userPortfolio, setUserPortfolio] = useState<UserType[]>([]);
@@ -112,6 +73,47 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
     const [loadingLoanHistory, setLoadingLoanHistory] = useState(true);
     const [loanHistoryData, setLoanHistoryData] = useState<LoanDataType[]>([]);
 
+    const t = useTranslations('PortfolioPage');
+
+    const FormSchema = z.object({
+        name: z.string({
+            required_error: `${t('nameRequired')}`,
+        }).min(2, {
+            message: `${t('nameMin')}`,
+        }).optional().nullable().or(z.literal('')),
+        email: z.string({
+            required_error: `${t('emailRequired')}`,
+        }).email({
+            message: `${t('invalidEmail')}`,
+        }).optional().nullable().or(z.literal(''))
+    })
+
+    const WithdrawTokenSchema = z.object({
+        tokenName: z.string({
+            required_error: `${t('tokenNameRequired')}`,
+        }).min(2, {
+            message: `${t('tokenNameRequired')}`,
+        }).optional().nullable().or(z.literal('')),
+        tokenAmount: z.string()
+            .refine(value => !isNaN(Number(value)), {
+                message: `${t('tokenAmountMessage1')}`,
+            })
+            .refine(value => Number(value) > 0, {
+                message: `${t('tokenAmountMessage2')}`,
+            })
+            .refine(value => {
+                const stringValue = String(value);
+                const [integerPart, decimalPart] = stringValue.split('.');
+
+                if (integerPart.length > 26 || (decimalPart && decimalPart.length > 26)) {
+                    return false;
+                }
+
+                return true;
+            }, {
+                message: `${t('tokenAmountMessage3')}`,
+            }),
+    })
 
     useEffect(() => {
         const fetchUserPortfolio = async () => {
@@ -120,11 +122,11 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
                 setUserPortfolio(result as UserType[]);
                 setLoading(false);
                 if (result === 'Error fetching user portfolio details') {
-                    toast.error('An error occurred while fetching user portfolio. Please try again!');
+                    toast.error(`${t('portfolioError')}`);
                     setLoading(false);
                 }
             } catch (error) {
-                toast.error('An error occurred while fetching user portfolio. Please try again!');
+                toast.error(`${t('portfolioError')}`);
                 setLoading(false);
             }
         };
@@ -256,7 +258,7 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
             }
             setLoadingUserStats(false);
         } catch (error) {
-            toast.error(`An error occurred while fetching user stats. Please try again!, ${error}`);
+            toast.error(`${t('portfolioStatsError')}`);
             setLoadingUserStats(false);
         }
     };
@@ -286,7 +288,7 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
         setLoanHistoryData(result as LoanDataType[]);
         setLoadingLoanHistory(false);
         if (result === 'Error fetching user loan details') {
-            toast.error('An error occurred while fetching user loan details. Please try again!');
+            toast.error(`${t('portfolioLoanError')}`);
             setLoadingLoanHistory(false);
         }
     };
@@ -317,23 +319,23 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
             token_amount: data.tokenAmount,
         }
         try {
-            fetch('/withdraw-email-api', {
+            fetch('/en/withdraw-email-api', {
                 method: 'POST',
                 body: JSON.stringify(values),
             })
                 .then((res) => res.json())
                 .then((response) => {
-                    toast.success('Request sent successfully! Tokens will be credited to your wallet shortly.');
+                    toast.success(`${t('withdrawSuccess')}`);
                     form.reset();
                 })
                 .catch((error) => {
-                    toast.error('An error occurred while sending withdraw request. Please try again!');
+                    toast.error(`${t('withdrawError')}`);
                 })
                 .finally(() => {
                     setWithdrawToken(false);
                 });
         } catch (error) {
-            toast.error('An error occurred while sending withdraw request. Please try again!');
+            toast.error(`${t('withdrawError')}`);
         }
     };
 
@@ -347,13 +349,13 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
             });
             if (result === 'User data updated') {
                 setSaveData(false);
-                toast.success('Portfolio updated successfully!');
+                toast.success(`${t('portfolioUpdateSuccess')}`);
             } else {
                 setSaveData(false);
-                toast.error('An error occurred while updating portfolio. Please try again!');
+                toast.error(`${t('portfolioUpdateError')}`);
             }
         } catch (error) {
-            toast.error('An error occurred while updating portfolio. Please try again!');
+            toast.error(`${t('portfolioUpdateError')}`);
         }
     };
 
@@ -369,34 +371,34 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
 
     const cardData: CardData[] = [
         {
-            title: 'Active Lending Value',
-            tooltipContent: 'See the value of your active lending portfolio.',
+            title: `${t('card1Title')}`,
+            tooltipContent: `${t('card1TooltipContent')}`,
             icon: 'Activity',
             currentData: maxLending,
             extraTooltipContent: otherLendings.map(b => `${b.total.toFixed(4)} ${b.token}`).join(', '),
         },
         {
-            title: 'Interest Earned',
-            tooltipContent: 'Track your net interest earned from completed loans.',
+            title: `${t('card2Title')}`,
+            tooltipContent: `${t('card2TooltipContent')}`,
             icon: 'DollarSign',
             currentData: maxInterest,
             extraTooltipContent: otherInterests.map(b => `${b.total.toFixed(4)} ${b.token}`).join(', '),
         },
         {
-            title: 'Completed Loans',
-            tooltipContent: 'Monitor the number of loans successfully repaid or liquidated.',
+            title: `${t('card3Title')}`,
+            tooltipContent: `${t('card3TooltipContent')}`,
             icon: 'Landmark',
             currentData: userStats?.completedLoans[0]?.count ?? '0',
         },
         {
-            title: 'Active Loans',
-            tooltipContent: 'Stay updated on the number of ongoing active loans and borrowings.',
+            title: `${t('card4Title')}`,
+            tooltipContent: `${t('card4TooltipContent')}`,
             icon: 'BriefcaseBusiness',
             currentData: userStats?.activeLoans[0]?.count ?? '0',
         },
         {
-            title: 'Active Borrowings Value',
-            tooltipContent: 'View the total value of all your current active borrowings, including interest.',
+            title: `${t('card5Title')}`,
+            tooltipContent: `${t('card5TooltipContent')}`,
             icon: 'Banknote',
             currentData: maxBorrowing,
             extraTooltipContent: otherBorrowings.map(b => `${b.total.toFixed(4)} ${b.token}`).join(', '),
@@ -423,19 +425,19 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
                     <TooltipProvider>
                         <CardHeader>
                             <div className='flex flex-col md:flex-row justify-between md:items-center space-y-2 md:space-y-0'>
-                                <div className='text-center md:text-start text-2xl md:text-4xl'>My Portfolio</div>
+                                <div className='text-center md:text-start text-2xl md:text-4xl'>{t('title')}</div>
                                 {/* {cardData[0].currentData !== undefined && typeof cardData[0].currentData === 'string' && parseFloat(cardData[0].currentData) > 0 && */}
                                 <Dialog>
                                     <div className='w-full md:w-auto'>
                                         <DialogTrigger asChild>
-                                            <Button className='w-full md:w-auto'>Withdraw Token</Button>
+                                            <Button className='w-full md:w-auto'>{t('withdrawToken')}</Button>
                                         </DialogTrigger>
                                     </div>
                                     <DialogContent className='max-w-[90vw] md:max-w-[425px]'>
                                         <DialogHeader>
-                                            <DialogTitle className='tracking-wide'>How many tokens do you want to withdraw?</DialogTitle>
+                                            <DialogTitle className='tracking-wide'>{t('withdrawDialogTitle')}</DialogTitle>
                                             <DialogDescription>
-                                                Specify the amount of tokens you want to withdraw from your active lending portfolio.
+                                                {t('withdrawDialogDesc')}
                                             </DialogDescription>
                                         </DialogHeader>
                                         <div className='grid gap-1'>
@@ -447,7 +449,7 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
                                                             name='tokenName'
                                                             render={({ field }) => (
                                                                 <FormItem>
-                                                                    <FormLabel>Token Name</FormLabel>
+                                                                    <FormLabel>{t('tokenName')}</FormLabel>
                                                                     <Select
                                                                         onValueChange={(value) => {
                                                                             field.onChange(value);
@@ -457,7 +459,7 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
                                                                     >
                                                                         <FormControl>
                                                                             <SelectTrigger>
-                                                                                <SelectValue placeholder='Select token name' />
+                                                                                <SelectValue placeholder={`${t('selectTokenName')}`} />
                                                                             </SelectTrigger>
                                                                         </FormControl>
                                                                         <SelectContent>
@@ -469,7 +471,7 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
                                                                         </SelectContent>
                                                                     </Select>
                                                                     <FormDescription>
-                                                                        Select the token you want to withdraw.
+                                                                        {t('tokenNameDesc')}
                                                                     </FormDescription>
                                                                     <FormMessage />
                                                                 </FormItem>
@@ -481,13 +483,13 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
                                                             name='tokenAmount'
                                                             render={({ field }) => (
                                                                 <FormItem className='w-full pb-2'>
-                                                                    <FormLabel>Withdraw Amount</FormLabel>
+                                                                    <FormLabel>{t('withdrawAmount')}</FormLabel>
                                                                     <FormControl>
-                                                                        <Input placeholder='Token withdraw amount' {...field} value={field.value || ''} type='number' step='any' min='0' max={tokenBalance} />
+                                                                        <Input placeholder={`${t('tokenWithdrawAmount')}`} {...field} value={field.value || ''} type='number' step='any' min='0' max={tokenBalance} />
                                                                     </FormControl>
                                                                     {tokenBalance > 0 &&
                                                                         <FormDescription>
-                                                                            Current balance: {tokenBalance} {withdrawForm.watch('tokenName')}
+                                                                            {t('currentBalance')}: {tokenBalance} {withdrawForm.watch('tokenName')}
                                                                         </FormDescription>
                                                                     }
                                                                     <FormMessage />
@@ -497,12 +499,12 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
 
                                                         <Button type='submit' className='w-full' disabled={withdrawToken}>
                                                             {withdrawToken && <Loader2 className='mr-2 h-4 w-4 animate-spin' size={20} />}
-                                                            {withdrawToken ? 'Requesting...' : 'Withdraw token'}
+                                                            {withdrawToken ? `${t('requesting')}` : `${t('withdrawToken')}`}
                                                         </Button>
                                                     </form>
                                                 </Form>
                                             ) : (
-                                                <div className='text-center'>No active lending found.</div>
+                                                <div className='text-center'>{t('noLendingFound')}</div>
                                             )}
                                         </div>
                                     </DialogContent>
@@ -518,12 +520,12 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
                                             name='name'
                                             render={({ field }) => (
                                                 <FormItem className='w-full'>
-                                                    <FormLabel>Name</FormLabel>
+                                                    <FormLabel>{t('yourName')}</FormLabel>
                                                     <FormControl>
-                                                        <Input placeholder='Your Name' {...field} value={field.value || ''} />
+                                                        <Input placeholder={`${t('yourName')}`} {...field} value={field.value || ''} />
                                                     </FormControl>
                                                     <FormDescription>
-                                                        This is an optional field.
+                                                        {t('optionalField')}
                                                     </FormDescription>
                                                     <FormMessage />
                                                 </FormItem>
@@ -535,12 +537,12 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
                                             name='email'
                                             render={({ field }) => (
                                                 <FormItem className='w-full'>
-                                                    <FormLabel>Email</FormLabel>
+                                                    <FormLabel>{t('yourEmail')}</FormLabel>
                                                     <FormControl>
-                                                        <Input placeholder='Your Email' {...field} value={field.value || ''} />
+                                                        <Input placeholder={`${t('yourEmail')}`} {...field} value={field.value || ''} />
                                                     </FormControl>
                                                     <FormDescription>
-                                                        This is an optional field.
+                                                        {t('optionalField')}
                                                     </FormDescription>
                                                     <FormMessage />
                                                 </FormItem>
@@ -549,75 +551,77 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
 
                                         <Button type='submit' className='bg-success hover:bg-green-800 w-full md:w-1/2' disabled={saveData}>
                                             {saveData && <Loader2 className='mr-2 h-4 w-4 animate-spin' size={20} />}
-                                            {saveData ? 'Saving...' : 'Save Details'}
+                                            {saveData ? `${t('saving')}` : `${t('saveDetails')}`}
                                         </Button>
                                     </div>
                                 </form>
                             </Form>
                         </CardHeader>
                         <CardContent>
-                            {userStats && (
-                                <div className='grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-5 lg:grid-flow-row lg:grid-rows-auto lg:align-content-start'>
-                                    {cardData.map((card: CardData, index: number) => (
-                                        <React.Fragment key={index}>
-                                            {loadingUserStats ? (
-                                                <div className='flex flex-col h-full space-y-2'>
-                                                    {['h-24', 'h-3', 'h-3 w-3/4'].map((classes, index) => (
-                                                        <Skeleton key={index} className={classes} />
-                                                    ))}
-                                                </div>
-                                            ) : (
-                                                <Tooltip delayDuration={300}>
-                                                    <TooltipTrigger>
-                                                        <Card className='flex flex-col h-full'>
-                                                            <CardHeader className='flex flex-row items-center justify-between pb-2'>
-                                                                <CardTitle className='text-sm font-medium flex flex-1 flex-row items-center space-x-1 text-start'>
-                                                                    <p>{card.title}</p>
-                                                                </CardTitle>
-                                                                {renderIcon({ name: card.icon })}
-                                                            </CardHeader>
-                                                            <CardContent className='text-start'>
-                                                                <p className='text-2xl font-bold'>
-                                                                    {card.currentData !== '' && card.currentData !== 0 ? card.currentData : '0'}
+                            <div className='grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-5 lg:grid-flow-row lg:grid-rows-auto lg:align-content-start'>
+                                {loadingUserStats ? (
+                                    <>
+                                        {cardData.map((card: CardData, index: number) => (
+                                            <div className='flex flex-col h-full space-y-2' key={index}>
+                                                {['h-24', 'h-3', 'h-3 w-3/4'].map((classes, index) => (
+                                                    <Skeleton key={index} className={classes} />
+                                                ))}
+                                            </div>
+                                        ))}
+                                    </>
+                                ) : (
+                                    <>
+                                        {cardData.map((card: CardData, index: number) => (
+                                            <Tooltip delayDuration={300} key={index}>
+                                                <TooltipTrigger>
+                                                    <Card className='flex flex-col h-full'>
+                                                        <CardHeader className='flex flex-row items-center justify-between pb-2'>
+                                                            <CardTitle className='text-sm font-medium flex flex-1 flex-row items-center space-x-1 text-start'>
+                                                                <p>{card.title}</p>
+                                                            </CardTitle>
+                                                            {renderIcon({ name: card.icon })}
+                                                        </CardHeader>
+                                                        <CardContent className='text-start'>
+                                                            <p className='text-2xl font-bold'>
+                                                                {card.currentData !== '' && card.currentData !== 0 ? card.currentData : '0'}
+                                                            </p>
+                                                            {(card.title === `${t('card5Title')}` && otherBorrowings.length > 0) ||
+                                                                (card.title === `${t('card1Title')}` && otherLendings.length > 0) ||
+                                                                (card.title === `${t('card2Title')}` && otherInterests.length > 0) ? (
+                                                                <p className='text-muted-foreground'>
+                                                                    +{card.title === `${t('card5Title')}` ? otherBorrowings.length
+                                                                        : card.title === `${t('card1Title')}` ? otherLendings.length
+                                                                            : card.title === `${t('card2Title')}` ? otherInterests.length
+                                                                                : 0} {(card.title === `${t('card5Title')}` ? otherBorrowings.length
+                                                                                    : card.title === `${t('card1Title')}` ? otherLendings.length
+                                                                                        : card.title === `${t('card2Title')}` ? otherInterests.length
+                                                                                            : 0) > 1 ? `${t('others')}` : `${t('other')}`}
                                                                 </p>
-                                                                {(card.title === 'Active Borrowings Value' && otherBorrowings.length > 0) ||
-                                                                    (card.title === 'Active Lending Value' && otherLendings.length > 0) ||
-                                                                    (card.title === 'Interest Earned' && otherInterests.length > 0) ? (
-                                                                    <p className='text-muted-foreground'>
-                                                                        +{card.title === 'Active Borrowings Value' ? otherBorrowings.length
-                                                                            : card.title === 'Active Lending Value' ? otherLendings.length
-                                                                                : card.title === 'Interest Earned' ? otherInterests.length
-                                                                                    : 0} other{(card.title === 'Active Borrowings Value' ? otherBorrowings.length
-                                                                                        : card.title === 'Active Lending Value' ? otherLendings.length
-                                                                                            : card.title === 'Interest Earned' ? otherInterests.length
-                                                                                                : 0) > 1 ? 's' : ''}
-                                                                    </p>
-                                                                ) : null}
-                                                            </CardContent>
-                                                        </Card>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
-                                                        {card.tooltipContent}
-                                                        {card.extraTooltipContent && (
-                                                            <div className='flex flex-col space-y-2 pt-2'>
-                                                                <div className='text-left font-semibold tracking-wide'>Other tokens:</div>
-                                                                <div className='grid grid-cols-2 gap-1 justify-center'>
-                                                                    {card.extraTooltipContent.split(', ').map((item, idx) => (
-                                                                        <div className='text-left' key={idx}>{item}</div>
-                                                                    ))}
-                                                                </div>
+                                                            ) : null}
+                                                        </CardContent>
+                                                    </Card>
+                                                </TooltipTrigger>
+                                                <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
+                                                    {card.tooltipContent}
+                                                    {card.extraTooltipContent && (
+                                                        <div className='flex flex-col space-y-2 pt-2'>
+                                                            <div className='text-left font-semibold tracking-wide'>{t('otherTokens')}:</div>
+                                                            <div className='grid grid-cols-2 gap-1 justify-center'>
+                                                                {card.extraTooltipContent.split(', ').map((item, idx) => (
+                                                                    <div className='text-left' key={idx}>{item}</div>
+                                                                ))}
                                                             </div>
-                                                        )}
-                                                    </TooltipContent>
-                                                </Tooltip>
-                                            )}
-                                        </React.Fragment>
-                                    ))}
-                                </div>
-                            )}
+                                                        </div>
+                                                    )}
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        ))}
+                                    </>
+                                )}
+                            </div>
 
                             <div className='pt-2'>
-                                <h1 className='text-xl py-2'>Loan History</h1>
+                                <h1 className='text-xl py-2'>{t('loanHistory')}</h1>
                                 {loadingLoanHistory ? (
                                     <div className='flex flex-col h-full space-y-2'>
                                         {['h-9 md:w-1/3', 'h-10', 'h-12', 'h-12', 'h-12', 'h-12'].map((classes, index) => (
@@ -629,8 +633,8 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
                                         columns={loanColumns(onTrigger)}
                                         data={loanHistoryData}
                                         userSearchColumn='borrowing_amount'
-                                        inputPlaceHolder='Search by borrowed token'
-                                        noResultsMessage='No loan found.'
+                                        inputPlaceHolder={`${t('searchLoan')}`}
+                                        noResultsMessage={`${t('noLoan')}`}
                                     />
                                 )}
                             </div>

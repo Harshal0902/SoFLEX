@@ -5,6 +5,7 @@ import { BorrowingAssetDataType, borrowingAssetColumns } from './columns'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { useTranslations } from 'next-intl'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
@@ -14,14 +15,6 @@ import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { DataTable } from '@/components/ui/data-table-defi'
 
-const FormSchema = z.object({
-    assetName: z.string({
-        required_error: 'Name is required',
-    }).min(3, {
-        message: 'Name must be at least 3 characters long',
-    }).optional()
-})
-
 export default function DeFiBorrowing() {
     const [open, setOpen] = useState(false);
     const [assetPrices, setAssetPrices] = useState<{ [key: string]: string }>({});
@@ -30,6 +23,16 @@ export default function DeFiBorrowing() {
 
     const { publicKey } = useWallet();
     const wallet = useWallet();
+    const t = useTranslations('DeFiBorrowPage');
+
+    const FormSchema = z.object({
+        assetName: z.string({
+            required_error: `${t('nameRequired')}`,
+        }).min(3, {
+            message: `${t('nameMin')}`,
+        }).optional()
+    })
+
 
     useEffect(() => {
         const fetchAssetData = async () => {
@@ -37,12 +40,13 @@ export default function DeFiBorrowing() {
             if (Array.isArray(result)) {
                 setBorrowingAssetData(result);
             } else {
-                toast.error('An error occurred while fetching asset data. Please try again!');
+                toast.error(`${t('assetFetchError')}`);
             }
             setLoadingData(false);
         };
 
         fetchAssetData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
@@ -57,7 +61,7 @@ export default function DeFiBorrowing() {
                         [token]: result.data.amount
                     }));
                 } catch (error) {
-                    toast.error(`An error occurred while fetching ${token} price. Please try again!`);
+                    toast.error(`${t('priceFetchError1')} ${token} ${t('priceFetchError2')}`);
                 }
             }
         };
@@ -67,6 +71,7 @@ export default function DeFiBorrowing() {
         // const intervalId = setInterval(fetchData, 30000);
 
         // return () => clearInterval(intervalId);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const form = useForm<z.infer<typeof FormSchema>>({
@@ -82,11 +87,11 @@ export default function DeFiBorrowing() {
         if (assetName && wallet.publicKey) {
             const result = await newAssetOrCollectionRequest({ walletAddress: wallet.publicKey.toString(), requestedAssetOrCollectionName: assetName, assetOrCollection: 'Asset' });
             if (result === 'Request for new Asset or Collection sent successfully') {
-                toast.success('Request sent successfully!');
+                toast.success(`${t('requestSuccess')}`);
                 setOpen(false);
                 form.reset();
             } else {
-                toast.error('An error occurred while sending request. Please try again!');
+                toast.error(`${t('requestError')}`);
             }
         }
     }
@@ -105,17 +110,17 @@ export default function DeFiBorrowing() {
             <Card>
                 <CardHeader>
                     <div className='flex flex-col md:flex-row justify-between md:items-center space-y-2 md:space-y-0'>
-                        <div className='text-center md:text-start text-2xl md:text-4xl'>All Assets</div>
+                        <div className='text-center md:text-start text-2xl md:text-4xl'>{t('allAssets')}</div>
                         {publicKey && (
                             <Dialog open={open} onOpenChange={setOpen}>
                                 <DialogTrigger asChild>
-                                    <Button variant='outline' className='w-full sm:w-auto'>Request new Asset for borrowing</Button>
+                                    <Button variant='outline' className='w-full sm:w-auto'>{t('requestBtn')}</Button>
                                 </DialogTrigger>
                                 <DialogContent className='max-w-[90vw] md:max-w-[425px]'>
                                     <DialogHeader>
-                                        <DialogTitle>Request for new assets</DialogTitle>
+                                        <DialogTitle>{t('requestDialogTitle')}</DialogTitle>
                                         <DialogDescription>
-                                            Make request for new assets for borrowing.
+                                            {t('requestDialogDesc')}
                                         </DialogDescription>
                                     </DialogHeader>
                                     <Form {...form}>
@@ -125,9 +130,9 @@ export default function DeFiBorrowing() {
                                                 name='assetName'
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>Asset Name</FormLabel>
+                                                        <FormLabel>{t('assetName')}</FormLabel>
                                                         <FormControl>
-                                                            <Input {...field} className='w-full' placeholder='Asset Name' />
+                                                            <Input {...field} className='w-full' placeholder={`${t('assetName')}`} />
                                                         </FormControl>
                                                         <FormMessage className='text-destructive tracking-wide' />
                                                     </FormItem>
@@ -135,7 +140,7 @@ export default function DeFiBorrowing() {
                                             />
 
                                             <Button type='submit'>
-                                                Submit Request
+                                                {t('submitRequest')}
                                             </Button>
                                         </form>
                                     </Form>
@@ -159,8 +164,8 @@ export default function DeFiBorrowing() {
                                 asset_price: assetPrices[asset.asset_symbol] ? formatPrice(assetPrices[asset.asset_symbol]) : asset.asset_price
                             }))}
                             userSearchColumn='asset_total_supply'
-                            inputPlaceHolder='Search by token'
-                            noResultsMessage='No assets found'
+                            inputPlaceHolder={`${t('searchToken')}`}
+                            noResultsMessage={`${t('noToken')}`}
                         />
                     )}
                 </CardContent>

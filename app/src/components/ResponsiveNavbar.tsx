@@ -1,7 +1,10 @@
 "use client"
 
-import React, { useState, useEffect } from 'react'
-import { usePathname } from 'next/navigation'
+import React, { useState, useEffect, useTransition } from 'react'
+import { useLocale, useTranslations } from 'next-intl'
+import { useParams } from 'next/navigation'
+import { useRouter, usePathname } from '@/navigation'
+import { Locale } from '@/config'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { toast } from 'sonner'
 import { Menu, X, Home, HandCoins, Gem, Triangle, WalletMinimal, Bell, BellRing, ChevronDown } from 'lucide-react'
@@ -13,40 +16,42 @@ import Image from 'next/image'
 
 interface Notification {
     title: string
-    noteficationTime: string
+    notificationTime: string
 }
 
 interface DropdownState {
     notification: boolean;
     profile: boolean;
+    language: boolean;
 }
 
-const notifications: Notification[] = [
-    {
-        title: 'Subscribe to our newsletter for updates!',
-        noteficationTime: '1 hour ago'
-    },
-    {
-        title: 'Welcome to the Devnet Beta Version!',
-        noteficationTime: '1 hour ago'
-    },
-    {
-        title: 'Welcome to SoFLEX!',
-        noteficationTime: '2 hours ago'
-    }
+interface Language {
+    value: string;
+    label: string;
+}
+
+const languages: Language[] = [
+    { value: 'en', label: 'English' },
+    { value: 'de', label: 'Deutsch' },
+    { value: 'es', label: 'Español' },
+    { value: 'zh', label: '中文' },
+    { value: 'ja', label: '日本語' },
+    { value: 'ko', label: '한국어' }
 ]
 
 export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const [isClosing, setIsClosing] = useState<boolean>(false);
-    // const [solBalance, setSolBalance] = useState<string>('');
     const [open, setOpen] = useState<boolean>(false);
     const [isMoreOption, setIsMoreOption] = useState<boolean>(false);
-    const [dropdownVisible, setDropdownVisible] = useState<DropdownState>({ notification: false, profile: false });
+    const [dropdownVisible, setDropdownVisible] = useState<DropdownState>({ notification: false, profile: false, language: false });
+    const [selectedLanguage, setSelectedLanguage] = useState<string>('');
+    const [isPending, startTransition] = useTransition();
 
     const toggleDropdown = (dropdown: keyof DropdownState) => setDropdownVisible((prev) => ({ ...prev, [dropdown]: !prev[dropdown] }));
     const toggleDropdownNotification = () => toggleDropdown('notification');
     const toggleDropdownProfile = () => toggleDropdown('profile');
+    const toggleDropdownLanguage = () => toggleDropdown('language');
 
     const toggleOpen = () => {
         if (isOpen) {
@@ -62,15 +67,34 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
 
     const pathname = usePathname();
 
+    const router = useRouter();
+    const params = useParams();
+    const t = useTranslations();
+    const locale = useLocale();
+
     useEffect(() => {
         if (isOpen) toggleOpen()
+        setSelectedLanguage(locale)
         /* eslint-disable react-hooks/exhaustive-deps */
-    }, [pathname])
+    }, [pathname, locale])
 
     const closeOnCurrent = (href: string) => {
         if (pathname === href) {
             toggleOpen()
         }
+    }
+
+    function handleLanguageChange(value: string) {
+        const nextLocale = value as Locale;
+        startTransition(() => {
+            router.replace(
+                // @ts-expect-error -- TypeScript will validate that only known `params`
+                // are used in combination with a given `pathname`. Since the two will
+                // always match for the current route, we can skip runtime checks.
+                { pathname, params },
+                { locale: nextLocale }
+            );
+        });
     }
 
     const { select, wallets, disconnect } = useWallet();
@@ -85,6 +109,21 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
         return `${start}...${end}`;
     };
 
+    const notifications: Notification[] = [
+        {
+            title: `${t('Notifications.notification1')}`,
+            notificationTime: `${t('Notifications.notificationTime')}`
+        },
+        {
+            title: `${t('Notifications.notification2')}`,
+            notificationTime: `${t('Notifications.notificationTime')}`
+        },
+        {
+            title: `${t('Notifications.notification3')}`,
+            notificationTime: `${t('Notifications.notificationTime')}`
+        }
+    ]
+
     const handleWalletSelect = async (walletName: any) => {
         if (walletName) {
             try {
@@ -92,7 +131,7 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
                 setOpen(false);
                 setIsOpen(false);
             } catch (error) {
-                toast.error('An error occurred while connecting your wallet. Please try again!.');
+                toast.error(`${t('Navbar.walletConnectError')}`);
             }
         }
     };
@@ -104,7 +143,7 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
     const handleDisconnect = async () => {
         disconnect();
         setIsOpen(false);
-        toast.success('Wallet disconnected successfully!');
+        toast.success(`${t('Navbar.walletDisconnectSuccess')}`);
     };
 
     return (
@@ -139,7 +178,7 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
                                     <div className='pt-2 px-2 cursor-pointer w-full'>
                                         <Link onClick={() => closeOnCurrent('/')} href='/'>
                                             <div className='flex flex-row justify-between items-center'>
-                                                Home
+                                                {t('Navbar.home')}
                                                 <Home />
                                             </div>
                                         </Link>
@@ -148,7 +187,7 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
                                     <div className='border-t-2 pt-2 px-2 cursor-pointer w-full'>
                                         <Link onClick={() => closeOnCurrent('/borrow')} href='/borrow'>
                                             <div className='flex flex-row justify-between items-center'>
-                                                Borrow
+                                                {t('Navbar.borrow')}
                                                 <HandCoins />
                                             </div>
                                         </Link>
@@ -157,30 +196,53 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
                                     <div className='border-t-2 pt-2 px-2 cursor-pointer w-full'>
                                         <Link onClick={() => closeOnCurrent('/lend')} href='/lend'>
                                             <div className='flex flex-row justify-between items-center'>
-                                                Lend
+                                                {t('Navbar.lend')}
                                                 <Gem />
                                             </div>
                                         </Link>
+                                    </div>
+
+                                    <div className='border-t-2 pt-2 px-2 cursor-pointer w-full'>
+                                        <div className='flex flex-row justify-between items-center' onClick={toggleDropdownLanguage}>
+                                            {t('Navbar.language')}
+                                            <div className={`transform ${dropdownVisible.language ? 'rotate-180 ease-in-out' : ''} transition-transform`}>
+                                                <ChevronDown />
+                                            </div>
+                                        </div>
+                                        <div className={`grid space-y-1 text-lg items-start pl-2 animate-fade-in-down-nav ${dropdownVisible.language ? 'block' : 'hidden'}`}>
+                                            <div className='grid grid-cols-3 space-x-1 items-center'>
+                                                {languages.map((lang) => (
+                                                    <Button
+                                                        disabled={isPending}
+                                                        variant='ghost'
+                                                        key={lang.value}
+                                                        onClick={() => { handleLanguageChange(lang.value); setSelectedLanguage(lang.value); }}
+                                                        className={`${lang.value === selectedLanguage && 'border-b-2 rounded-none'}`}>
+                                                        {lang.label}
+                                                    </Button>
+                                                ))}
+                                            </div>
+                                        </div>
                                     </div>
 
                                     {isWallet ? (
                                         <>
                                             <div className='border-t-2 pt-2 px-2 cursor-pointer w-full'>
                                                 <div className='flex flex-row justify-between items-center' onClick={toggleDropdownNotification}>
-                                                    Notification
+                                                    {t('Notifications.title')}
                                                     <div className='relative'>
                                                         <Bell className='cursor-pointer' />
                                                         <div className='w-2.5 h-2.5 absolute -top-0.5 right-1 bg-green-600 rounded-full'></div>
                                                     </div>
                                                 </div>
                                                 <div className={`grid space-y-1 text-lg items-start pl-2 animate-fade-in-down-nav ${dropdownVisible.notification ? 'block' : 'hidden'}`}>
-                                                    <p className='text-muted-foreground text-sm'>You have 3 unread messages.</p>
+                                                    <p className='text-muted-foreground text-sm'>{t('Notifications.description')}</p>
                                                     <div className='py-2 grid gap-y-5'>
                                                         <div className='flex items-center space-x-1 rounded-md border p-4'>
                                                             <BellRing />
                                                             <div className='flex-1 space-y-1'>
                                                                 <p className='text-sm font-medium leading-none'>
-                                                                    Push Notifications
+                                                                    {t('Notifications.pushNotification')}
                                                                 </p>
                                                             </div>
                                                             <Switch />
@@ -197,7 +259,7 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
                                                                             {notification.title}
                                                                         </p>
                                                                         <p className='text-sm text-muted-foreground'>
-                                                                            {notification.noteficationTime}
+                                                                            {notification.notificationTime}
                                                                         </p>
                                                                     </div>
                                                                 </div>
@@ -205,7 +267,7 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
                                                         </div>
                                                         {/* <Button className='w-full' asChild>
                                                             <Link href='/notifications'>
-                                                                Load More Notifications
+                                                                {t('Notifications.allNotification')}
                                                             </Link>
                                                         </Button> */}
                                                     </div>
@@ -214,7 +276,7 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
 
                                             <div className='border-t-2 pt-2 px-2 cursor-pointer w-full'>
                                                 <div className='flex flex-row justify-between items-center' onClick={toggleDropdownProfile}>
-                                                    Profile
+                                                    {t('Navbar.profile')}
                                                     <div className={`transform ${dropdownVisible.profile ? 'rotate-180 ease-in-out' : ''} transition-transform`}>
                                                         <ChevronDown />
                                                     </div>
@@ -224,17 +286,17 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
                                                         {formatWalletAddress(wallet?.publicKey?.toString())}
                                                     </div>
                                                     <Link onClick={() => closeOnCurrent('/portfolio')} href='/portfolio' passHref>
-                                                        My Portfolio
+                                                        {t('Navbar.myPortfolio')}
                                                     </Link>
                                                     <Link onClick={() => closeOnCurrent('/check-credit-score')} href='/check-credit-score' passHref>
-                                                        Check Credit Score
+                                                        {t('Navbar.checkCreditScore')}
                                                     </Link>
                                                 </div>
                                             </div>
 
                                             <div className='border-y-2 py-2 px-2 cursor-pointer w-full'>
                                                 <Button variant='destructive' className='text-md w-full' onClick={handleDisconnect}>
-                                                    Disconnect Wallet
+                                                    {t('Navbar.disconnectWallet')}
                                                 </Button>
                                             </div>
                                         </>
@@ -243,12 +305,12 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
                                             <Dialog open={open} onOpenChange={setOpen}>
                                                 <DialogTrigger asChild>
                                                     <Button className='text-md w-full'>
-                                                        Connect Wallet
+                                                        {t('Navbar.connectWallet')}
                                                     </Button>
                                                 </DialogTrigger>
                                                 <DialogContent className='max-w-[90vw] md:max-w-[450px]'>
                                                     {wallets.some((wallet) => wallet.readyState === 'Installed') &&
-                                                        <DialogTitle className='text-xl md:text-2xl tracking-wide text-center'>Connect a wallet on Solana to continue</DialogTitle>
+                                                        <DialogTitle className='text-xl md:text-2xl tracking-wide text-center'>{t('Navbar.walletConnectTitle')}</DialogTitle>
                                                     }
                                                     <div className='flex flex-col space-y-2'>
                                                         {wallets
@@ -262,19 +324,19 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
                                                                         </div>
                                                                     </div>
                                                                     <div className='text-sm text-accent-foreground/80'>
-                                                                        Detected
+                                                                        {t('Navbar.detected')}
                                                                     </div>
                                                                 </Button>
                                                             ))}
                                                         {!wallets.some((wallet) => wallet.readyState === 'Installed') && (
                                                             <div className='flex flex-col space-y-2 items-center justify-center'>
-                                                                <h1 className='text-xl md:text-2xl tracking-wide text-center'>You&apos;ll need a wallet on Solana to continue</h1>
+                                                                <h1 className='text-xl md:text-2xl tracking-wide text-center'>{t('Navbar.noWalletMessage')}</h1>
                                                                 <div className='p-4 rounded-full border-2'>
                                                                     <WalletMinimal strokeWidth={1} className='h-16 w-16 font-light' />
                                                                 </div>
                                                                 <div className='flex flex-row justify-center py-2'>
                                                                     <a href='https://phantom.app' target='_blank'>
-                                                                        <Button className='w-full px-20'>Get Wallet</Button>
+                                                                        <Button className='w-full px-20'>{t('Navbar.getWallet')}</Button>
                                                                     </a>
                                                                 </div>
                                                             </div>
@@ -293,13 +355,13 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
                                                         </div>
                                                         <div className='flex justify-end px-2'>
                                                             <div className='flex flex-row space-x-2 items-center cursor-pointer px-2' onClick={toggleMoreOption}>
-                                                                <h1>{isMoreOption ? 'Less' : 'More'} option</h1>
+                                                                <h1>{isMoreOption ? `${t('Navbar.less')}` : `${t('Navbar.more')}`} {t('Navbar.options')}</h1>
                                                                 <Triangle fill={`text-foreground`} className={`dark:hidden h-3 w-3 transform transition-transform duration-200 ${isMoreOption ? '' : 'rotate-180'}`} />
                                                                 <Triangle fill={`white`} className={`hidden dark:block h-3 w-3 transform transition-transform duration-200 ${isMoreOption ? '' : 'rotate-180'}`} />
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <p className='text-center text-sm'>By connecting a wallet, you agree to SoFLEX&apos;s <a href='/tos' target='_blank'><span className='underline'>Terms of Service</span></a>, <a href='/ua' target='_blank'><span className='underline'>User Agreement</span></a>, and consent to its <a href='/privacy' target='_blank'><span className='underline'>Privacy Policy</span></a>.</p>
+                                                    <p className='px-2 text-center'>{t('Navbar.acceptTerms1')} <a href='/tos' target='_blank'><span className='underline'>{t('Navbar.acceptTerms2')}</span></a>, <a href='/ua' target='_blank'><span className='underline'>{t('Navbar.acceptTerms3')}</span></a>, {t('Navbar.acceptTerms4')} <a href='/privacy' target='_blank'><span className='underline'>{t('Navbar.acceptTerms5')}</span></a>.</p>
                                                 </DialogContent>
                                             </Dialog>
                                         </div>

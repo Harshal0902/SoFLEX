@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { useForm } from 'react-hook-form'
 import { SignerWalletAdapterProps } from '@solana/wallet-adapter-base'
 import { createTransferInstruction, createAssociatedTokenAccountInstruction, getAssociatedTokenAddress, getAccount } from '@solana/spl-token'
@@ -26,29 +27,6 @@ export type LendingAssetDataType = {
     asset_ltv: string;
 }
 
-const FormSchema = z.object({
-    lending_amount: z
-        .string()
-        .refine(value => !isNaN(Number(value)), {
-            message: 'Amount must be a number.',
-        })
-        .refine(value => Number(value) > 0, {
-            message: 'Amount must be a positive number.',
-        })
-        .refine(value => {
-            const stringValue = String(value);
-            const [integerPart, decimalPart] = stringValue.split('.');
-
-            if (integerPart.length > 7 || (decimalPart && decimalPart.length > 6)) {
-                return false;
-            }
-
-            return true;
-        }, {
-            message: 'Amount must have up to 7 digits before the decimal point and up to 6 digits after the decimal point.',
-        }),
-});
-
 export const configureAndSendCurrentTransaction = async (
     transaction: Transaction,
     connection: Connection,
@@ -74,10 +52,34 @@ export default function DeFiLendingButton({ row }: { row: { original: LendingAss
     const [sigValidation, setSigValidation] = useState<boolean>(false);
     const [open, setOpen] = useState(false);
 
+    const t = useTranslations('DeFiLendPage');
     const order = row.original;
     const { publicKey, sendTransaction, signTransaction } = useWallet();
     const { connection } = useConnection();
     const wallet = useWallet();
+
+    const FormSchema = z.object({
+        lending_amount: z
+            .string()
+            .refine(value => !isNaN(Number(value)), {
+                message: `${t('amountMessage1')}`,
+            })
+            .refine(value => Number(value) > 0, {
+                message: `${t('amountMessage3')}`,
+            })
+            .refine(value => {
+                const stringValue = String(value);
+                const [integerPart, decimalPart] = stringValue.split('.');
+
+                if (integerPart.length > 7 || (decimalPart && decimalPart.length > 6)) {
+                    return false;
+                }
+
+                return true;
+            }, {
+                message: `${t('amountMessage3')}`,
+            }),
+    });
 
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
@@ -151,7 +153,7 @@ export default function DeFiLendingButton({ row }: { row: { original: LendingAss
     async function onSubmit(values: z.infer<typeof FormSchema>) {
         try {
             if (!connection || !publicKey) {
-                return toast.error('Wallet not connected. Please connect your wallet and try again!');
+                return toast.error(`${t('walletConnectError')}`);
             }
 
             setIsSubmitting(true);
@@ -245,7 +247,7 @@ export default function DeFiLendingButton({ row }: { row: { original: LendingAss
                 const polling = setInterval(async () => {
                     if (!sig || !wallet.publicKey) {
                         clearInterval(polling);
-                        return toast.error('Transaction failed. Please try again!');
+                        return toast.error(`${t('transactionFailed')}`);
                     }
 
                     const transaction = await connection.getParsedTransaction(sig);
@@ -262,28 +264,28 @@ export default function DeFiLendingButton({ row }: { row: { original: LendingAss
                         if (result === 'Request for new DeFi Lending sent successfully') {
                             setOpen(false);
                             setSigValidation(true);
-                            toast.success('Lending successful! Interest starts accruing.');
+                            toast.success(`${t('lendingSuccess')}`);
                         } else {
-                            toast.error('An error occurred while lending. Please try again!');
+                            toast.error(`${t('lendingError')}`);
                         }
                     } else if (Date.now() - start > timeout) {
                         clearInterval(polling);
                         setIsSubmitting(false);
                         setSigValidation(false);
-                        toast.error('Invalid transaction. Please try again!');
+                        toast.error(`${t('invalidTransaction')}`);
                     } else {
                         clearInterval(polling);
                         setIsSubmitting(false);
                         setSigValidation(false);
-                        toast.error('Invalid transaction. Please try again!');
+                        toast.error(`${t('invalidTransaction')}`);
                     }
                 }, interval);
             }
         } catch (error) {
             if (error == 'TokenAccountNotFoundError') {
-                toast.error('Insufficient balance in your wallet.');
+                toast.error(`${t('insufficientBalance')}`);
             } else {
-                toast.error('An error occurred while repaying the loan. Please try again!');
+                toast.error(`${t('lendingError')}`);
             }
             setIsSubmitting(false);
         }
@@ -293,16 +295,16 @@ export default function DeFiLendingButton({ row }: { row: { original: LendingAss
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 <Button disabled={!publicKey}>
-                    {publicKey ? 'Lend' : 'Connect Wallet'}
+                    {publicKey ? `${t('lend')}` : `${t('connectWallet')}`}
                 </Button>
             </DialogTrigger>
             <DialogContent className='max-w-[90vw] md:max-w-[425px]'>
                 <DialogHeader>
                     <DialogTitle className='flex flex-row space-x-1 items-center'>
-                        <div>Lend Token</div>
+                        <div>{t('lendToken')}</div>
                     </DialogTitle>
                     <DialogDescription>
-                        Lend your token to earn interest.
+                        {t('lendDialogDesc')}
                     </DialogDescription>
                 </DialogHeader>
                 <div>
@@ -314,12 +316,12 @@ export default function DeFiLendingButton({ row }: { row: { original: LendingAss
                                 name='lending_amount'
                                 render={({ field }) => (
                                     <FormItem className='w-full px-2'>
-                                        <FormLabel>Lending amount (in {order.asset_symbol})</FormLabel>
+                                        <FormLabel>{t('lendingAmount')} ({t('in')} {order.asset_symbol})</FormLabel>
                                         <FormControl>
-                                            <Input {...field} placeholder={`Enter the ${order.asset_symbol} you want to lend `} />
+                                            <Input {...field} placeholder={`${t('enterThe')} ${order.asset_symbol} ${t('youWantTo')} `} />
                                         </FormControl>
                                         <FormDescription>
-                                            Enter the amount you want to lend.
+                                            {t('enterAmount')}
                                         </FormDescription>
                                         <FormMessage />
                                     </FormItem>
@@ -329,14 +331,14 @@ export default function DeFiLendingButton({ row }: { row: { original: LendingAss
                             <div className='flex flex-col space-y-1 pt-2'>
                                 <div className='flex flex-row items-center justify-between hover:bg-accent hover:rounded px-2'>
                                     <div className='flex flex-row items-center space-x-1'>
-                                        <h1 className='font-semibold tracking-wide'>Current Price</h1>
+                                        <h1 className='font-semibold tracking-wide'>{t('currentPrice')}</h1>
                                         <TooltipProvider>
                                             <Tooltip delayDuration={300}>
                                                 <TooltipTrigger asChild>
                                                     <span><Info className='h-4 w-4 ml-1 cursor-pointer' /></span>
                                                 </TooltipTrigger>
                                                 <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
-                                                    The current price of the asset in USD.
+                                                    {t('currentPriceUSD')}
                                                 </TooltipContent>
                                             </Tooltip>
                                         </TooltipProvider>
@@ -345,14 +347,14 @@ export default function DeFiLendingButton({ row }: { row: { original: LendingAss
                                 </div>
                                 <div className='flex flex-row items-center justify-between hover:bg-accent hover:rounded px-2'>
                                     <div className='flex flex-row items-center space-x-1'>
-                                        <h1 className='font-semibold tracking-wide'>Asset Yield</h1>
+                                        <h1 className='font-semibold tracking-wide'>{t('assetYield')}</h1>
                                         <TooltipProvider>
                                             <Tooltip delayDuration={300}>
                                                 <TooltipTrigger asChild>
                                                     <span><Info className='h-4 w-4 ml-1 cursor-pointer' /></span>
                                                 </TooltipTrigger>
                                                 <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
-                                                    The annual percentage yield (APY) earned for supplying the asset.
+                                                    {t('apy')}
                                                 </TooltipContent>
                                             </Tooltip>
                                         </TooltipProvider>
@@ -361,14 +363,14 @@ export default function DeFiLendingButton({ row }: { row: { original: LendingAss
                                 </div>
                                 <div className='flex flex-row items-center justify-between hover:bg-accent hover:rounded px-2'>
                                     <div className='flex flex-row items-center space-x-1'>
-                                        <h1 className='font-semibold tracking-wide'>Token balance</h1>
+                                        <h1 className='font-semibold tracking-wide'>{t('tokenBalance')}</h1>
                                         <TooltipProvider>
                                             <Tooltip delayDuration={300}>
                                                 <TooltipTrigger asChild>
                                                     <span><Info className='h-4 w-4 ml-1 cursor-pointer' /></span>
                                                 </TooltipTrigger>
                                                 <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
-                                                    The amount of the asset you have in your wallet.
+                                                    {t('tokenBalanceDesc')}
                                                 </TooltipContent>
                                             </Tooltip>
                                         </TooltipProvider>
@@ -379,24 +381,24 @@ export default function DeFiLendingButton({ row }: { row: { original: LendingAss
 
                             {isSubmitting && !sigValidation &&
                                 <div className={`text-center px-2 ${isSubmitting ? 'animate-fade-in-up-short' : ''}`}>
-                                    Transaction in progress. Please avoid refreshing or closing this tab.
+                                    {t('transactionInProgress')}
                                 </div>
                             }
 
                             {sigValidation &&
                                 <div className={`text-center px-2 ${sigValidation ? 'animate-fade-in-up-short' : ''}`}>
-                                    Validating transaction. Please avoid refreshing or closing this tab.
+                                    {t('validatingTransaction')}
                                 </div>
                             }
 
                             {parseFloat(tokenBalance) >= parseFloat(form.watch('lending_amount')) && parseFloat(tokenBalance) > 0 ? (
                                 <Button type='submit' className='w-full mt-4' disabled={isSubmitting}>
                                     {isSubmitting && <Loader2 className='animate-spin mr-2' size={15} />}
-                                    {isSubmitting ? 'Lending...' : 'Lend'}
+                                    {isSubmitting ? `${t('lending')}` : `${t('lend')}`}
                                 </Button>
                             ) : (
                                 <Button className='w-full mt-4' disabled>
-                                    {parseFloat(tokenBalance) <= 0 || parseFloat(tokenBalance) < parseFloat(form.watch('lending_amount')) ? 'Insufficient Balance' : 'Lend'}
+                                    {parseFloat(tokenBalance) <= 0 || parseFloat(tokenBalance) < parseFloat(form.watch('lending_amount')) ? `${t('insufficientBalanceText')}` : `${t('lend')}`}
                                 </Button>
                             )}
                         </form>

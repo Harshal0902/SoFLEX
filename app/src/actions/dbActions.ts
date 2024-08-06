@@ -1,7 +1,7 @@
 "use server"
 
 import { db } from '@/db/db'
-import { waitlist, users, new_asset_or_collection_request, asset_details, nft_collection_details, defi_borrowing, defi_lending, te_user_stats } from '@/db/schema'
+import { waitlist, users, new_asset_or_collection_request, asset_details, nft_collection_details, defi_borrowing, defi_lending } from '@/db/schema'
 import crypto from 'crypto'
 import { eq, count, and, desc } from 'drizzle-orm'
 

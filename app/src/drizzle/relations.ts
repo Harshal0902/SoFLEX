@@ -1,5 +1,5 @@
 import { relations } from 'drizzle-orm/relations'
-import { asset_details, defi_lending, users, defi_borrowing, new_asset_or_collection_request, te_user_stats } from './schema'
+import { asset_details, defi_lending, users, defi_borrowing, new_asset_or_collection_request } from './schema'
 
 export const defi_lendingRelations = relations(defi_lending, ({ one }) => ({
 	asset_detail: one(asset_details, {
@@ -21,7 +21,6 @@ export const usersRelations = relations(users, ({ many }) => ({
 	defi_lendings: many(defi_lending),
 	defi_borrowings: many(defi_borrowing),
 	new_asset_or_collection_requests: many(new_asset_or_collection_request),
-	te_user_stats: many(te_user_stats),
 }));
 
 export const defi_borrowingRelations = relations(defi_borrowing, ({ one }) => ({
@@ -38,13 +37,6 @@ export const defi_borrowingRelations = relations(defi_borrowing, ({ one }) => ({
 export const new_asset_or_collection_requestRelations = relations(new_asset_or_collection_request, ({ one }) => ({
 	user: one(users, {
 		fields: [new_asset_or_collection_request.user_address],
-		references: [users.user_address]
-	}),
-}));
-
-export const te_user_statsRelations = relations(te_user_stats, ({ one }) => ({
-	user: one(users, {
-		fields: [te_user_stats.user_address],
 		references: [users.user_address]
 	}),
 }));

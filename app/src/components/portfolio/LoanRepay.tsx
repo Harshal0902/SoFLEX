@@ -3,6 +3,7 @@ import { SignerWalletAdapterProps } from '@solana/wallet-adapter-base'
 import { createTransferInstruction, createAssociatedTokenAccountInstruction, getAssociatedTokenAddress, getAccount } from '@solana/spl-token'
 import { LAMPORTS_PER_SOL, PublicKey, Transaction, Connection, TransactionInstruction, SystemProgram } from '@solana/web3.js'
 import { updateUserBorrowStatus } from '@/actions/dbActions'
+import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { useWallet, useConnection } from '@solana/wallet-adapter-react'
 import { Loader2, Info, ExternalLink } from 'lucide-react'
@@ -56,6 +57,7 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
     const { publicKey, sendTransaction, signTransaction } = useWallet();
     const { connection } = useConnection();
     const wallet = useWallet();
+    const t = useTranslations('PortfolioPage');
 
     useEffect(() => {
         const fetchTokenAccounts = async () => {
@@ -148,7 +150,7 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
     async function onRepay() {
         try {
             if (!connection || !publicKey) {
-                return toast.error('Wallet not connected. Please connect your wallet and try again!');
+                return toast.error(`${t('walletNotConnected')}`);
             }
 
             setIsSubmitting(true);
@@ -244,7 +246,7 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
                 const polling = setInterval(async () => {
                     if (!sig) {
                         clearInterval(polling);
-                        return toast.error('Transaction failed. Please try again!');
+                        return toast.error(`${t('transactionFailed')}`);
                     }
 
                     const transaction = await connection.getParsedTransaction(sig);
@@ -261,30 +263,30 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
                             setTrigger(true);
                             setSigValidation(true);
                             onTrigger();
-                            toast.success('Loan repaid successfully!');
+                            toast.success(`${t('loanRepaySuccess')}`);
                         } else {
-                            toast.error('An error occurred while updating the loan status. Please try again!');
+                            toast.error(`${t('loanUpdateError')}`);
                         }
                     } else if (Date.now() - start > timeout) {
                         clearInterval(polling);
                         setIsSubmitting(false);
                         setSigValidation(false);
-                        toast.error('Invalid transaction. Please try again!');
+                        toast.error(`${t('invalidTransaction')}`);
                     } else {
                         clearInterval(polling);
                         setIsSubmitting(false);
                         setSigValidation(false);
-                        toast.error('Invalid transaction. Please try again!');
+                        toast.error(`${t('invalidTransaction')}`);
                     }
                 }, interval);
             }
         } catch (error) {
             if (error == 'TokenAccountNotFoundError') {
-                toast.error('Insufficient balance in your wallet.');
+                toast.error(`${t('insufficientBalance')}`);
             } else if (error == 'WalletSendTransactionError: invalid account') {
-                toast.error('Invalid wallet account. Please try again!');
+                toast.error(`${t('invalidWallet')}`);
             } else {
-                toast.error('An error occurred while repaying the loan. Please try again!');
+                toast.error(`${t('repayLoanError')}`);
             }
             setIsSubmitting(false);
         }
@@ -294,32 +296,32 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 <Button>
-                    Loan Details
+                    {t('loanDetails')}
                 </Button>
             </DialogTrigger>
             <DialogContent className='max-w-[90vw] md:max-w-[40vw]'>
                 <DialogHeader>
                     <DialogTitle>
-                        Repay Loan
+                        {t('repayLoan')}
                     </DialogTitle>
                     <DialogDescription>
-                        Repay your loan with the amount you borrowed and the interest rate.
+                        {t('dialogDesc')}
                     </DialogDescription>
                 </DialogHeader>
 
                 <div className='w-full flex flex-col space-y-2 max-h-[45vh] md:max-h-[60vh] overflow-y-auto'>
-                    <h1 className='flex flex-row flex-wrap space-x-2 px-2'>Loan details for Loan ID: <span className='block md:hidden font-semibold tracking-wide'>{order.borrow_id.slice(0, 8)}...{order.borrow_id.slice(-8)}</span> <span className='hidden md:block font-semibold tracking-wide'>{order.borrow_id}</span></h1>
+                    <h1 className='flex flex-row flex-wrap space-x-2 px-2'>{t('loanDetailsId')}: <span className='block md:hidden font-semibold tracking-wide'>{order.borrow_id.slice(0, 8)}...{order.borrow_id.slice(-8)}</span> <span className='hidden md:block font-semibold tracking-wide'>{order.borrow_id}</span></h1>
 
                     <div className='flex flex-row flex-wrap items-center justify-between hover:bg-accent hover:rounded px-2'>
                         <div className='flex flex-row items-center space-x-1'>
-                            <h1 className='font-semibold tracking-wide'>Borrow Amount</h1>
+                            <h1 className='font-semibold tracking-wide'>{t('borrowAmount')}</h1>
                             <TooltipProvider>
                                 <Tooltip delayDuration={300}>
                                     <TooltipTrigger asChild>
                                         <span><Info className='h-4 w-4 ml-0.5 cursor-pointer' /></span>
                                     </TooltipTrigger>
                                     <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
-                                        The amount you borrowed.
+                                        {t('amountBorrowed')}
                                     </TooltipContent>
                                 </Tooltip>
                             </TooltipProvider>
@@ -329,14 +331,14 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
 
                     <div className='flex flex-row flex-wrap items-center justify-between hover:bg-accent hover:rounded px-2'>
                         <div className='flex flex-row items-center space-x-1'>
-                            <h1 className='font-semibold tracking-wide'>Borrowed at</h1>
+                            <h1 className='font-semibold tracking-wide'>{t('borrowedAt')}</h1>
                             <TooltipProvider>
                                 <Tooltip delayDuration={300}>
                                     <TooltipTrigger asChild>
                                         <span><Info className='h-4 w-4 ml-0.5 cursor-pointer' /></span>
                                     </TooltipTrigger>
                                     <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
-                                        The date and time you borrowed the amount.
+                                        {t('borrowedDateAndTime')}
                                     </TooltipContent>
                                 </Tooltip>
                             </TooltipProvider>
@@ -346,14 +348,14 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
 
                     <div className='flex flex-row flex-wrap items-center justify-between hover:bg-accent hover:rounded px-2'>
                         <div className='flex flex-row items-center space-x-1'>
-                            <h1 className='font-semibold tracking-wide'>Interest Rate</h1>
+                            <h1 className='font-semibold tracking-wide'>{t('interestRate')}</h1>
                             <TooltipProvider>
                                 <Tooltip delayDuration={300}>
                                     <TooltipTrigger asChild>
                                         <span><Info className='h-4 w-4 ml-0.5 cursor-pointer' /></span>
                                     </TooltipTrigger>
                                     <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
-                                        The interest rate for the loan.
+                                        {t('interestRateDesc')}
                                     </TooltipContent>
                                 </Tooltip>
                             </TooltipProvider>
@@ -363,14 +365,14 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
 
                     <div className='flex flex-row flex-wrap items-center justify-between hover:bg-accent hover:rounded px-2'>
                         <div className='flex flex-row items-center space-x-1'>
-                            <h1 className='font-semibold tracking-wide'>Repayment Total</h1>
+                            <h1 className='font-semibold tracking-wide'>{t('repaymentTotal')}</h1>
                             <TooltipProvider>
                                 <Tooltip delayDuration={300}>
                                     <TooltipTrigger asChild>
                                         <span><Info className='h-4 w-4 ml-0.5 cursor-pointer' /></span>
                                     </TooltipTrigger>
                                     <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
-                                        Total Repayment Amount (Borrowed Amount + Interest).
+                                        {t('totalAmountToRepay')}
                                     </TooltipContent>
                                 </Tooltip>
                             </TooltipProvider>
@@ -380,14 +382,14 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
 
                     <div className='flex flex-row flex-wrap items-center justify-between hover:bg-accent hover:rounded px-2'>
                         <div className='flex flex-row items-center space-x-1'>
-                            <h1 className='font-semibold tracking-wide'>Borrow Duration</h1>
+                            <h1 className='font-semibold tracking-wide'>{t('borrowDuration')}</h1>
                             <TooltipProvider>
                                 <Tooltip delayDuration={300}>
                                     <TooltipTrigger asChild>
                                         <span><Info className='h-4 w-4 ml-0.5 cursor-pointer' /></span>
                                     </TooltipTrigger>
                                     <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
-                                        The duration of the loan.
+                                        {t('durationOfBorrowing')}
                                     </TooltipContent>
                                 </Tooltip>
                             </TooltipProvider>
@@ -397,14 +399,14 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
 
                     <div className='flex flex-row flex-wrap items-center justify-between hover:bg-accent hover:rounded px-2'>
                         <div className='flex flex-row items-center space-x-1'>
-                            <h1 className='font-semibold tracking-wide'>Due By</h1>
+                            <h1 className='font-semibold tracking-wide'>{t('dueBy')}</h1>
                             <TooltipProvider>
                                 <Tooltip delayDuration={300}>
                                     <TooltipTrigger asChild>
                                         <span><Info className='h-4 w-4 ml-0.5 cursor-pointer' /></span>
                                     </TooltipTrigger>
                                     <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
-                                        Deadline for repayment.
+                                        {t('deadline')}
                                     </TooltipContent>
                                 </Tooltip>
                             </TooltipProvider>
@@ -414,14 +416,14 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
 
                     <div className='flex flex-row flex-wrap items-center justify-between hover:bg-accent hover:rounded px-2'>
                         <div className='flex flex-row items-center space-x-1'>
-                            <h1 className='font-semibold tracking-wide'>Borrow Status</h1>
+                            <h1 className='font-semibold tracking-wide'>{t('borrowStatus')}</h1>
                             <TooltipProvider>
                                 <Tooltip delayDuration={300}>
                                     <TooltipTrigger asChild>
                                         <span><Info className='h-4 w-4 ml-0.5 cursor-pointer' /></span>
                                     </TooltipTrigger>
                                     <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
-                                        The status of your loan.
+                                        {t('statusOfBorrowing')}
                                     </TooltipContent>
                                 </Tooltip>
                             </TooltipProvider>
@@ -432,7 +434,7 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
                     <div>
                         <Accordion type='multiple' className='px-2'>
                             <AccordionItem value='collateral'>
-                                <AccordionTrigger className='hover:no-underline text-left font-medium tracking-wide'>Selected NFT(s) and cNFT(s) for Collateral</AccordionTrigger>
+                                <AccordionTrigger className='hover:no-underline text-left font-medium tracking-wide'>{t('selectedCollateral')}</AccordionTrigger>
                                 <AccordionContent>
                                     <div className='flex flex-row space-x-2 flex-wrap justify-evenly'>
                                         {JSON.parse(order.borrowing_collateralization_assets).map((asset: { image_uri: string; name: string; external_url: string; mint: string; floorprice: string }, index: React.Key) => (
@@ -442,11 +444,11 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
                                                 </div>
                                                 <p className='text-center'>{asset.name}</p>
                                                 <div className='flex flex-row items-center justify-center space-x-2'>
-                                                    <a href={asset.external_url} target='_blank' className='text-primary'>View collection</a>
+                                                    <a href={asset.external_url} target='_blank' className='text-primary'>{t('viewCollection')}</a>
                                                     <ExternalLink className='h-4 w-4' />
                                                 </div>
                                                 <div className='flex flex-row items-center justify-center space-x-2'>
-                                                    <a href={`https://solscan.io/token/${asset.mint}`} target='_blank' className='text-primary'>View on Solscan</a>
+                                                    <a href={`https://solscan.io/token/${asset.mint}`} target='_blank' className='text-primary'>{t('viewOnSolscan')}</a>
                                                     <ExternalLink className='h-4 w-4' />
                                                 </div>
                                             </div>
@@ -458,14 +460,14 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
                     </div>
 
                     {isSubmitting && !sigValidation &&
-                        <div className={`text-center px-2 ${isSubmitting ? 'animate-fade-in-up-short' : ''}`}>
-                            Transaction in progress. Please avoid refreshing or closing this tab.
+                        <div className={`text-center px-2 ${isSubmitting && 'animate-fade-in-up-short'}`}>
+                            {t('transactionInProgress')}
                         </div>
                     }
 
                     {sigValidation &&
-                        <div className={`text-center px-2 ${sigValidation ? 'animate-fade-in-up-short' : ''}`}>
-                            Validating transaction. Please avoid refreshing or closing this tab.
+                        <div className={`text-center px-2 ${sigValidation && 'animate-fade-in-up-short'}`}>
+                            {t('validatingTransaction')}
                         </div>
                     }
 
@@ -476,7 +478,7 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
                         </Button>
                     ) : (
                         <Button className='w-full mt-4' disabled>
-                            {parseFloat(tokenBalance) <= 0 || parseFloat(tokenBalance) < parseFloat(order.borrowing_total) ? 'Insufficient Balance' : order.borrowing_status === 'Active' ? 'Repay' : order.borrowing_status}
+                            {parseFloat(tokenBalance) <= 0 || parseFloat(tokenBalance) < parseFloat(order.borrowing_total) ? `${t('insufficientBalanceMsg')}` : order.borrowing_status === 'Active' ? 'Repay' : order.borrowing_status}
                         </Button>
                     )}
                 </div>

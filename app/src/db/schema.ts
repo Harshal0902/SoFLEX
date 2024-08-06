@@ -92,20 +92,6 @@ export const new_asset_or_collection_request = pgTable('new_asset_or_collection_
 		}
 	});
 
-export const te_user_stats = pgTable('te_user_stats', {
-	user_address: text('user_address').primaryKey().notNull().references(() => users.user_address),
-	interestearned: varchar('interestearned', { length: 255 }),
-	interestearnedlastmonth: varchar('interestearnedlastmonth', { length: 255 }),
-	completedloans: varchar('completedloans', { length: 225 }),
-	completedloanslastmonth: varchar('completedloanslastmonth', { length: 225 }),
-	activeloans: varchar('activeloans', { length: 225 }),
-	activeloanslastmonth: varchar('activeloanslastmonth', { length: 225 }),
-	activeborrowingsvalue: varchar('activeborrowingsvalue', { length: 225 }),
-	activeborrowingsvaluelastmonth: varchar('activeborrowingsvaluelastmonth', { length: 225 }),
-	activelendingvalue: varchar('activelendingvalue', { length: 225 }),
-	activelendingvaluelastmonth: varchar('activelendingvaluelastmonth', { length: 225 }),
-});
-
 export const waitlist = pgTable('waitlist', {
 	waitlist_id: serial('waitlist_id').primaryKey().notNull(),
 	email: varchar('email', { length: 255 }).notNull(),

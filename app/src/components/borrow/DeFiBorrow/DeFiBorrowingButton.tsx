@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
@@ -6,7 +7,7 @@ import { updateUserCreditScore, newDeFiBorrowing } from '@/actions/dbActions'
 import { toast } from 'sonner'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { ChevronRight, ChevronLeft, Loader2, Info, ExternalLink } from 'lucide-react'
-import InfoButton from '@/components/InfoButton'
+// import InfoButton from '@/components/InfoButton'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog'
@@ -55,43 +56,6 @@ const borrowDuration = [
     '30 days',
 ]
 
-const FormSchema = z.object({
-    borrowing_amount: z
-        .string()
-        .refine(value => {
-            const parsedValue = parseFloat(value);
-            return !isNaN(parsedValue);
-        }, {
-            message: 'Borrow amount must be a number.',
-        })
-        .refine(value => {
-            const parsedValue = parseFloat(value);
-            return parsedValue > 0;
-        }, {
-            message: 'Borrow amount must be a positive number.',
-        })
-        .refine(value => {
-            const stringValue = String(value);
-            const [integerPart, decimalPart] = stringValue.split('.');
-
-            if (integerPart.length > 7 || (decimalPart && decimalPart.length > 6)) {
-                return false;
-            }
-
-            return true;
-        }, {
-            message: 'Borrow amount must have up to 6 digits before the decimal point.',
-        }),
-    borrowing_duration: z.string({
-        required_error: 'Borrowing duration is required.',
-    }),
-    agree_terms: z.boolean()
-        .refine(value => value === true, {
-            message: 'You must agree to the Terms of Service and Privacy Policy.',
-            path: ['agree_terms']
-        }),
-});
-
 export default function DeFiBorrowingButton({ row }: { row: { original: BorrowingAssetDataType } }) {
     const [open, setOpen] = useState(false);
     const [currentSection, setCurrentSection] = useState(1);
@@ -111,8 +75,46 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
     const order = row.original;
     const { publicKey } = useWallet();
     const wallet = useWallet();
+    const t = useTranslations('DeFiBorrowPage');
 
     const shyft_api_key = process.env.NEXT_PUBLIC_SHYFTAPI!;
+
+    const FormSchema = z.object({
+        borrowing_amount: z
+            .string()
+            .refine(value => {
+                const parsedValue = parseFloat(value);
+                return !isNaN(parsedValue);
+            }, {
+                message: `${t('borrowAmountMsg1')}`,
+            })
+            .refine(value => {
+                const parsedValue = parseFloat(value);
+                return parsedValue > 0;
+            }, {
+                message: `${t('borrowAmountMsg2')}`,
+            })
+            .refine(value => {
+                const stringValue = String(value);
+                const [integerPart, decimalPart] = stringValue.split('.');
+
+                if (integerPart.length > 7 || (decimalPart && decimalPart.length > 6)) {
+                    return false;
+                }
+
+                return true;
+            }, {
+                message: `${t('borrowAmountMsg3')}`,
+            }),
+        borrowing_duration: z.string({
+            required_error: `${t('borrowDurationMsg')}`,
+        }),
+        agree_terms: z.boolean()
+            .refine(value => value === true, {
+                message: `${t('agreeTermsMsg')}`,
+                path: ['agree_terms']
+            }),
+    });
 
     useEffect(() => {
         async function fetchData() {
@@ -141,10 +143,10 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                         }));
                         setcNFTResult(formattedResult);
                     } else {
-                        toast.error('An error occurred while fetching cNFT(s) for the wallet. Please try again!');
+                        toast.error(`${t('cNFTError')}`);
                     }
                 } catch (error) {
-                    toast.error(`An error occurred while fetching cNFT(s) for the wallet. Please try again!`);
+                    toast.error(`${t('cNFTError')}`);
                 } finally {
                     setcNFTLoading(false);
                 }
@@ -181,10 +183,10 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                         }));
                         setNFTResult(formattedResult);
                     } else {
-                        toast.error('An error occurred while fetching NFT(s) for the wallet. Please try again!');
+                        toast.error(`${t('nftError')}`);
                     }
                 } catch (error) {
-                    toast.error(`An error occurred while fetching NFT(s) for the wallet. Please try again!`);
+                    toast.error(`${t('nftError')}`);
                 } finally {
                     setNFTLoading(false);
                 }
@@ -277,7 +279,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
             const transactionHistoryScore = ((sentPercentage - receivedPercentage) / 100).toFixed(2);
             calculateCreditScore(transactionHistoryScore);
         } catch (error) {
-            toast.error('An error occurred while fetching transaction history. Please try again!');
+            toast.error(`${t('transactionHistoryError')}`);
         } finally {
             setLoading(false);
         }
@@ -299,7 +301,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                 creditScore: parseFloat(creditScoreValue.toFixed(2)),
             });
             if (result === 'Error updating user credit score') {
-                toast.error('An error occurred while updating credit score. Please try again!');
+                toast.error(`${t('creditScoreHistoryError')}`);
             }
         }
     };
@@ -359,16 +361,16 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                 if (result === 'Request for new DeFi Borrowing sent successfully') {
                     setIsSubmitting(false);
                     setOpen(false);
-                    toast.success('Borrowing successful! Assets will be credited to your wallet shortly.');
+                    toast.success(`${t('borrowingSuccess')}`);
                     form.reset();
                 } else {
                     setCurrentSection(2);
                     setIsSubmitting(false);
-                    toast.error('An error occurred while borrowing. Please try again!');
+                    toast.error(`${t('borrowingError')}`);
                 }
             }
         } catch (error) {
-            toast.error('An error occurred while borrowing. Please try again!');
+            toast.error(`${t('borrowingError')}`);
         }
     }
 
@@ -376,17 +378,17 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 <Button disabled={!publicKey}>
-                    {publicKey ? 'Borrow' : 'Connect Wallet'}
+                    {publicKey ? `${t('borrow')}` : `${t('connectWallet')}`}
                 </Button>
             </DialogTrigger>
             <DialogContent className='max-w-[90vw] md:max-w-[40vw]'>
                 <DialogHeader>
                     <DialogTitle className='flex flex-row space-x-1 items-center'>
-                        <div>Borrow Token</div>
+                        <div>{t('borrowToken')}</div>
                         {/* <InfoButton /> */}
                     </DialogTitle>
                     <DialogDescription>
-                        Borrow token from the lending pool.
+                        {t('borrowTokenDesc')}
                     </DialogDescription>
                 </DialogHeader>
 
@@ -401,12 +403,12 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                     name='borrowing_amount'
                                     render={({ field }) => (
                                         <FormItem className='w-full px-2'>
-                                            <FormLabel>Borrowing amount (in {order.asset_symbol})</FormLabel>
+                                            <FormLabel>{t('borrowingAmount')} ({t('in')} {order.asset_symbol})</FormLabel>
                                             <FormControl>
                                                 <Input {...field} />
                                             </FormControl>
                                             <FormDescription>
-                                                Enter the amount you want to borrow.
+                                                {t('borrowAmount')}
                                             </FormDescription>
                                             <FormMessage />
                                         </FormItem>
@@ -415,14 +417,14 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
 
                                 <div className='flex flex-row items-center justify-between hover:bg-accent hover:rounded px-2'>
                                     <div className='flex flex-row items-center space-x-1'>
-                                        <h1 className='font-semibold tracking-wide'>Current Price</h1>
+                                        <h1 className='font-semibold tracking-wide'>{t('currentPrice')}</h1>
                                         <TooltipProvider>
                                             <Tooltip delayDuration={300}>
                                                 <TooltipTrigger asChild>
                                                     <span><Info className='h-4 w-4 ml-1 cursor-pointer' /></span>
                                                 </TooltipTrigger>
                                                 <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
-                                                    The current price of the asset in USD.
+                                                    {t('priceInUSD')}
                                                 </TooltipContent>
                                             </Tooltip>
                                         </TooltipProvider>
@@ -433,7 +435,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                 <div>
                                     <Accordion type='multiple' defaultValue={['cNFT', 'NFT']} className='px-2'>
                                         <AccordionItem value='cNFT'>
-                                            <AccordionTrigger className='hover:no-underline text-left font-semibold tracking-wide'>Select cNFT(s) or Synthetic Asset(s) for Collateral</AccordionTrigger>
+                                            <AccordionTrigger className='hover:no-underline text-left font-semibold tracking-wide'>{t('selectCollateral')}</AccordionTrigger>
                                             <AccordionContent>
                                                 {cNFTLoading ? (
                                                     <div className='flex flex-row space-x-2 flex-wrap justify-evenly'>
@@ -459,26 +461,26 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                                                             {
                                                                                 nft.external_url !== undefined && nft.external_url !== null && nft.external_url !== '' && (
                                                                                     <div className='flex flex-row items-center justify-center space-x-2'>
-                                                                                        <a href={nft.external_url} target='_blank' className='text-primary'>View collection</a>
+                                                                                        <a href={nft.external_url} target='_blank' className='text-primary'>{t('viewCollection')}</a>
                                                                                         <ExternalLink className='h-4 w-4' />
                                                                                     </div>
                                                                                 )
                                                                             }
                                                                             <div className='flex flex-row items-center justify-center space-x-2'>
-                                                                                <a href={`https://solscan.io/token/${nft.mint}`} target='_blank' className='text-primary'>View on Solscan</a>
+                                                                                <a href={`https://solscan.io/token/${nft.mint}`} target='_blank' className='text-primary'>{t('viewOnSolscan')}</a>
                                                                                 <ExternalLink className='h-4 w-4' />
                                                                             </div>
                                                                             {nft.floorprice && nft.floorprice > 0 ? (
-                                                                                <p className='text-center'>cNFT Price: {formatAsset_price(nft.floorprice)} SOL</p>
+                                                                                <p className='text-center'>{t('cNFTPrice')}: {formatAsset_price(nft.floorprice)} SOL</p>
                                                                             ) : (
-                                                                                <p className='text-center'>cNFT Price: 0 SOL</p>
+                                                                                <p className='text-center'>{t('cNFTPrice')}: 0 SOL</p>
                                                                             )}
                                                                         </div>
                                                                     )}
                                                                 </>
                                                             ))
                                                         ) : (
-                                                            <p>No cNFT(s) or Synthetic Asset(s) found for you wallet.</p>
+                                                            <p>{t('nocNFT')}</p>
                                                         )}
                                                     </div>
                                                 )}
@@ -486,7 +488,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                         </AccordionItem>
 
                                         <AccordionItem value='NFT'>
-                                            <AccordionTrigger className='hover:no-underline text-left font-semibold tracking-wide'>Select NFT(s) for Collateral</AccordionTrigger>
+                                            <AccordionTrigger className='hover:no-underline text-left font-semibold tracking-wide'>{t('selectNFT')}</AccordionTrigger>
                                             <AccordionContent>
                                                 {NFTLoading ? (
                                                     <div className='flex flex-row space-x-2 flex-wrap justify-evenly'>
@@ -512,26 +514,26 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                                                             {
                                                                                 nft.external_url !== undefined && nft.external_url !== null && nft.external_url !== '' && (
                                                                                     <div className='flex flex-row items-center justify-center space-x-2'>
-                                                                                        <a href={nft.external_url} target='_blank' className='text-primary'>View collection</a>
+                                                                                        <a href={nft.external_url} target='_blank' className='text-primary'>{t('viewCollection')}</a>
                                                                                         <ExternalLink className='h-4 w-4' />
                                                                                     </div>
                                                                                 )
                                                                             }
                                                                             <div className='flex flex-row items-center justify-center space-x-2'>
-                                                                                <a href={`https://solscan.io/token/${nft.mint}`} target='_blank' className='text-primary'>View on Solscan</a>
+                                                                                <a href={`https://solscan.io/token/${nft.mint}`} target='_blank' className='text-primary'>{t('viewOnSolscan')}</a>
                                                                                 <ExternalLink className='h-4 w-4' />
                                                                             </div>
                                                                             {nft.floorprice && nft.floorprice > 0 ? (
-                                                                                <p className='text-center'>NFT Price: {formatAsset_price(nft.floorprice)} SOL</p>
+                                                                                <p className='text-center'>{t('nftPrice')}: {formatAsset_price(nft.floorprice)} SOL</p>
                                                                             ) : (
-                                                                                <p className='text-center'>NFT Price: 0 SOL</p>
+                                                                                <p className='text-center'>{t('nftPrice')}: 0 SOL</p>
                                                                             )}
                                                                         </div>
                                                                     )}
                                                                 </>
                                                             ))
                                                         ) : (
-                                                            <p>No NFT(s) found for you wallet.</p>
+                                                            <p>{t('noNFT')}</p>
                                                         )}
                                                     </div>
                                                 )}
@@ -542,14 +544,14 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
 
                                 <div className='flex flex-row flex-wrap items-center justify-between hover:bg-accent hover:rounded px-2 mt-2'>
                                     <div className='flex flex-row items-center space-x-1'>
-                                        <h1 className='font-semibold tracking-wide'>Total Collateral Value</h1>
+                                        <h1 className='font-semibold tracking-wide'>{t('totalCollateral')}</h1>
                                         <TooltipProvider>
                                             <Tooltip delayDuration={300}>
                                                 <TooltipTrigger asChild>
                                                     <span><Info className='h-4 w-4 ml-1 cursor-pointer' /></span>
                                                 </TooltipTrigger>
                                                 <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
-                                                    The total value of the collateral in SOL.
+                                                    {t('totalCollateralValue')}
                                                 </TooltipContent>
                                             </Tooltip>
                                         </TooltipProvider>
@@ -562,11 +564,11 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                     name='borrowing_duration'
                                     render={({ field }) => (
                                         <FormItem className='w-full px-2'>
-                                            <FormLabel>Borrow Duration</FormLabel>
+                                            <FormLabel>{t('borrowDuration')}</FormLabel>
                                             <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                 <FormControl>
                                                     <SelectTrigger>
-                                                        <SelectValue placeholder='Select borrow duration' />
+                                                        <SelectValue placeholder={`${t('selectDuration')}`} />
                                                     </SelectTrigger>
                                                 </FormControl>
                                                 <SelectContent>
@@ -578,7 +580,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                                 </SelectContent>
                                             </Select>
                                             <FormDescription>
-                                                Select the duration for borrowing the asset.
+                                                {t('selectDurationDesc')}
                                             </FormDescription>
                                             <FormMessage />
                                         </FormItem>
@@ -587,14 +589,14 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
 
                                 <div>
                                     {parseFloat(formatAsset_price(totalCNFTPrice + totalNFTPrice)) < parseFloat(form.watch('borrowing_amount')) &&
-                                        <p className='text-destructive text-center px-2'>The value of the collateral must be greater than the amount borrowed.</p>
+                                        <p className='text-destructive text-center px-2'>{t('greaterValue')}</p>
                                     }
                                 </div>
 
                                 {((parseFloat(formatAsset_price(totalCNFTPrice + totalNFTPrice)) + (0.4 * parseFloat(formatAsset_price(totalCNFTPrice + totalNFTPrice)))) > parseFloat(form.watch('borrowing_amount'))) && form.watch('borrowing_duration') &&
                                     <div className='flex flex-col items-end justify-center px-2'>
                                         <div className='group border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded cursor-pointer text-sm py-2.5 px-4 w-full md:w-auto flex flex-row items-center justify-center' onClick={handleSubmitSection}>
-                                            Calculate Interest Rate
+                                            {t('calculateInterest')}
                                             <ChevronRight className='w-4 h-4 ml-1 group-hover:transform group-hover:translate-x-1 duration-300 ease-in-out' />
                                         </div>
                                     </div>
@@ -608,23 +610,23 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                     <>
                                         <div className='flex flex-row items-center justify-between hover:bg-accent hover:rounded px-2'>
                                             <div className='flex flex-row items-center space-x-1 text-sm md:text-lg'>
-                                                <h1 className='tracking-wide'>Credit Score</h1>
+                                                <h1 className='tracking-wide'>{t('creditScore')}</h1>
                                                 <TooltipProvider>
                                                     <Tooltip delayDuration={300}>
                                                         <TooltipTrigger asChild>
                                                             <span><Info className='h-4 w-4 ml-1 cursor-pointer' /></span>
                                                         </TooltipTrigger>
                                                         <TooltipContent className='max-w-[18rem] md:max-w-[26rem]'>
-                                                            How we calculate credit score:
-                                                            <p className='text-center'>a x BH  +  b x (TH + CD) + c</p>
+                                                            {t('howWeCalculate')}:
+                                                            <p className='text-center'>{t('formulaUsed')}</p>
                                                             <div className='py-1'>
-                                                                <p>Where:</p>
-                                                                <p>BH: Borrower History Score (0-100)</p>
-                                                                <p>TH: Transaction History Score (0-100)</p>
-                                                                <p>CD: Collateral Diversity Score (0-100)</p>
-                                                                <p>a: 0.55 (Moderate weight on BH)</p>
-                                                                <p>b: 0.35 (Moderate weight on combined TH + CD)</p>
-                                                                <p>c: 30 (Constant value to adjust score range)</p>
+                                                                <p>{t('where')}:</p>
+                                                                <p>{t('formula1')}</p>
+                                                                <p>{t('formula2')}</p>
+                                                                <p>{t('formula3')}</p>
+                                                                <p>{t('formula4')}</p>
+                                                                <p>{t('formula5')}</p>
+                                                                <p>{t('formula6')}</p>
                                                             </div>
                                                         </TooltipContent>
                                                     </Tooltip>
@@ -635,23 +637,24 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
 
                                         <div className='flex flex-row items-center justify-between text-sm md:text-lg hover:bg-accent hover:rounded px-2'>
                                             <div className='flex flex-row items-center space-x-1'>
-                                                <h1 className='tracking-wide'>Interest Rate</h1>
+                                                <h1 className='tracking-wide'>{t('interestRate')}</h1>
                                                 <TooltipProvider>
                                                     <Tooltip delayDuration={300}>
                                                         <TooltipTrigger asChild>
                                                             <span><Info className='h-4 w-4 ml-1 cursor-pointer' /></span>
                                                         </TooltipTrigger>
                                                         <TooltipContent className='max-w-[18rem] md:max-w-[26rem]'>
-                                                            How we calculate interest rate:
-                                                            <p className='text-center'>Cost x ( BR + RP  + DA)</p>
+                                                            {t('interestRateFormula')}:
+                                                            <p className='text-center'>{t('interestFormula')}</p>
                                                             <div className='py-1'>
-                                                                <p>Where:</p>
-                                                                <p>Cost: Requested Loan Amount</p>
-                                                                <p>Base Rate: 0.05  (Minimum interest rate)</p>
-                                                                <p>Risk Premium: (155 - OCS) x (RF / (155 - 30))</p>
-                                                                <p>OCS: On-Chain Credit Score</p>
-                                                                <p>Duration Adjustment = Duration(in months) x DF</p>
-                                                                <p>Duration_Factor (DF) = 0.5 ( To Adjust Duration)</p>
+                                                                <p>{t('where')}:</p>
+                                                                <p>{t('interestFormula')}</p>
+                                                                <p>{t('interestFormula1')}</p>
+                                                                <p>{t('interestFormula2')}</p>
+                                                                <p>{t('interestFormula3')}</p>
+                                                                <p>{t('interestFormula4')}</p>
+                                                                <p>{t('interestFormula5')}</p>
+                                                                <p>{t('interestFormula6')}</p>
                                                             </div>
                                                         </TooltipContent>
                                                     </Tooltip>
@@ -662,25 +665,25 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
 
                                         <div className='flex flex-row items-center justify-between flex-wrap text-sm md:text-lg hover:bg-accent hover:rounded px-2'>
                                             <div className='flex flex-row items-center space-x-1'>
-                                                <h1 className='tracking-wide'>Due By</h1>
+                                                <h1 className='tracking-wide'>{t('dueBy')}</h1>
                                             </div>
                                             <div>{dueByDate}</div>
                                         </div>
 
                                         <Accordion type='multiple' className='px-2'>
                                             <AccordionItem value='summary'>
-                                                <AccordionTrigger className='hover:no-underline text-left font-semibold tracking-wide'>Borrow Summary</AccordionTrigger>
+                                                <AccordionTrigger className='hover:no-underline text-left font-semibold tracking-wide'>{t('borrowSummary')}</AccordionTrigger>
                                                 <AccordionContent className='flex flex-col space-y-2'>
                                                     <div className='flex flex-row items-center justify-between flex-wrap text-sm md:text-lg hover:bg-accent hover:rounded px-2'>
                                                         <div className='flex flex-row items-center space-x-1'>
-                                                            <h1 className='tracking-wide'>Borrowing Amount</h1>
+                                                            <h1 className='tracking-wide'>{t('borrowingAmount')}</h1>
                                                             <TooltipProvider>
                                                                 <Tooltip delayDuration={300}>
                                                                     <TooltipTrigger asChild>
                                                                         <span><Info className='h-4 w-4 ml-1 cursor-pointer' /></span>
                                                                     </TooltipTrigger>
                                                                     <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
-                                                                        The total amount you are borrowing.
+                                                                        {t('borrowingTotal')}
                                                                     </TooltipContent>
                                                                 </Tooltip>
                                                             </TooltipProvider>
@@ -690,14 +693,14 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
 
                                                     <div className='flex flex-row items-center justify-between flex-wrap text-sm md:text-lg hover:bg-accent hover:rounded px-2'>
                                                         <div className='flex flex-row items-center space-x-1'>
-                                                            <h1 className='tracking-wide'>Borrowing Duration</h1>
+                                                            <h1 className='tracking-wide'>{t('borrowingDuration')}</h1>
                                                             <TooltipProvider>
                                                                 <Tooltip delayDuration={300}>
                                                                     <TooltipTrigger asChild>
                                                                         <span><Info className='h-4 w-4 ml-1 cursor-pointer' /></span>
                                                                     </TooltipTrigger>
                                                                     <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
-                                                                        The total duration for borrowing the asset.
+                                                                        {t('borrowingTotalDuration')}
                                                                     </TooltipContent>
                                                                 </Tooltip>
                                                             </TooltipProvider>
@@ -707,14 +710,14 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
 
                                                     <div className='flex flex-row items-center justify-between flex-wrap text-sm md:text-lg hover:bg-accent hover:rounded px-2'>
                                                         <div className='flex flex-row items-center space-x-1'>
-                                                            <h1 className='tracking-wide'>Borrowing Interest</h1>
+                                                            <h1 className='tracking-wide'>{t('borrowingInterest')}</h1>
                                                             <TooltipProvider>
                                                                 <Tooltip delayDuration={300}>
                                                                     <TooltipTrigger asChild>
                                                                         <span><Info className='h-4 w-4 ml-1 cursor-pointer' /></span>
                                                                     </TooltipTrigger>
                                                                     <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
-                                                                        The interest rate for borrowing the asset.
+                                                                        {t('borrowingTotalInterest')}
                                                                     </TooltipContent>
                                                                 </Tooltip>
                                                             </TooltipProvider>
@@ -723,7 +726,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                                     </div>
 
                                                     <div>
-                                                        <div className='text-sm md:text-lg px-2'>Selected NFT(s) and cNFT(s) for Collateral</div>
+                                                        <div className='text-sm md:text-lg px-2'>{t('selectedCollateral')}</div>
                                                         <div className='flex flex-row space-x-2 flex-wrap justify-evenly py-2'>
                                                             {combinedCollateralList.map((item, index) => (
                                                                 <div className='border rounded mt-4 p-2 flex flex-col space-y-2' key={index}>
@@ -732,14 +735,14 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                                                     </div>
                                                                     <p className='text-center'>{item.name}</p>
                                                                     <div className='flex flex-row items-center justify-center space-x-2'>
-                                                                        <a href={item.external_url} target='_blank' className='text-primary'>View collection</a>
+                                                                        <a href={item.external_url} target='_blank' className='text-primary'>{t('viewCollection')}</a>
                                                                         <ExternalLink className='h-4 w-4' />
                                                                     </div>
                                                                     <div className='flex flex-row items-center justify-center space-x-2'>
-                                                                        <a href={`https://solscan.io/token/${item.mint}`} target='_blank' className='text-primary'>View on Solscan</a>
+                                                                        <a href={`https://solscan.io/token/${item.mint}`} target='_blank' className='text-primary'>{t('viewOnSolscan')}</a>
                                                                         <ExternalLink className='h-4 w-4' />
                                                                     </div>
-                                                                    <p className='text-center'>cNFT Price: {formatAsset_price(item.floorprice)} SOL</p>
+                                                                    <p className='text-center'>{t('price')}: {formatAsset_price(item.floorprice)} SOL</p>
                                                                 </div>
                                                             ))}
                                                         </div>
@@ -750,7 +753,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                         </Accordion>
 
                                         <div className='text-center py-2'>
-                                            Repay {(parseFloat(form.watch('borrowing_amount')) + ((interestRate / 100) * parseFloat(form.watch('borrowing_amount'))))} {order.asset_symbol} within {form.watch('borrowing_duration')} (by {dueByDate})
+                                            {t('repay')} {(parseFloat(form.watch('borrowing_amount')) + ((interestRate / 100) * parseFloat(form.watch('borrowing_amount'))))} {order.asset_symbol} {t('within')} {form.watch('borrowing_duration')} ({t('by')} {dueByDate})
                                         </div>
 
                                         <FormField
@@ -777,7 +780,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                                                 <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                                                             </FormControl>
                                                             <FormLabel>
-                                                                By checking this box, you agree to the terms: failure to repay {(parseFloat(form.watch('borrowing_amount')) + ((interestRate / 100) * parseFloat(form.watch('borrowing_amount'))))} {order.asset_symbol} within {form.watch('borrowing_duration')} results in default. In such cases, the pool may claim collateral. Manage loans on the portfolio page.
+                                                                {t('terms1')} {(parseFloat(form.watch('borrowing_amount')) + ((interestRate / 100) * parseFloat(form.watch('borrowing_amount'))))} {order.asset_symbol} {t('within')} {form.watch('borrowing_duration')} {t('terms2')}
                                                             </FormLabel>
                                                         </div>
                                                         <FormMessage />
@@ -789,7 +792,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                 ) : (
                                     <div className='flex flex-row items-center justify-center py-16 text-xl'>
                                         <Loader2 className='text-xl mr-2 mt-0.5 font-extrabold animate-spin' />
-                                        Loading...
+                                        {t('loading')}
                                     </div>
                                 )}
 
@@ -798,12 +801,12 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                         {!isSubmitting &&
                                             <div className='group border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded cursor-pointer text-sm py-2.5 px-4 w-full md:w-auto flex flex-row items-center justify-center' onClick={handleNFTSection}>
                                                 <ChevronLeft className='w-4 h-4 mr-1 group-hover:-translate-x-1 duration-300 ease-in-out' />
-                                                Edit borrow details
+                                                {t('editDetails')}
                                             </div>
                                         }
                                         <Button type='submit' className='px-16 w-full md:w-auto' disabled={isSubmitting || loading}>
                                             {isSubmitting && <Loader2 className='animate-spin mr-2' size={15} />}
-                                            {isSubmitting ? 'Borrowing...' : 'Borrow'}
+                                            {isSubmitting ? `${t('borrowing')}` : `${t('borrow')}`}
                                         </Button>
                                     </div>
                                 }

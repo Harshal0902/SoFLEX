@@ -1,26 +1,52 @@
 "use client"
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useTransition } from 'react'
+import { useLocale, useTranslations } from 'next-intl'
+import { useParams } from 'next/navigation'
+import { useRouter, usePathname } from '@/navigation'
+import { Locale } from '@/config'
 import Link from 'next/link'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { addNewUser } from '@/actions/dbActions'
 import { toast } from 'sonner'
 import ResponsiveNavbar from './ResponsiveNavbar'
-import { Button } from './ui/button'
+import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { WalletMinimal, Triangle, Bell, User, LogOut } from 'lucide-react'
+import { WalletMinimal, Triangle, Bell, User, Languages, LogOut } from 'lucide-react'
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import Image from 'next/image'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import Notifications from './Notifications'
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select'
 import ModeToggle from './ModeToggle'
+
+
+interface Language {
+    value: string;
+    label: string;
+}
+
+const languages: Language[] = [
+    { value: 'en', label: 'English' },
+    { value: 'de', label: 'Deutsch' },
+    { value: 'es', label: 'Español' },
+    { value: 'zh', label: '中文' },
+    { value: 'ja', label: '日本語' },
+    { value: 'ko', label: '한국어' }
+]
 
 export default function Navbar() {
     const [isHidden, setIsHidden] = useState(false);
     const [prevScrollPos, setPrevScrollPos] = useState(0);
     const [open, setOpen] = useState<boolean>(false);
     const [isMoreOption, setIsMoreOption] = useState<boolean>(false);
+    const [isPending, startTransition] = useTransition();
 
+    const router = useRouter();
+    const pathname = usePathname();
+    const params = useParams();
+    const t = useTranslations('Navbar');
+    const locale = useLocale();
     const { select, wallets, publicKey, disconnect, connected } = useWallet();
     const wallet = useWallet();
 
@@ -44,11 +70,11 @@ export default function Navbar() {
                         walletAddress: wallet.publicKey.toString(),
                     });
                     if (result === 'Error adding new user') {
-                        toast.error('An error occurred while setting up your account. Please try again!.');
+                        toast.error(`${t('addUserDBError')}`);
                     }
                     // toast.success('Wallet connected successfully!');
                 } catch (error) {
-                    toast.error('An error occurred while setting up your account. Please try again!.');
+                    toast.error(`${t('addUserDBError')}`);
                 }
             }
         };
@@ -56,6 +82,19 @@ export default function Navbar() {
         addUserToDB();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [publicKey]);
+
+    function handleLanguageChange(value: string) {
+        const nextLocale = value as Locale;
+        startTransition(() => {
+            router.replace(
+                // @ts-expect-error -- TypeScript will validate that only known `params`
+                // are used in combination with a given `pathname`. Since the two will
+                // always match for the current route, we can skip runtime checks.
+                { pathname, params },
+                { locale: nextLocale }
+            );
+        });
+    }
 
     const formatWalletAddress = (address: string | undefined): string => {
         if (!address || address.length <= 8) {
@@ -72,7 +111,7 @@ export default function Navbar() {
                 select(walletName);
                 setOpen(false);
             } catch (error) {
-                toast.error('An error occurred while connecting your wallet. Please try again!.');
+                toast.error(`${t('walletConnectError')}`);
             }
         }
     };
@@ -83,7 +122,7 @@ export default function Navbar() {
 
     const handleDisconnect = async () => {
         disconnect();
-        toast.success('Wallet disconnected successfully!');
+        toast.success(`${t('walletDisconnectSuccess')}`);
     };
 
     return (
@@ -92,7 +131,7 @@ export default function Navbar() {
                 <Link href='/' passHref>
                     <div className='inline-flex items-center justify-center text-2xl md:text-5xl cursor-pointer'>
                         SoFLEX
-                        <Badge variant='outline' className='ml-2 text-primary border-primary'>Devnet Beta</Badge>
+                        <Badge variant='outline' className='ml-2 text-primary border-primary'>{t('devnetBeta')}</Badge>
                     </div>
                 </Link>
 
@@ -100,12 +139,12 @@ export default function Navbar() {
                     <div className='lg:inline-flex lg:flex-row lg:ml-auto lg:w-auto w-full lg:items-center items-start flex flex-col lg:h-auto lg:space-x-4'>
                         <Button variant='ghost' className='hover:bg-primary hover:text-white text-md' asChild>
                             <Link href='/borrow' passHref>
-                                Borrow
+                                {t('borrow')}
                             </Link>
                         </Button>
                         <Button variant='ghost' className='hover:bg-primary hover:text-white text-md' asChild>
                             <Link href='/lend' passHref>
-                                Lend
+                                {t('lend')}
                             </Link>
                         </Button>
                         {publicKey ? (
@@ -131,16 +170,16 @@ export default function Navbar() {
                                         </div>
                                         <Link href='/portfolio' passHref>
                                             <div className='pb-[0.4rem] pr-1 hover:text-primary text-[0.95rem]' >
-                                                My Portfolio
+                                                {t('myPortfolio')}
                                             </div>
                                         </Link>
                                         <Link href='/check-credit-score' passHref>
                                             <div className='pb-[0.4rem] pr-1 hover:text-primary text-[0.95rem]' >
-                                                Check Credit Score
+                                                {t('checkCreditScore')}
                                             </div>
                                         </Link>
                                         <div className='flex flex-row justify-between items-center text-destructive cursor-pointer' onClick={handleDisconnect}>
-                                            Disconnect Wallet
+                                            <div>{t('disconnectWallet')}</div>
                                             <div>
                                                 <LogOut size={16} />
                                             </div>
@@ -151,13 +190,13 @@ export default function Navbar() {
                         ) : (
                             <Dialog open={open} onOpenChange={setOpen}>
                                 <DialogTrigger asChild>
-                                    <Button className=' text-md'>
-                                        Connect Wallet
+                                    <Button className='text-md'>
+                                        {t('connectWallet')}
                                     </Button>
                                 </DialogTrigger>
                                 <DialogContent className='max-w-[90vw] md:max-w-[380px]'>
                                     {wallets.some((wallet) => wallet.readyState === 'Installed') &&
-                                        <DialogTitle className='text-xl md:text-2xl tracking-wide text-center'>Connect a wallet on Solana to continue</DialogTitle>
+                                        <DialogTitle className='text-xl md:text-2xl tracking-wide text-center'>{t('walletConnectTitle')}</DialogTitle>
                                     }
                                     <div className='flex flex-col space-y-2'>
                                         {wallets
@@ -171,19 +210,19 @@ export default function Navbar() {
                                                         </div>
                                                     </div>
                                                     <div className='text-sm text-accent-foreground/80'>
-                                                        Detected
+                                                        {t('detected')}
                                                     </div>
                                                 </Button>
                                             ))}
                                         {!wallets.some((wallet) => wallet.readyState === 'Installed') && (
                                             <div className='flex flex-col space-y-2 items-center justify-center'>
-                                                <h1 className='text-xl md:text-2xl tracking-wide text-center'>You&apos;ll need a wallet on Solana to continue</h1>
+                                                <h1 className='text-xl md:text-2xl tracking-wide text-center'>{t('noWalletMessage')}</h1>
                                                 <div className='p-4 rounded-full border-2'>
                                                     <WalletMinimal strokeWidth={1} className='h-16 w-16 font-light' />
                                                 </div>
                                                 <div className='flex flex-row justify-center py-2'>
                                                     <a href='https://phantom.app' target='_blank'>
-                                                        <Button className='w-full px-20'>Get Wallet</Button>
+                                                        <Button className='w-full px-20'>{t('getWallet')}</Button>
                                                     </a>
                                                 </div>
                                             </div>
@@ -202,17 +241,37 @@ export default function Navbar() {
                                         </div>
                                         <div className='flex justify-end px-2'>
                                             <div className='flex flex-row space-x-2 items-center cursor-pointer px-2' onClick={toggleMoreOption}>
-                                                <h1>{isMoreOption ? 'Less' : 'More'} option</h1>
+                                                <h1>{isMoreOption ? `${t('less')}` : `${t('more')}`} {t('options')}</h1>
                                                 <Triangle fill={`text-foreground`} className={`dark:hidden h-3 w-3 transform transition-transform duration-200 ${isMoreOption ? '' : 'rotate-180'}`} />
                                                 <Triangle fill={`white`} className={`hidden dark:block h-3 w-3 transform transition-transform duration-200 ${isMoreOption ? '' : 'rotate-180'}`} />
                                             </div>
                                         </div>
                                     </div>
 
-                                    <p className='px-2 text-center'>By connecting a wallet, you agree to SoFLEX&apos;s <a href='/tos' target='_blank'><span className='underline'>Terms of Service</span></a>, <a href='/ua' target='_blank'><span className='underline'>User Agreement</span></a>, and consent to its <a href='/privacy' target='_blank'><span className='underline'>Privacy Policy</span></a>.</p>
+                                    <p className='px-2 text-center'>{t('acceptTerms1')} <a href='/tos' target='_blank'><span className='underline'>{t('acceptTerms2')}</span></a>, <a href='/ua' target='_blank'><span className='underline'>{t('acceptTerms3')}</span></a>, {t('acceptTerms4')} <a href='/privacy' target='_blank'><span className='underline'>{t('acceptTerms5')}</span></a>.</p>
                                 </DialogContent>
                             </Dialog>
                         )}
+
+                        <Select defaultValue={locale} onValueChange={handleLanguageChange}>
+                            <SelectTrigger className={`w-[85px] ${isPending && 'pointer-events-none opacity-60'} border flex items-center`}>
+                                <Languages className='h-4 w-4 mr-1' />
+                                <SelectValue>{locale}</SelectValue>
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectLabel className='flex flex-row space-x-1 items-center justify-center -ml-4'>
+                                        <Languages className='h-4 w-4' />
+                                        <p className='tracking-wider'>{t('language')}</p>
+                                    </SelectLabel>
+                                    {languages.map((lang) => (
+                                        <SelectItem key={lang.value} value={lang.value}>
+                                            {lang.label} ({lang.value})
+                                        </SelectItem>
+                                    ))}
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
                     </div>
                 </div>
 

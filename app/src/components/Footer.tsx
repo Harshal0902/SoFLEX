@@ -2,6 +2,7 @@
 
 import React from 'react'
 import { addUserWaitlist } from '@/actions/dbActions'
+import { useTranslations } from 'next-intl'
 import MaxWidthWrapper from './MaxWidthWrapper'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -22,36 +23,6 @@ interface SocialLinkType {
     link: string;
     imageName: string;
 }
-
-const forCompany: FooterLinkType[] = [
-    {
-        title: 'About Us',
-        link: '/'
-    },
-    {
-        title: 'Contact Us',
-        link: '/contact-us'
-    },
-    {
-        title: 'Frequently Asked Questions',
-        link: '/faqs'
-    }
-]
-
-const forLegal: FooterLinkType[] = [
-    {
-        title: 'Terms of Service',
-        link: 'tos'
-    },
-    {
-        title: 'User Agreement',
-        link: 'ua'
-    },
-    {
-        title: 'Privacy Policy',
-        link: 'privacy'
-    }
-]
 
 const companySocial: SocialLinkType[] = [
     {
@@ -80,16 +51,58 @@ const companySocial: SocialLinkType[] = [
     // }
 ]
 
-const FormSchema = z.object({
-    email: z.string({
-        required_error: 'Email is required',
-    }).email({
-        message: 'Invalid email format',
-    })
-})
-
 export default function Footer() {
+    const t = useTranslations('Footer');
     const currentYear = new Date().getFullYear();
+
+    const forProducts: FooterLinkType[] = [
+        {
+            title: `${t('borrow')}`,
+            link: '/borrow'
+        },
+        {
+            title: `${t('lend')}`,
+            link: '/lend'
+        },
+    ]
+
+    const forCompany: FooterLinkType[] = [
+        {
+            title: `${t('aboutUs')}`,
+            link: '/'
+        },
+        {
+            title: `${t('contactUs')}`,
+            link: '/contact-us'
+        },
+        {
+            title: `${t('faqs')}`,
+            link: '/faqs'
+        }
+    ]
+
+    const forLegal: FooterLinkType[] = [
+        {
+            title: `${t('tos')}`,
+            link: 'tos'
+        },
+        {
+            title: `${t('ua')}`,
+            link: 'ua'
+        },
+        {
+            title: `${t('privacy')}`,
+            link: 'privacy'
+        }
+    ]
+
+    const FormSchema = z.object({
+        email: z.string({
+            required_error: `${t('emailError')}`,
+        }).email({
+            message: `${t('invalidEmailError')}`,
+        })
+    })
 
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
@@ -106,9 +119,9 @@ export default function Footer() {
 
             if (result) {
                 if (result === 'Error adding user to waitlist') {
-                    toast.info('User already added to the newsletter.');
+                    toast.info(`${t('toastInfo')}`);
                 } else {
-                    toast.success('User added to newsletter successfully!');
+                    toast.success(`${t('toastSuccess')}`);
                     form.reset();
                 }
             }
@@ -120,9 +133,9 @@ export default function Footer() {
             <footer className='bg-blue-100/80 dark:bg-gray-900 my-2.5 md:my-6 rounded backdrop-blur-0'>
                 <div className='container p-6 mx-auto'>
 
-                    <div className='grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-y-10 lg:grid-cols-4'>
+                    <div className='grid grid-cols-1 gap-6 sm:grid-cols-3 sm:gap-y-10 lg:grid-cols-5'>
                         <div className='sm:col-span-2'>
-                            <h1 className='max-w-lg text-xl font-semibold tracking-wide'>Subscribe to Our Newsletter to Get Updates:</h1>
+                            <h1 className='max-w-lg text-xl font-semibold tracking-wide'>{t('newsletter')}:</h1>
                             <Form {...form}>
                                 <form onSubmit={form.handleSubmit(onSubmit)} autoComplete='off' className='flex flex-col mx-auto mt-6 md:space-x-2 space-y-3 md:space-y-0 md:flex-row'>
                                     <FormField
@@ -131,10 +144,10 @@ export default function Footer() {
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormControl>
-                                                    <Input {...field} className='w-full' placeholder='Email Address' />
+                                                    <Input {...field} className='w-full' placeholder={`${t('emailPlaceholder')}`} />
                                                 </FormControl>
                                                 <FormDescription>
-                                                    Don&apos;t worry we will not send you spam emails.
+                                                    {t('emailDescription')}
                                                 </FormDescription>
                                                 <FormMessage className='text-destructive tracking-wide' />
                                             </FormItem>
@@ -142,14 +155,26 @@ export default function Footer() {
                                     />
 
                                     <Button type='submit'>
-                                        Subscribe
+                                        {t('subscribe')}
                                     </Button>
                                 </form>
                             </Form>
                         </div>
 
                         <div>
-                            <p className='font-semibold tracking-wide'>Legal</p>
+                            <p className='font-semibold tracking-wide'>{t('products')}</p>
+
+                            <div className='flex flex-col items-start mt-5 space-y-2'>
+                                {forProducts.map((link, index) => (
+                                    <Link href={link.link} key={index} passHref>
+                                        <p className='transition-colors duration-300 hover:text-primary hover:cursor-pointer'>{link.title}</p>
+                                    </Link>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div>
+                            <p className='font-semibold tracking-wide'>{t('legal')}</p>
 
                             <div className='flex flex-col items-start mt-5 space-y-2'>
                                 {forLegal.map((link, index) => (
@@ -160,9 +185,8 @@ export default function Footer() {
                             </div>
                         </div>
 
-
                         <div>
-                            <p className='font-semibold tracking-wide'>Company</p>
+                            <p className='font-semibold tracking-wide'>{t('company')}</p>
 
                             <div className='flex flex-col items-start mt-5 space-y-2'>
                                 {forCompany.map((link, index) => (
@@ -178,7 +202,7 @@ export default function Footer() {
 
                     <div className='sm:flex sm:items-center sm:justify-between'>
                         <div className='flex flex-col space-y-2'>
-                            <h1 className='text-lg'>Connect with us on:</h1>
+                            <h1 className='text-lg'>{t('connect')}:</h1>
                             <div className='flex gap-2 hover:cursor-pointer items-center'>
                                 {companySocial.map((social, index) => (
                                     <a href={social.link} target='_blank' rel='noopener noreferrer' key={index} className='p-2 flex items-center justify-center rounded-full bg-gray-100 border-2 border-primary'>
@@ -189,7 +213,7 @@ export default function Footer() {
                         </div>
                     </div>
 
-                    <p className='flex flex-wrap justify-center items-center py-2 text-center text-xl w-full mx-auto'>&copy; {currentYear} SoFLEX, Inc. All rights reserved.</p>
+                    <p className='flex flex-wrap justify-center items-center py-2 text-center text-xl w-full mx-auto'>&copy; {currentYear} {t('copyRight')}</p>
                 </div>
             </footer>
         </MaxWidthWrapper>

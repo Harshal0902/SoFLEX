@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import { useWallet } from '@solana/wallet-adapter-react'
+import { useTranslations } from 'next-intl'
 import { updateUserCreditScore } from '@/actions/dbActions'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
@@ -21,6 +22,7 @@ export default function CheckCreditScorePage({ walletAddress }: { walletAddress:
     const [creditScore, setCreditScore] = useState<number | null>(null);
 
     const wallet = useWallet();
+    const t = useTranslations('CheckCreditScorePage');
 
     const NEXT_PUBLIC_SHYFTAPIKey = process.env.NEXT_PUBLIC_SHYFTAPI!;
 
@@ -60,7 +62,7 @@ export default function CheckCreditScorePage({ walletAddress }: { walletAddress:
             const transactionHistoryScore = ((sentPercentage - receivedPercentage) / 100).toFixed(2);
             calculateCreditScore(transactionHistoryScore);
         } catch (error) {
-            toast.error('An error occurred while fetching transaction history. Please try again!');
+            toast.error(`${t('transactionHistoryError')}`);
         } finally {
             setLoading(false);
         }
@@ -80,7 +82,7 @@ export default function CheckCreditScorePage({ walletAddress }: { walletAddress:
             creditScore: parseFloat(creditScoreValue.toFixed(2)),
         });
         if (result === 'Error updating user credit score') {
-            toast.error('An error occurred while updating credit score. Please try again!');
+            toast.error(`${t('updateCreditScoreError')}`);
         }
     };
 
@@ -88,7 +90,7 @@ export default function CheckCreditScorePage({ walletAddress }: { walletAddress:
         <Card className='my-4'>
             <CardHeader>
                 <div>
-                    <div className='text-center font-medium text-2xl md:text-4xl'>My On-Chain Credit Score</div>
+                    <div className='text-center font-medium text-2xl md:text-4xl'>{t('title')}</div>
                 </div>
             </CardHeader>
             <CardContent>
@@ -96,24 +98,23 @@ export default function CheckCreditScorePage({ walletAddress }: { walletAddress:
                     <div className='flex items-center justify-center'>
                         <Button className='px-8' onClick={knowTransactionHistory} disabled={loading}>
                             {loading && <Loader2 className='animate-spin mr-2' size={15} />}
-                            {loading ? 'Calculating...' : 'Check On-Chain Credit Score'}
+                            {loading ? `${t('calculating')}` : `${t('checkCreditScore')}`}
                         </Button>
                     </div>
                     {creditScore && (
-                        <h1 className='text-center pt-2 font-semibold tracking-wider'>Your Credit Score: {isNaN(creditScore) ? '36.48' : creditScore}</h1>
+                        <h1 className='text-center pt-2 font-semibold tracking-wider'>{t('yourCreditScore')}: {isNaN(creditScore) ? '36.48' : creditScore}</h1>
                     )}
                     <div className='py-2'>
-                        <p className='font-semibold'>Formula used = a * BH + b * (TH + CD) + c</p>
+                        <p className='font-semibold'>{t('formulaUsed')}</p>
                         <ul>
-                            <p>Where:</p>
-                            <li className='list-disc ml-5'>BH: Borrower History Score (0-100): This score can be calculated by analyzing a borrower&apos;s past borrowing and repayment behavior on the platform.</li>
-                            <li className='list-disc ml-5'>TH: Transaction History Score (0-100): This score can be derived from the borrower&apos;s overall on-chain activity like on-chain transaction frequency and volume.</li>
-                            <li className='list-disc ml-5'>CD: Collateral Diversity Score (0-100): This score can assess the risk profile of the collateral the borrower intends to use for the loan, such as liquidity of the collateral asset.</li>
-                            <li className='list-disc ml-5'>Coefficient a: 0.55 (Moderate weight on BH)</li>
-                            <li className='list-disc ml-5'>Coefficient b: 0.35 (Moderate weight on combined TH + CD)</li>
-                            <li className='list-disc ml-5'>Coefficient c = 30 (Constant value to adjust score range)</li>
+                            <p>{t('where')}:</p>
+                            <li className='list-disc ml-5'>{t('formula1')}</li>
+                            <li className='list-disc ml-5'>{t('formula2')}</li>
+                            <li className='list-disc ml-5'>{t('formula3')}</li>
+                            <li className='list-disc ml-5'>{t('formula4')}</li>
+                            <li className='list-disc ml-5'>{t('formula5')}</li>
+                            <li className='list-disc ml-5'>{t('formula6')}</li>
                         </ul>
-
                     </div>
                 </div>
             </CardContent>

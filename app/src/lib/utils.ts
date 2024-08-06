@@ -10,7 +10,7 @@ export function constructMetadata({
   title = 'SoFLEX',
   description = 'Solana NFT and Synthetic Asset Lending and Borrowing Platform',
   image = '/assets/thumbnails/thumbnail.png',
-  icons = '/favicon.ico',
+  icons = '/logo/favicon.ico',
   noIndex = false
 }: {
   title?: string

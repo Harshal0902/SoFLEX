@@ -1,13 +1,17 @@
+import createNextIntlPlugin from 'next-intl/plugin';
+
+const withNextIntl = createNextIntlPlugin();
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     async rewrites() {
         return [
             {
-                source: '/email-api/:slug*',
+                source: '/en/email-api/:slug*',
                 destination: '/api/email/:slug*',
             },
             {
-                source: '/withdraw-email-api/:slug*',
+                source: '/en/withdraw-email-api/:slug*',
                 destination: '/api/withdraw-email/:slug*',
             },
             {
@@ -33,4 +37,4 @@ const nextConfig = {
     }
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);

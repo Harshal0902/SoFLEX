@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
@@ -23,26 +24,27 @@ export type LendingNFTCollectionDataType = {
     nft_floor_price: string;
 }
 
-const FormSchema = z.object({
-    lending_amount: z.string().refine((value) => {
-        const parsedValue = parseFloat(value);
-        return !isNaN(parsedValue) && parsedValue >= 0;
-    }, {
-        message: 'Lending Amount must be a valid non-negative number',
-    }).refine((value) => {
-        return parseFloat(value) > 0;
-    }, {
-        message: 'Lending Amount must be greater than 0',
-    }).transform((value) => parseFloat(value))
-});
-
 export default function P2PLendingButton({ row }: { row: { original: LendingNFTCollectionDataType } }) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [open, setOpen] = useState(false);
     const [offerCount, setOfferCount] = useState<number>(1);
 
+    const t = useTranslations('P2PLendPage');
     const order = row.original;
     const { publicKey } = useWallet();
+
+    const FormSchema = z.object({
+        lending_amount: z.string().refine((value) => {
+            const parsedValue = parseFloat(value);
+            return !isNaN(parsedValue) && parsedValue >= 0;
+        }, {
+            message: `${t('lendingAmountMessage1')}`,
+        }).refine((value) => {
+            return parseFloat(value) > 0;
+        }, {
+            message: `${t('lendingAmountMessage2')}`,
+        }).transform((value) => parseFloat(value))
+    });
 
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
@@ -75,13 +77,13 @@ export default function P2PLendingButton({ row }: { row: { original: LendingNFTC
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 <Button disabled={!publicKey}>
-                    {publicKey ? 'Lend' : 'Connect Wallet'}
+                    {publicKey ? `${t('lend')}` : `${t('connectWallet')}`}
                 </Button>
             </DialogTrigger>
             <DialogContent className='max-w-[90vw] md:max-w-[40vw]'>
                 <DialogHeader>
                     <DialogTitle className='flex flex-row space-x-1 items-center'>
-                        <div>Lend SOL</div>
+                        <div>{t('lend')} SOL</div>
                         <InfoButton />
                     </DialogTitle>
                 </DialogHeader>
@@ -94,15 +96,15 @@ export default function P2PLendingButton({ row }: { row: { original: LendingNFTC
                             <div className='text-xl tracking-wide break-words'>{order.nft_name}</div>
                             <div className='grid grid-cols-3 gap-x-2 w-full pt-0.5'>
                                 <div className='flex flex-col items-center justify-center py-3 border rounded w-full h-full'>
-                                    <h1 className='text-[0.6rem] lg:text-sm tracking-wider break-words'>Floor</h1>
+                                    <h1 className='text-[0.6rem] lg:text-sm tracking-wider break-words'>{t('floor')}</h1>
                                     <p className='text-[0.5rem] lg:text-sm'>{order.nft_floor_price} SOL</p>
                                 </div>
                                 <div className='flex flex-col items-center justify-center py-3 border rounded w-full h-full'>
-                                    <h1 className='text-[0.6rem] lg:text-sm tracking-wider break-words'>APY</h1>
+                                    <h1 className='text-[0.6rem] lg:text-sm tracking-wider break-words'>{t('apy')}</h1>
                                     <p className='text-[0.5rem] lg:text-sm'>{order.nft_apy}</p>
                                 </div>
                                 <div className='flex flex-col items-center justify-center py-3 border rounded w-full h-full'>
-                                    <h1 className='text-[0.6rem] lg:text-sm tracking-wider break-words'>Duration</h1>
+                                    <h1 className='text-[0.6rem] lg:text-sm tracking-wider break-words'>{t('duration')}</h1>
                                     <p className='text-[0.5rem] lg:text-sm'>{order.nft_duration}</p>
                                 </div>
                             </div>
@@ -119,15 +121,15 @@ export default function P2PLendingButton({ row }: { row: { original: LendingNFTC
                                     name='lending_amount'
                                     render={({ field }) => (
                                         <FormItem className='w-full'>
-                                            <FormLabel>Offer Amount (in SOL)</FormLabel>
+                                            <FormLabel>{t('offerAmount')} ({t('in')} SOL)</FormLabel>
                                             <FormControl>
-                                                <Input type='number' max={parseFloat(order.nft_floor_price)} placeholder='Offer Amount' {...field} />
+                                                <Input type='number' max={parseFloat(order.nft_floor_price)} placeholder={`${t('offerAmount')}`} {...field} />
                                             </FormControl>
                                             <FormDescription>
-                                                Enter the amount you want to lend
+                                                {t('offerDescription')}
                                             </FormDescription>
                                             {lendingAmount >= threshold && (
-                                                <p className='text-sm text-destructive'>This offer amount is close to the current floor price!</p>
+                                                <p className='text-sm text-destructive'>{t('closeOffer')}</p>
                                             )}
                                             <FormMessage />
                                         </FormItem>
@@ -135,14 +137,14 @@ export default function P2PLendingButton({ row }: { row: { original: LendingNFTC
                                 />
 
                                 <div className='w-full'>
-                                    <h1 className='text-sm font-medium leading-none md:pt-2'>Total Intrest (in SOL)</h1>
+                                    <h1 className='text-sm font-medium leading-none md:pt-2'>{t('totalInterest')} ({t('in')} SOL)</h1>
                                     <h1 className='text-lg md:text-2xl py-1 md:py-3'>{((parseFloat(order.nft_intrest) / 100) * (form.watch('lending_amount') * offerCount)).toFixed(4)} SOL</h1>
                                     <p className='text-sm text-muted-foreground'>{order.nft_intrest} x {offerCount}</p>
                                 </div>
                             </div>
 
                             <div>
-                                <h1 className='text-sm font-medium leading-none py-2'>Number of Offers</h1>
+                                <h1 className='text-sm font-medium leading-none py-2'>{t('noOfOffers')}</h1>
                                 <div className='grid grid-cols-5 gap-2 items-center justify-center'>
                                     <div className='col-span-1 border rounded p-2 grid place-items-center cursor-pointer' onClick={handleDecrease}>
                                         <Minus className='h-5 w-5 md:h-6 md:w-6' />
@@ -155,13 +157,13 @@ export default function P2PLendingButton({ row }: { row: { original: LendingNFTC
                             </div>
 
                             <div className='py-2'>
-                                <p className='text-lg'>Your total is {(form.watch('lending_amount') * offerCount).toFixed(4)} SOL</p>
+                                <p className='text-lg'>{t('yourTotal')} {(form.watch('lending_amount') * offerCount).toFixed(4)} SOL</p>
                             </div>
 
                             {/* <Button type='submit' className='w-full mt-4' disabled={isSubmitting}> */}
                             <Button type='submit' className='w-full mt-4' disabled>
                                 {isSubmitting && <Loader2 className='animate-spin mr-2' size={15} />}
-                                {isSubmitting ? 'Borrowing...' : 'Borrow'}
+                                {isSubmitting ? `${t('lending')}` : `${t('lend')}`}
                             </Button>
                         </form>
                     </Form>

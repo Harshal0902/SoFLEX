@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { newAssetOrCollectionRequest, nftCollectionDetails } from '@/actions/dbActions'
 import { useWallet } from '@solana/wallet-adapter-react'
+import { useTranslations } from 'next-intl'
 import { BorrowingNFTCollectionDataType, borrowingNFTCollectionColumns } from './columns'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -14,14 +15,6 @@ import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { DataTable } from '@/components/ui/data-table-p2p'
 
-const FormSchema = z.object({
-    nftCollectionName: z.string({
-        required_error: 'Name is required',
-    }).min(3, {
-        message: 'Name must be at least 3 characters long',
-    }).optional()
-})
-
 export default function P2PBorrowing() {
     const [open, setOpen] = useState(false);
     const [loadingData, setLoadingData] = useState<boolean>(true);
@@ -29,6 +22,15 @@ export default function P2PBorrowing() {
 
     const { publicKey } = useWallet();
     const wallet = useWallet();
+    const t = useTranslations('P2PBorrowPage');
+
+    const FormSchema = z.object({
+        nftCollectionName: z.string({
+            required_error: `${t('nameRequired')}`,
+        }).min(3, {
+            message: `${t('nameMin')}`,
+        }).optional()
+    })
 
     useEffect(() => {
         const fetchNFTCollectionData = async () => {
@@ -36,12 +38,13 @@ export default function P2PBorrowing() {
             if (Array.isArray(result)) {
                 setBorrowingNFTCollectionData(result);
             } else {
-                toast.error('An error occurred while fetching NFT Collection data. Please try again!');
+                toast.error(`${t('nftFetchError')}`);
             }
             setLoadingData(false);
         };
 
         fetchNFTCollectionData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const form = useForm<z.infer<typeof FormSchema>>({
@@ -57,11 +60,11 @@ export default function P2PBorrowing() {
         if (nftCollectionName && wallet.publicKey) {
             const result = await newAssetOrCollectionRequest({ walletAddress: wallet.publicKey.toString(), requestedAssetOrCollectionName: nftCollectionName, assetOrCollection: 'NFT Collectiion' });
             if (result === 'Request for new Asset or Collection sent successfully') {
-                toast.success('Request sent successfully!');
                 setOpen(false);
                 form.reset();
+                toast.success(`${t('requestSuccess')}`);
             } else {
-                toast.error('An error occurred while sending request. Please try again!');
+                toast.error(`${t('requestError')}`);
             }
         }
     }
@@ -71,17 +74,17 @@ export default function P2PBorrowing() {
             <Card>
                 <CardHeader>
                     <div className='flex flex-col md:flex-row justify-between md:items-center space-y-2 md:space-y-0'>
-                        <div className='text-center md:text-start text-2xl md:text-4xl'>All NFT Collection</div>
+                        <div className='text-center md:text-start text-2xl md:text-4xl'>{t('title')}</div>
                         {publicKey && (
                             <Dialog open={open} onOpenChange={setOpen}>
                                 <DialogTrigger asChild>
-                                    <Button variant='outline' className='w-full md:w-auto'>Request new NFT Collection to borrow</Button>
+                                    <Button variant='outline' className='w-full md:w-auto'>{t('requestBtn')}</Button>
                                 </DialogTrigger>
                                 <DialogContent className='max-w-[90vw] md:max-w-[425px]'>
                                     <DialogHeader>
-                                        <DialogTitle>Request for new NFT Collection</DialogTitle>
+                                        <DialogTitle>{t('requestDialogTitle')}</DialogTitle>
                                         <DialogDescription>
-                                            Make request for new NFT Collection for borrowing.
+                                            {t('requestDialogDesc')}
                                         </DialogDescription>
                                     </DialogHeader>
                                     <Form {...form}>
@@ -91,9 +94,9 @@ export default function P2PBorrowing() {
                                                 name='nftCollectionName'
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>NFT Collection Name</FormLabel>
+                                                        <FormLabel>{t('nftCollectionName')}</FormLabel>
                                                         <FormControl>
-                                                            <Input {...field} className='w-full' placeholder='NFT Collection Name' />
+                                                            <Input {...field} className='w-full' placeholder={`${t('nftCollectionName')}`} />
                                                         </FormControl>
                                                         <FormMessage className='text-destructive tracking-wide' />
                                                     </FormItem>
@@ -101,7 +104,7 @@ export default function P2PBorrowing() {
                                             />
 
                                             <Button type='submit'>
-                                                Submit Request
+                                                {t('submitRequest')}
                                             </Button>
                                         </form>
                                     </Form>
@@ -124,8 +127,8 @@ export default function P2PBorrowing() {
                                 ...nftCollection,
                             }))}
                             userSearchColumn='nft_name'
-                            inputPlaceHolder='Search for NFT Collection'
-                            noResultsMessage='No NFT Collection found'
+                            inputPlaceHolder={`${t('searchCollection')}`}
+                            noResultsMessage={`${t('noCollection')}`}
                         />
                     )}
                 </CardContent>

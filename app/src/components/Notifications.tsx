@@ -1,43 +1,46 @@
 import { BellRing } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
+import { useTranslations } from 'next-intl'
+// import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
-import Link from 'next/link'
+// import Link from 'next/link'
 
 interface Notification {
     title: string
-    noteficationTime: string
+    notificationTime: string
 }
-
-const notifications: Notification[] = [
-    {
-        title: 'Subscribe to our newsletter for updates!',
-        noteficationTime: '1 hour ago'
-    },
-    {
-        title: 'Welcome to the Devnet Beta Version!',
-        noteficationTime: '1 hour ago'
-    },
-    {
-        title: 'Welcome to SoFLEX!',
-        noteficationTime: '2 hours ago'
-    }
-]
 
 type CardProps = React.ComponentProps<typeof Card>
 
 export default function Notifications({ className, ...props }: CardProps) {
+    const t = useTranslations('Notifications');
+
+    const notifications: Notification[] = [
+        {
+            title: `${t('notification1')}`,
+            notificationTime: `${t('notificationTime')}`
+        },
+        {
+            title: `${t('notification2')}`,
+            notificationTime: `${t('notificationTime')}`
+        },
+        {
+            title: `${t('notification3')}`,
+            notificationTime: `${t('notificationTime')}`
+        }
+    ]
+
     return (
         <div className={cn('w-[250px]', className)} {...props}>
-            <h1 className='text-xl font-semibold tracking-wide'>Notifications</h1>
-            <p className='text-muted-foreground'>You have 3 unread messages.</p>
+            <h1 className='text-xl font-semibold tracking-wide'>{t('title')}</h1>
+            <p className='text-muted-foreground'>{t('description')}</p>
             <div className='py-2 grid gap-y-5'>
                 <div className='flex items-center space-x-4 rounded-md border p-4'>
                     <BellRing />
                     <div className='flex-1 space-y-1'>
                         <p className='text-sm font-medium leading-none'>
-                            Push Notifications
+                            {t('pushNotification')}
                         </p>
                     </div>
                     <Switch />
@@ -54,7 +57,7 @@ export default function Notifications({ className, ...props }: CardProps) {
                                     {notification.title}
                                 </p>
                                 <p className='text-sm text-muted-foreground'>
-                                    {notification.noteficationTime}
+                                    {notification.notificationTime}
                                 </p>
                             </div>
                         </div>
@@ -62,7 +65,7 @@ export default function Notifications({ className, ...props }: CardProps) {
                 </div>
                 {/* <Button className='w-full' asChild>
                     <Link href='/notifications'>
-                        See All Notifications
+                        {t('allNotification)}
                     </Link>
                 </Button> */}
             </div>
