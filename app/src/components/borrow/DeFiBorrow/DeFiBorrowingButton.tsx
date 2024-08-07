@@ -112,7 +112,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
         agree_terms: z.boolean()
             .refine(value => value === true, {
                 message: `${t('agreeTermsMsg')}`,
-                path: ['agree_terms']
+                // path: ['agree_terms']
             }),
     });
 

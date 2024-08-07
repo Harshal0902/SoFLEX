@@ -157,9 +157,10 @@ export default function DeFiLendingButton({ row }: { row: { original: LendingAss
             }
 
             setIsSubmitting(true);
+            setSigValidation(false);
 
             const recipientPubKey = new PublicKey('Cq6JPmEspG6oNcUC47WHuEJWU1K4knsLzHYHSfvpnDHk');
-            let tokenAddress;
+            let tokenAddress: PublicKey;
             let sig: string | undefined;
 
             if (order.asset_symbol === 'SOL') {
@@ -176,39 +177,28 @@ export default function DeFiLendingButton({ row }: { row: { original: LendingAss
                 let amount = 1000000 * parseFloat(values.lending_amount);
                 amount = parseFloat(amount.toFixed(6));
 
-                if (order.asset_symbol === 'USDC') {
-                    // tokenAddress = new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'); // USDC token address on solana mainnet-beta
-                    tokenAddress = new PublicKey('4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU'); // USDC token address on solana devnet
-                } else if (order.asset_symbol === 'USDT') {
-                    // tokenAddress = new PublicKey('Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB'); // USDT token address on solana mainnet-beta
-                    tokenAddress = new PublicKey('EJwZgeZrdC8TXTQbQBoL6bfuAnFUUy1PVCMB4DYPzVaS'); // USDT token address on solana devnet
-                } else if (order.asset_symbol === 'JUP') {
-                    tokenAddress = new PublicKey('JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN'); // JUP token address on solana mainnet-beta
-                } else if (order.asset_symbol === 'PYTH') {
-                    tokenAddress = new PublicKey('HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3RKwX8eACQBCt3'); // PYTH token address on solana mainnet-beta
-                } else if (order.asset_symbol === 'JTO') {
-                    tokenAddress = new PublicKey('jtojtomepa8beP8AuQc6eXt5FriJwfFMwQx2v2f9mCL'); // JTO token address on solana mainnet-beta
-                } else if (order.asset_symbol === 'RAY') {
-                    tokenAddress = new PublicKey('4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R'); // RAY token address on solana mainnet-beta
-                } else if (order.asset_symbol === 'BLZE') {
-                    tokenAddress = new PublicKey('BLZEEuZUBVqFhj8adcCFPJvPVCiCyVmh3hkJMrU8KuJA'); // BLZE token address on solana mainnet-beta
-                } else if (order.asset_symbol === 'tBTC') {
-                    tokenAddress = new PublicKey('6DNSN2BJsaPFdFFc1zP37kkeNe4Usc1Sqkzr9C9vPWcU'); // tBTC token address on solana mainnet-beta
-                } else if (order.asset_symbol === 'mSOL') {
-                    tokenAddress = new PublicKey('mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So'); // mSOLO token address on solana mainnet-beta
-                }
+                const tokenAddresses: { [key: string]: PublicKey } = {
+                    // 'USDC': new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'); // USDC token address on solana mainnet-beta
+                    'USDC': new PublicKey('4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU'),
+                    // 'USDT': new PublicKey('Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB'); // USDT token address on solana mainnet-beta
+                    'USDT': new PublicKey('EJwZgeZrdC8TXTQbQBoL6bfuAnFUUy1PVCMB4DYPzVaS'),
+                    'JUP': new PublicKey('JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN'),
+                    'PYTH': new PublicKey('HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3RKwX8eACQBCt3'),
+                    'JTO': new PublicKey('jtojtomepa8beP8AuQc6eXt5FriJwfFMwQx2v2f9mCL'),
+                    'RAY': new PublicKey('4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R'),
+                    'BLZE': new PublicKey('BLZEEuZUBVqFhj8adcCFPJvPVCiCyVmh3hkJMrU8KuJA'),
+                    'tBTC': new PublicKey('6DNSN2BJsaPFdFFc1zP37kkeNe4Usc1Sqkzr9C9vPWcU'),
+                    'mSOL': new PublicKey('mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So')
+                };
+
+                tokenAddress = tokenAddresses[order.asset_symbol];
 
                 if (tokenAddress && signTransaction) {
                     const transactionInstructions: TransactionInstruction[] = [];
-                    const associatedTokenFrom = await getAssociatedTokenAddress(
-                        tokenAddress,
-                        publicKey
-                    );
+                    const associatedTokenFrom = await getAssociatedTokenAddress(tokenAddress, publicKey);
                     const fromAccount = await getAccount(connection, associatedTokenFrom);
-                    const associatedTokenTo = await getAssociatedTokenAddress(
-                        tokenAddress,
-                        recipientPubKey
-                    );
+                    const associatedTokenTo = await getAssociatedTokenAddress(tokenAddress, recipientPubKey);
+
                     if (!(await connection.getAccountInfo(associatedTokenTo))) {
                         transactionInstructions.push(
                             createAssociatedTokenAccountInstruction(
@@ -227,6 +217,7 @@ export default function DeFiLendingButton({ row }: { row: { original: LendingAss
                             amount
                         )
                     );
+
                     const transaction = new Transaction().add(...transactionInstructions);
                     sig = await configureAndSendCurrentTransaction(
                         transaction,
@@ -237,17 +228,20 @@ export default function DeFiLendingButton({ row }: { row: { original: LendingAss
                 }
             }
 
-            const timeout = 8000;
-            const interval = 1000;
-            const start = Date.now();
-
             if (sig && wallet.publicKey) {
                 setSigValidation(true);
+
+                const timeout = 8000;
+                const interval = 1000;
+                const start = Date.now();
 
                 const polling = setInterval(async () => {
                     if (!sig || !wallet.publicKey) {
                         clearInterval(polling);
-                        return toast.error(`${t('transactionFailed')}`);
+                        toast.error(`${t('transactionFailed')}`);
+                        setSigValidation(false);
+                        setIsSubmitting(false);
+                        return;
                     }
 
                     const transaction = await connection.getParsedTransaction(sig);
@@ -268,18 +262,18 @@ export default function DeFiLendingButton({ row }: { row: { original: LendingAss
                         } else {
                             toast.error(`${t('lendingError')}`);
                         }
+                        setSigValidation(false);
+                        setIsSubmitting(false);
                     } else if (Date.now() - start > timeout) {
                         clearInterval(polling);
-                        setIsSubmitting(false);
-                        setSigValidation(false);
                         toast.error(`${t('invalidTransaction')}`);
-                    } else {
-                        clearInterval(polling);
-                        setIsSubmitting(false);
                         setSigValidation(false);
-                        toast.error(`${t('invalidTransaction')}`);
+                        setIsSubmitting(false);
                     }
                 }, interval);
+            } else {
+                setSigValidation(false);
+                setIsSubmitting(false);
             }
         } catch (error) {
             if (error == 'TokenAccountNotFoundError') {
@@ -287,6 +281,7 @@ export default function DeFiLendingButton({ row }: { row: { original: LendingAss
             } else {
                 toast.error(`${t('lendingError')}`);
             }
+            setSigValidation(false);
             setIsSubmitting(false);
         }
     }
