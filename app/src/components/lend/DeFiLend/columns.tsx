@@ -16,35 +16,35 @@ export type LendingAssetDataType = {
     asset_ltv: string;
 }
 
-export const lendingAssetColumns: ColumnDef<LendingAssetDataType>[] = [
+export const lendingAssetColumns = (t: (key: string) => string): ColumnDef<LendingAssetDataType>[] => [
     {
         accessorKey: 'asset_name',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title='Asset Name' />
+            <DataTableColumnHeader column={column} title={t('assetName')} />
         ),
     },
     {
         accessorKey: 'asset_total_supply',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title='Total Supply' info='The total amount of the asset available for lending.' />
+            <DataTableColumnHeader column={column} title={t('totalSupply')} info={t('totalSupplyInfo')} />
         ),
     },
     {
         accessorKey: 'asset_yield',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title='Asset Yield' info='The annual percentage yield (APY) earned for supplying the asset.' />
+            <DataTableColumnHeader column={column} title={t('assetYield')} info={t('assetYieldInfo')} />
         ),
     },
     {
         accessorKey: 'asset_total_borrow',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title='Total Borrow' info='The total amount of the asset borrowed from the lending pool.' />
+            <DataTableColumnHeader column={column} title={t('totalBorrow')} info={t('totalBorrowInfo')} />
         ),
     },
     {
         accessorKey: 'asset_ltv',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title='LTV' info='The Borrowed amount vs. collateral value indicates loan risk.' />
+            <DataTableColumnHeader column={column} title={t('ltv')} info={t('ltvInfo')} />
         ),
     },
     {

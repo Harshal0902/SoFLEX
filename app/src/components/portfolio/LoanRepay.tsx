@@ -320,7 +320,7 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
                                     <TooltipTrigger asChild>
                                         <span><Info className='h-4 w-4 ml-0.5 cursor-pointer' /></span>
                                     </TooltipTrigger>
-                                    <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
+                                    <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center text-wrap'>
                                         {t('amountBorrowed')}
                                     </TooltipContent>
                                 </Tooltip>
@@ -337,7 +337,7 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
                                     <TooltipTrigger asChild>
                                         <span><Info className='h-4 w-4 ml-0.5 cursor-pointer' /></span>
                                     </TooltipTrigger>
-                                    <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
+                                    <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center text-wrap'>
                                         {t('borrowedDateAndTime')}
                                     </TooltipContent>
                                 </Tooltip>
@@ -354,7 +354,7 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
                                     <TooltipTrigger asChild>
                                         <span><Info className='h-4 w-4 ml-0.5 cursor-pointer' /></span>
                                     </TooltipTrigger>
-                                    <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
+                                    <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center text-wrap'>
                                         {t('interestRateDesc')}
                                     </TooltipContent>
                                 </Tooltip>
@@ -371,7 +371,7 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
                                     <TooltipTrigger asChild>
                                         <span><Info className='h-4 w-4 ml-0.5 cursor-pointer' /></span>
                                     </TooltipTrigger>
-                                    <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
+                                    <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center text-wrap'>
                                         {t('totalAmountToRepay')}
                                     </TooltipContent>
                                 </Tooltip>
@@ -388,7 +388,7 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
                                     <TooltipTrigger asChild>
                                         <span><Info className='h-4 w-4 ml-0.5 cursor-pointer' /></span>
                                     </TooltipTrigger>
-                                    <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
+                                    <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center text-wrap'>
                                         {t('durationOfBorrowing')}
                                     </TooltipContent>
                                 </Tooltip>
@@ -405,7 +405,7 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
                                     <TooltipTrigger asChild>
                                         <span><Info className='h-4 w-4 ml-0.5 cursor-pointer' /></span>
                                     </TooltipTrigger>
-                                    <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
+                                    <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center text-wrap'>
                                         {t('deadline')}
                                     </TooltipContent>
                                 </Tooltip>
@@ -422,7 +422,7 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
                                     <TooltipTrigger asChild>
                                         <span><Info className='h-4 w-4 ml-0.5 cursor-pointer' /></span>
                                     </TooltipTrigger>
-                                    <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
+                                    <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center text-wrap'>
                                         {t('statusOfBorrowing')}
                                     </TooltipContent>
                                 </Tooltip>

@@ -157,7 +157,7 @@ export default function DeFiLending() {
                         </div>
                     ) : (
                         <DataTable
-                            columns={lendingAssetColumns}
+                            columns={lendingAssetColumns(t)}
                             data={lendingAssetData.map(asset => ({
                                 ...asset,
                                 asset_price: assetPrices[asset.asset_symbol] ? formatPrice(assetPrices[asset.asset_symbol]) : asset.asset_price

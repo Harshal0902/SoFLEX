@@ -122,7 +122,7 @@ export default function P2PLending() {
                         </div>
                     ) : (
                         <DataTable
-                            columns={lendingNFTCollectionColumns}
+                            columns={lendingNFTCollectionColumns(t)}
                             data={lendingNFTCollectionData.map(nftCollection => ({
                                 ...nftCollection,
                             }))}

@@ -178,10 +178,10 @@ export default function DeFiLendingButton({ row }: { row: { original: LendingAss
                 amount = parseFloat(amount.toFixed(6));
 
                 const tokenAddresses: { [key: string]: PublicKey } = {
-                    // 'USDC': new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'); // USDC token address on solana mainnet-beta
-                    'USDC': new PublicKey('4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU'),
-                    // 'USDT': new PublicKey('Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB'); // USDT token address on solana mainnet-beta
-                    'USDT': new PublicKey('EJwZgeZrdC8TXTQbQBoL6bfuAnFUUy1PVCMB4DYPzVaS'),
+                    // 'USDC': new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'), // USDC token address on solana mainnet-beta
+                    'USDC': new PublicKey('4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU'), // USDC token address on solana devnet
+                    // 'USDT': new PublicKey('Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB'), // USDT token address on solana mainnet-beta
+                    'USDT': new PublicKey('EJwZgeZrdC8TXTQbQBoL6bfuAnFUUy1PVCMB4DYPzVaS'), //USDT token address on solana devnet
                     'JUP': new PublicKey('JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN'),
                     'PYTH': new PublicKey('HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3RKwX8eACQBCt3'),
                     'JTO': new PublicKey('jtojtomepa8beP8AuQc6eXt5FriJwfFMwQx2v2f9mCL'),
@@ -332,7 +332,7 @@ export default function DeFiLendingButton({ row }: { row: { original: LendingAss
                                                 <TooltipTrigger asChild>
                                                     <span><Info className='h-4 w-4 ml-1 cursor-pointer' /></span>
                                                 </TooltipTrigger>
-                                                <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
+                                                <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center text-wrap'>
                                                     {t('currentPriceUSD')}
                                                 </TooltipContent>
                                             </Tooltip>
@@ -348,7 +348,7 @@ export default function DeFiLendingButton({ row }: { row: { original: LendingAss
                                                 <TooltipTrigger asChild>
                                                     <span><Info className='h-4 w-4 ml-1 cursor-pointer' /></span>
                                                 </TooltipTrigger>
-                                                <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
+                                                <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center text-wrap'>
                                                     {t('apy')}
                                                 </TooltipContent>
                                             </Tooltip>
@@ -364,7 +364,7 @@ export default function DeFiLendingButton({ row }: { row: { original: LendingAss
                                                 <TooltipTrigger asChild>
                                                     <span><Info className='h-4 w-4 ml-1 cursor-pointer' /></span>
                                                 </TooltipTrigger>
-                                                <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
+                                                <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center text-wrap'>
                                                     {t('tokenBalanceDesc')}
                                                 </TooltipContent>
                                             </Tooltip>

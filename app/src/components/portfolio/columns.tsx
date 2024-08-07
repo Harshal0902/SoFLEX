@@ -26,35 +26,35 @@ export type LoanDataType = {
 // Expired: The loan offer has expired without being accepted or disbursed.
 // Closed: The loan has been closed for reasons such as early repayment or administrative closure.
 
-export const loanColumns = (onTrigger: () => void): ColumnDef<LoanDataType>[] => [
+export const loanColumns = (onTrigger: () => void, t: (key: string) => string): ColumnDef<LoanDataType>[] => [
     {
         accessorKey: 'borrow_id',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title='Loan ID' />
+            <DataTableColumnHeader column={column} title={t('loanId')} />
         ),
     },
     {
         accessorKey: 'borrowing_amount',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title='Borrowed Amount' />
+            <DataTableColumnHeader column={column} title={t('borrowedAmount')} />
         ),
     },
     {
         accessorKey: 'borrowing_total',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title='Repayment Total' info='Total Repayment Amount (Borrowed Amount + Interest).' />
+            <DataTableColumnHeader column={column} title={t('repaymentTotal')} info={t('repaymentTotalInfo')} />
         ),
     },
     {
         accessorKey: 'borrowing_due_by',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title='Due By' info='Deadline for repayment.' />
+            <DataTableColumnHeader column={column} title={t('dueBy')} info={t('dueByInfo')} />
         ),
     },
     {
         accessorKey: 'borrowing_status',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title='Status' />
+            <DataTableColumnHeader column={column} title={t('status')} />
         ),
     },
     {

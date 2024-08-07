@@ -122,13 +122,13 @@ export default function P2PBorrowing() {
                         </div>
                     ) : (
                         <DataTable
-                            columns={borrowingNFTCollectionColumns}
+                            columns={borrowingNFTCollectionColumns(t)}
                             data={borrowingNFTCollectionData.map(nftCollection => ({
                                 ...nftCollection,
                             }))}
                             userSearchColumn='nft_name'
-                            inputPlaceHolder={`${t('searchCollection')}`}
-                            noResultsMessage={`${t('noCollection')}`}
+                            inputPlaceHolder={t('searchCollection')}
+                            noResultsMessage={t('noCollection')}
                         />
                     )}
                 </CardContent>

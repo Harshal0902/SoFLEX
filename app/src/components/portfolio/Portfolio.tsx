@@ -601,7 +601,7 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
                                                         </CardContent>
                                                     </Card>
                                                 </TooltipTrigger>
-                                                <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
+                                                <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center text-wrap'>
                                                     {card.tooltipContent}
                                                     {card.extraTooltipContent && (
                                                         <div className='flex flex-col space-y-2 pt-2'>
@@ -630,11 +630,11 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
                                     </div>
                                 ) : (
                                     <DataTable
-                                        columns={loanColumns(onTrigger)}
+                                        columns={loanColumns(onTrigger, t)}
                                         data={loanHistoryData}
                                         userSearchColumn='borrowing_amount'
-                                        inputPlaceHolder={`${t('searchLoan')}`}
-                                        noResultsMessage={`${t('noLoan')}`}
+                                        inputPlaceHolder={t('searchLoan')}
+                                        noResultsMessage={t('noLoan')}
                                     />
                                 )}
                             </div>

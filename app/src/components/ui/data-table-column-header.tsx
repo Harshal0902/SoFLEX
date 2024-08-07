@@ -1,5 +1,6 @@
 import { ArrowDown, ArrowUp, ChevronsUpDown } from 'lucide-react'
 import { Column } from '@tanstack/react-table'
+import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Info } from 'lucide-react'
@@ -14,6 +15,8 @@ interface DataTableColumnHeaderProps<TData, TValue>
 }
 
 export function DataTableColumnHeader<TData, TValue>({ column, title, info, className }: DataTableColumnHeaderProps<TData, TValue>) {
+    const t = useTranslations('DataTable');
+
     if (!column.getCanSort()) {
         return <div className={cn(className)}>{title}</div>
     }
@@ -34,7 +37,7 @@ export function DataTableColumnHeader<TData, TValue>({ column, title, info, clas
                                     <TooltipTrigger asChild>
                                         <span><Info className='h-3 w-3 ml-1' /></span>
                                     </TooltipTrigger>
-                                    <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
+                                    <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center text-wrap'>
                                         {info}
                                     </TooltipContent>
                                 </Tooltip>
@@ -53,16 +56,16 @@ export function DataTableColumnHeader<TData, TValue>({ column, title, info, clas
                     {(column.getIsSorted() === 'desc' || column.getIsSorted() === 'asc') && (
                         <DropdownMenuItem onClick={() => column.clearSorting()}>
                             <ChevronsUpDown className='mr-2 h-3.5 w-3.5 text-muted-foreground/70' />
-                            Default
+                            {t('default')}
                         </DropdownMenuItem>
                     )}
                     <DropdownMenuItem onClick={() => column.toggleSorting(false)}>
                         <ArrowUp className='mr-2 h-3.5 w-3.5 text-muted-foreground/70' />
-                        Asc
+                        {t('asc')}
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => column.toggleSorting(true)}>
                         <ArrowDown className='mr-2 h-3.5 w-3.5 text-muted-foreground/70' />
-                        Desc
+                        {t('desc')}
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>

@@ -16,35 +16,35 @@ export type LendingNFTCollectionDataType = {
     nft_floor_price: string;
 }
 
-export const lendingNFTCollectionColumns: ColumnDef<LendingNFTCollectionDataType>[] = [
+export const lendingNFTCollectionColumns = (t: (key: string) => string): ColumnDef<LendingNFTCollectionDataType>[] => [
     {
         accessorKey: 'nft_name',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title='NFT Collection Name' />
+            <DataTableColumnHeader column={column} title={t('nftCollectionName')} />
         ),
     },
     {
         accessorKey: 'nft_pool',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title='Avaliable Supply' info='The total amount of the pool available for lending.' />
+            <DataTableColumnHeader column={column} title={t('availableSupply')} info={t('availableSupplyInfo')} />
         ),
     },
     {
         accessorKey: 'nft_best_offer',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title='Best Offer' info='The Offer offered for NFT collection.' />
+            <DataTableColumnHeader column={column} title={t('bestOffer')} info={t('bestOfferInfo')} />
         ),
     },
     {
         accessorKey: 'nft_apy',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title='APY' info='Earn competitive returns on your NFT assets with our innovative lending platform.' />
+            <DataTableColumnHeader column={column} title={t('apy')} info={t('apyInfo')} />
         ),
     },
     {
         accessorKey: 'nft_duration',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title='Duration' info='The duration you can lend.' />
+            <DataTableColumnHeader column={column} title={t('duration')} info={t('durationInfo')} />
         ),
     },
     {

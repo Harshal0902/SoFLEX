@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import { ColumnDef, ColumnFiltersState, SortingState, VisibilityState, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table'
+import { useTranslations } from 'next-intl'
 import { DataTableViewOptions } from '@/components/ui/data-table-view-options'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Input } from '@/components/ui/input'
@@ -46,7 +47,9 @@ export function DataTable<TData, TValue>({
             columnVisibility,
             rowSelection,
         },
-    })
+    });
+
+    const t = useTranslations('DataTable');
 
     const clearSearch = () => {
         setColumnFilters([]);
@@ -109,7 +112,7 @@ export function DataTable<TData, TValue>({
                         ) : (
                             <TableRow>
                                 <TableCell colSpan={columns.length} className='h-24 text-center'>
-                                    No results.
+                                    {t('noResults')}
                                 </TableCell>
                             </TableRow>
                         )}

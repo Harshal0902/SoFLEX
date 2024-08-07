@@ -33,7 +33,6 @@ export default function DeFiBorrowing() {
         }).optional()
     })
 
-
     useEffect(() => {
         const fetchAssetData = async () => {
             const result = await assetDetails();
@@ -158,14 +157,14 @@ export default function DeFiBorrowing() {
                         </div>
                     ) : (
                         <DataTable
-                            columns={borrowingAssetColumns}
+                            columns={borrowingAssetColumns(t)}
                             data={borrowingAssetData.map(asset => ({
                                 ...asset,
                                 asset_price: assetPrices[asset.asset_symbol] ? formatPrice(assetPrices[asset.asset_symbol]) : asset.asset_price
                             }))}
                             userSearchColumn='asset_total_supply'
-                            inputPlaceHolder={`${t('searchToken')}`}
-                            noResultsMessage={`${t('noToken')}`}
+                            inputPlaceHolder={t('searchToken')}
+                            noResultsMessage={t('noToken')}
                         />
                     )}
                 </CardContent>

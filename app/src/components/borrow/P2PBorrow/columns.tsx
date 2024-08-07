@@ -16,35 +16,35 @@ export type BorrowingNFTCollectionDataType = {
     nft_floor_price: string;
 }
 
-export const borrowingNFTCollectionColumns: ColumnDef<BorrowingNFTCollectionDataType>[] = [
+export const borrowingNFTCollectionColumns = (t: (key: string) => string): ColumnDef<BorrowingNFTCollectionDataType>[] => [
     {
         accessorKey: 'nft_name',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title='NFT Collection Name' />
+            <DataTableColumnHeader column={column} title={t('nftCollectionName')} />
         ),
     },
     {
         accessorKey: 'nft_pool',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title='Avaliable Supply' info='The total amount of the pool available for borrowing.' />
+            <DataTableColumnHeader column={column} title={t('availableSupply')} info={t('availableSupplyInfo')} />
         ),
     },
     {
         accessorKey: 'nft_best_offer',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title='Best Offer' info='The Offer offered for NFT collection.' />
+            <DataTableColumnHeader column={column} title={t('bestOffer')} info={t('bestOfferInfo')} />
         ),
     },
     {
         accessorKey: 'nft_intrest',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title='Interest' info='The available on borrowing the NFT collection.' />
+            <DataTableColumnHeader column={column} title={t('interest')} info={t('interestInfo')} />
         ),
     },
     {
         accessorKey: 'nft_duration',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title='Duration' info='The duration you can borrow.' />
+            <DataTableColumnHeader column={column} title={t('duration')} info={t('durationInfo')} />
         ),
     },
     {

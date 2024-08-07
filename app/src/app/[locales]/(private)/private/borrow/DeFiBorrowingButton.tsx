@@ -421,7 +421,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                                 <TooltipTrigger asChild>
                                                     <span><Info className='h-4 w-4 ml-1 cursor-pointer' /></span>
                                                 </TooltipTrigger>
-                                                <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
+                                                <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center text-wrap'>
                                                     The current price of the asset in USD.
                                                 </TooltipContent>
                                             </Tooltip>
@@ -528,7 +528,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                                 <TooltipTrigger asChild>
                                                     <span><Info className='h-4 w-4 ml-1 cursor-pointer' /></span>
                                                 </TooltipTrigger>
-                                                <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
+                                                <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center text-wrap'>
                                                     The total value of the collateral in SOL.
                                                 </TooltipContent>
                                             </Tooltip>
@@ -659,7 +659,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                                                     <TooltipTrigger asChild>
                                                                         <span><Info className='h-4 w-4 ml-1 cursor-pointer' /></span>
                                                                     </TooltipTrigger>
-                                                                    <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
+                                                                    <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center text-wrap'>
                                                                         The total amount you are borrowing.
                                                                     </TooltipContent>
                                                                 </Tooltip>
@@ -676,7 +676,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                                                     <TooltipTrigger asChild>
                                                                         <span><Info className='h-4 w-4 ml-1 cursor-pointer' /></span>
                                                                     </TooltipTrigger>
-                                                                    <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
+                                                                    <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center text-wrap'>
                                                                         The total duration for borrowing the asset.
                                                                     </TooltipContent>
                                                                 </Tooltip>
@@ -693,7 +693,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
                                                                     <TooltipTrigger asChild>
                                                                         <span><Info className='h-4 w-4 ml-1 cursor-pointer' /></span>
                                                                     </TooltipTrigger>
-                                                                    <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center'>
+                                                                    <TooltipContent className='max-w-[18rem] md:max-w-[26rem] text-center text-wrap'>
                                                                         The interest rate for borrowing the asset.
                                                                     </TooltipContent>
                                                                 </Tooltip>
