@@ -78,15 +78,16 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
                             // tokenAddress = new PublicKey('Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB'); // USDT token address on solana mainnet-beta
                             tokenAddress = new PublicKey('EJwZgeZrdC8TXTQbQBoL6bfuAnFUUy1PVCMB4DYPzVaS'); // USDT token address on solana devnet
                             decimalPlaces = 6;
+                        } else if (order.borrowing_token === 'EURC') {
+                            // tokenAddress = new PublicKey('HzwqbKZw8HxMN6bF2yFZNrht3c2iXXzpKcFu7uBEDKtr'); // EURC token address on solana mainnet-beta
+                            tokenAddress = new PublicKey('HzwqbKZw8HxMN6bF2yFZNrht3c2iXXzpKcFu7uBEDKtr'); // EURC token address on solana devnet
+                            decimalPlaces = 6;
                         } else if (order.borrowing_token === 'JUP') {
                             tokenAddress = new PublicKey('JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN'); // JUP token address on solana mainnet-beta
                             decimalPlaces = 6;
                         } else if (order.borrowing_token === 'PYTH') {
                             tokenAddress = new PublicKey('HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3RKwX8eACQBCt3'); // PYTH token address on solana mainnet-beta
                             decimalPlaces = 6;
-                        } else if (order.borrowing_token === 'JTO') {
-                            tokenAddress = new PublicKey('jtojtomepa8beP8AuQc6eXt5FriJwfFMwQx2v2f9mCL'); // JTO token address on solana mainnet-beta
-                            decimalPlaces = 9;
                         } else if (order.borrowing_token === 'RAY') {
                             tokenAddress = new PublicKey('4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R'); // RAY token address on solana mainnet-beta
                             decimalPlaces = 6;
@@ -98,6 +99,9 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
                             decimalPlaces = 8;
                         } else if (order.borrowing_token === 'mSOL') {
                             tokenAddress = new PublicKey('mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So'); // mSOLO token address on solana mainnet-beta
+                            decimalPlaces = 9;
+                        } else if (order.borrowing_token === 'JTO') {
+                            tokenAddress = new PublicKey('jtojtomepa8beP8AuQc6eXt5FriJwfFMwQx2v2f9mCL'); // JTO token address on solana mainnet-beta
                             decimalPlaces = 9;
                         }
                         if (tokenAddress && decimalPlaces) {
@@ -154,15 +158,15 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
             }
 
             setIsSubmitting(true);
+            setSigValidation(false);
 
             const userAddress = new PublicKey(order.borrow_user_address);
             const recipientPubKey = new PublicKey('Cq6JPmEspG6oNcUC47WHuEJWU1K4knsLzHYHSfvpnDHk');
-            let tokenAddress;
+            let tokenAddress: PublicKey;
             let sig: string | undefined;
 
             if (order.borrowing_token === 'SOL') {
                 let amount = LAMPORTS_PER_SOL * parseFloat(order.borrowing_total);
-                amount = parseFloat(amount.toFixed(6));
                 const transaction = new Transaction();
                 const sendSolInstruction = SystemProgram.transfer({
                     fromPubkey: userAddress,
@@ -175,39 +179,29 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
                 let amount = 1000000 * parseFloat(order.borrowing_total);
                 amount = parseInt(amount.toFixed(6));
 
-                if (order.borrowing_token === 'USDC') {
-                    // tokenAddress = new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'); // USDC token address on solana mainnet-beta
-                    tokenAddress = new PublicKey('4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU'); // USDC token address on solana devnet
-                } else if (order.borrowing_token === 'USDT') {
-                    // tokenAddress = new PublicKey('Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB'); // USDT token address on solana mainnet-beta
-                    tokenAddress = new PublicKey('EJwZgeZrdC8TXTQbQBoL6bfuAnFUUy1PVCMB4DYPzVaS'); // USDT token address on solana devnet
-                } else if (order.borrowing_token === 'JUP') {
-                    tokenAddress = new PublicKey('JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN'); // JUP token address on solana mainnet-beta
-                } else if (order.borrowing_token === 'PYTH') {
-                    tokenAddress = new PublicKey('HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3RKwX8eACQBCt3'); // PYTH token address on solana mainnet-beta
-                } else if (order.borrowing_token === 'JTO') {
-                    tokenAddress = new PublicKey('jtojtomepa8beP8AuQc6eXt5FriJwfFMwQx2v2f9mCL'); // JTO token address on solana mainnet-beta
-                } else if (order.borrowing_token === 'RAY') {
-                    tokenAddress = new PublicKey('4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R'); // RAY token address on solana mainnet-beta
-                } else if (order.borrowing_token === 'BLZE') {
-                    tokenAddress = new PublicKey('BLZEEuZUBVqFhj8adcCFPJvPVCiCyVmh3hkJMrU8KuJA'); // BLZE token address on solana mainnet-beta
-                } else if (order.borrowing_token === 'tBTC') {
-                    tokenAddress = new PublicKey('6DNSN2BJsaPFdFFc1zP37kkeNe4Usc1Sqkzr9C9vPWcU'); // tBTC token address on solana mainnet-beta
-                } else if (order.borrowing_token === 'mSOL') {
-                    tokenAddress = new PublicKey('mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So'); // mSOLO token address on solana mainnet-beta
-                }
+                const tokenAddresses: { [key: string]: PublicKey } = {
+                    // 'USDC': new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'), // USDC token address on solana mainnet-beta
+                    'USDC': new PublicKey('4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU'), // USDC token address on solana devnet
+                    // 'USDT': new PublicKey('Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB'), // USDT token address on solana mainnet-beta
+                    'USDT': new PublicKey('EJwZgeZrdC8TXTQbQBoL6bfuAnFUUy1PVCMB4DYPzVaS'), //USDT token address on solana devnet
+                    'EURC': new PublicKey('HzwqbKZw8HxMN6bF2yFZNrht3c2iXXzpKcFu7uBEDKtr'),
+                    'JUP': new PublicKey('JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN'),
+                    'PYTH': new PublicKey('HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3RKwX8eACQBCt3'),
+                    'RAY': new PublicKey('4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R'),
+                    'BLZE': new PublicKey('BLZEEuZUBVqFhj8adcCFPJvPVCiCyVmh3hkJMrU8KuJA'),
+                    'tBTC': new PublicKey('6DNSN2BJsaPFdFFc1zP37kkeNe4Usc1Sqkzr9C9vPWcU'),
+                    'mSOL': new PublicKey('mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So'),
+                    'JTO': new PublicKey('jtojtomepa8beP8AuQc6eXt5FriJwfFMwQx2v2f9mCL')
+                };
+
+                tokenAddress = tokenAddresses[order.borrowing_token];
 
                 if (tokenAddress && signTransaction) {
                     const transactionInstructions: TransactionInstruction[] = [];
-                    const associatedTokenFrom = await getAssociatedTokenAddress(
-                        tokenAddress,
-                        userAddress
-                    );
+                    const associatedTokenFrom = await getAssociatedTokenAddress(tokenAddress, userAddress);
                     const fromAccount = await getAccount(connection, associatedTokenFrom);
-                    const associatedTokenTo = await getAssociatedTokenAddress(
-                        tokenAddress,
-                        recipientPubKey
-                    );
+                    const associatedTokenTo = await getAssociatedTokenAddress(tokenAddress, recipientPubKey);
+
                     if (!(await connection.getAccountInfo(associatedTokenTo))) {
                         transactionInstructions.push(
                             createAssociatedTokenAccountInstruction(
@@ -226,6 +220,7 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
                             amount
                         )
                     );
+
                     const transaction = new Transaction().add(...transactionInstructions);
                     sig = await configureAndSendCurrentTransaction(
                         transaction,
@@ -236,17 +231,20 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
                 }
             }
 
-            const timeout = 8000;
-            const interval = 1000;
-            const start = Date.now();
-
             if (sig && wallet.publicKey) {
                 setSigValidation(true);
+
+                const timeout = 8000;
+                const interval = 1000;
+                const start = Date.now();
 
                 const polling = setInterval(async () => {
                     if (!sig) {
                         clearInterval(polling);
-                        return toast.error(`${t('transactionFailed')}`);
+                        toast.error(`${t('transactionFailed')}`);
+                        setSigValidation(false);
+                        setIsSubmitting(false);
+                        return;
                     }
 
                     const transaction = await connection.getParsedTransaction(sig);
@@ -258,6 +256,7 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
                             borrowStatus: 'Repaid',
                             transactionSignature: sig
                         });
+
                         if (result === 'User borrow status updated') {
                             setOpen(false);
                             setTrigger(true);
@@ -267,18 +266,18 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
                         } else {
                             toast.error(`${t('loanUpdateError')}`);
                         }
+                        setSigValidation(false);
+                        setIsSubmitting(false);
                     } else if (Date.now() - start > timeout) {
                         clearInterval(polling);
-                        setIsSubmitting(false);
                         setSigValidation(false);
-                        toast.error(`${t('invalidTransaction')}`);
-                    } else {
-                        clearInterval(polling);
                         setIsSubmitting(false);
-                        setSigValidation(false);
                         toast.error(`${t('invalidTransaction')}`);
                     }
                 }, interval);
+            } else {
+                setIsSubmitting(false);
+                setSigValidation(false);
             }
         } catch (error) {
             if (error == 'TokenAccountNotFoundError') {
@@ -288,6 +287,7 @@ export default function LoanRepay({ row, onTrigger }: { row: { original: LoanDat
             } else {
                 toast.error(`${t('repayLoanError')}`);
             }
+            setSigValidation(false);
             setIsSubmitting(false);
         }
     }

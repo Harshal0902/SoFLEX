@@ -107,15 +107,16 @@ export default function DeFiLendingButton({ row }: { row: { original: LendingAss
                             // tokenAddress = new PublicKey('Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB'); // USDT token address on solana mainnet-beta
                             tokenAddress = new PublicKey('EJwZgeZrdC8TXTQbQBoL6bfuAnFUUy1PVCMB4DYPzVaS'); // USDT token address on solana devnet
                             decimalPlaces = 6;
+                        } else if (order.asset_symbol === 'EURC') {
+                            // tokenAddress = new PublicKey('HzwqbKZw8HxMN6bF2yFZNrht3c2iXXzpKcFu7uBEDKtr'); // EURC token address on solana mainnet-beta
+                            tokenAddress = new PublicKey('HzwqbKZw8HxMN6bF2yFZNrht3c2iXXzpKcFu7uBEDKtr'); // EURC token address on solana devnet
+                            decimalPlaces = 6;
                         } else if (order.asset_symbol === 'JUP') {
                             tokenAddress = new PublicKey('JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN'); // JUP token address on solana mainnet-beta
                             decimalPlaces = 6;
                         } else if (order.asset_symbol === 'PYTH') {
                             tokenAddress = new PublicKey('HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3RKwX8eACQBCt3'); // PYTH token address on solana mainnet-beta
                             decimalPlaces = 6;
-                        } else if (order.asset_symbol === 'JTO') {
-                            tokenAddress = new PublicKey('jtojtomepa8beP8AuQc6eXt5FriJwfFMwQx2v2f9mCL'); // JTO token address on solana mainnet-beta
-                            decimalPlaces = 9;
                         } else if (order.asset_symbol === 'RAY') {
                             tokenAddress = new PublicKey('4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R'); // RAY token address on solana mainnet-beta
                             decimalPlaces = 6;
@@ -127,6 +128,9 @@ export default function DeFiLendingButton({ row }: { row: { original: LendingAss
                             decimalPlaces = 8;
                         } else if (order.asset_symbol === 'mSOL') {
                             tokenAddress = new PublicKey('mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So'); // mSOLO token address on solana mainnet-beta
+                            decimalPlaces = 9;
+                        } else if (order.asset_symbol === 'JTO') {
+                            tokenAddress = new PublicKey('jtojtomepa8beP8AuQc6eXt5FriJwfFMwQx2v2f9mCL'); // JTO token address on solana mainnet-beta
                             decimalPlaces = 9;
                         }
                         if (tokenAddress && decimalPlaces) {
@@ -182,13 +186,14 @@ export default function DeFiLendingButton({ row }: { row: { original: LendingAss
                     'USDC': new PublicKey('4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU'), // USDC token address on solana devnet
                     // 'USDT': new PublicKey('Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB'), // USDT token address on solana mainnet-beta
                     'USDT': new PublicKey('EJwZgeZrdC8TXTQbQBoL6bfuAnFUUy1PVCMB4DYPzVaS'), //USDT token address on solana devnet
+                    'EURC': new PublicKey('HzwqbKZw8HxMN6bF2yFZNrht3c2iXXzpKcFu7uBEDKtr'),
                     'JUP': new PublicKey('JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN'),
                     'PYTH': new PublicKey('HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3RKwX8eACQBCt3'),
-                    'JTO': new PublicKey('jtojtomepa8beP8AuQc6eXt5FriJwfFMwQx2v2f9mCL'),
                     'RAY': new PublicKey('4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R'),
                     'BLZE': new PublicKey('BLZEEuZUBVqFhj8adcCFPJvPVCiCyVmh3hkJMrU8KuJA'),
                     'tBTC': new PublicKey('6DNSN2BJsaPFdFFc1zP37kkeNe4Usc1Sqkzr9C9vPWcU'),
-                    'mSOL': new PublicKey('mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So')
+                    'mSOL': new PublicKey('mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So'),
+                    'JTO': new PublicKey('jtojtomepa8beP8AuQc6eXt5FriJwfFMwQx2v2f9mCL')
                 };
 
                 tokenAddress = tokenAddresses[order.asset_symbol];
@@ -266,9 +271,9 @@ export default function DeFiLendingButton({ row }: { row: { original: LendingAss
                         setIsSubmitting(false);
                     } else if (Date.now() - start > timeout) {
                         clearInterval(polling);
-                        toast.error(`${t('invalidTransaction')}`);
                         setSigValidation(false);
                         setIsSubmitting(false);
+                        toast.error(`${t('invalidTransaction')}`);
                     }
                 }, interval);
             } else {

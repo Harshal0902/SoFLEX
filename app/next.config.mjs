@@ -7,11 +7,11 @@ const nextConfig = {
     async rewrites() {
         return [
             {
-                source: '/en/email-api/:slug*',
+                source: '/api-route/email-api/:slug*',
                 destination: '/api/email/:slug*',
             },
             {
-                source: '/en/withdraw-email-api/:slug*',
+                source: '/api-route/withdraw-email-api/:slug*',
                 destination: '/api/withdraw-email/:slug*',
             },
             {

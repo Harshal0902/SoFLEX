@@ -3,7 +3,7 @@
 import { db } from '@/db/db'
 import { waitlist, users, new_asset_or_collection_request, asset_details, nft_collection_details, defi_borrowing, defi_lending } from '@/db/schema'
 import crypto from 'crypto'
-import { eq, count, and, desc } from 'drizzle-orm'
+import { eq, count, and, asc, desc } from 'drizzle-orm'
 
 interface AssetOrCollectionType {
     walletAddress: string;
@@ -105,7 +105,7 @@ export const newAssetOrCollectionRequest = async ({ walletAddress, requestedAsse
 
 export const assetDetails = async () => {
     try {
-        const data = await db.select().from(asset_details);
+        const data = await db.select().from(asset_details).orderBy(asc(asset_details.order));
         return data;
     } catch (error) {
         return 'Error fetching Asset details';

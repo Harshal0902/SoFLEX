@@ -1,9 +1,9 @@
-import { pgTable, unique, pgEnum, text, timestamp, serial, varchar, primaryKey, doublePrecision } from 'drizzle-orm/pg-core'
+import { pgTable, unique, pgEnum, text, numeric, timestamp, serial, varchar, primaryKey, doublePrecision } from 'drizzle-orm/pg-core'
 
 export const aal_level = pgEnum('aal_level', ['aal1', 'aal2', 'aal3'])
 export const code_challenge_method = pgEnum('code_challenge_method', ['s256', 'plain'])
 export const factor_status = pgEnum('factor_status', ['unverified', 'verified'])
-export const factor_type = pgEnum('factor_type', ['totp', 'webauthn'])
+export const factor_type = pgEnum('factor_type', ['totp', 'webauthn', 'phone'])
 export const one_time_token_type = pgEnum('one_time_token_type', ['confirmation_token', 'reauthentication_token', 'recovery_token', 'email_change_token_new', 'email_change_token_current', 'phone_change_token'])
 export const key_status = pgEnum('key_status', ['default', 'valid', 'invalid', 'expired'])
 export const key_type = pgEnum('key_type', ['aead-ietf', 'aead-det', 'hmacsha512', 'hmacsha256', 'auth', 'shorthash', 'generichash', 'kdf', 'secretbox', 'secretstream', 'stream_xchacha20'])
@@ -19,11 +19,13 @@ export const asset_details = pgTable('asset_details', {
 	asset_yield: text('asset_yield').notNull(),
 	asset_total_borrow: text('asset_total_borrow').notNull(),
 	asset_ltv: text('asset_ltv').notNull(),
+	order: numeric('order').notNull(),
 },
 	(table) => {
 		return {
 			asset_details_asset_name_key: unique('asset_details_asset_name_key').on(table.asset_name),
 			asset_details_asset_symbol_key: unique('asset_details_asset_symbol_key').on(table.asset_symbol),
+			asset_details_order_key: unique('asset_details_order_key').on(table.order),
 		}
 	});
 

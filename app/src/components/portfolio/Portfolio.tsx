@@ -319,7 +319,7 @@ export default function Portfolio({ walletAddress }: { walletAddress: string }) 
             token_amount: data.tokenAmount,
         }
         try {
-            fetch('/en/withdraw-email-api', {
+            fetch('/api-route/withdraw-email-api', {
                 method: 'POST',
                 body: JSON.stringify(values),
             })

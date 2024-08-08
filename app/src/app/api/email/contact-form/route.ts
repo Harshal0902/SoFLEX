@@ -7,7 +7,7 @@ import { ContactUs } from '@/email/ContactUs'
 export async function POST(request: NextRequest) {
     const myEmail = process.env.PERSONAL_EMAIL;
     const password = process.env.EMAIL_PASSWORD;
-    // const email2 = 'singhdivyanshu917@gmail.com';
+    const email2 = 'singhdivyanshu917@gmail.com';
 
     const { email, name, message } = await request.json();
 
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     const mailOptions: Mail.Options = {
         from: myEmail,
         to: myEmail,
-        // cc: email2,
+        cc: email2,
         replyTo: email,
         subject: `Message from ${name} (${email}) on SoFLEX Contact Us page`,
         html: emailHtml

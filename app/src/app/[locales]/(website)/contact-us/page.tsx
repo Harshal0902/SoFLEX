@@ -52,7 +52,7 @@ export default function Page() {
     function onSubmit(values: z.infer<typeof FormSchema>) {
         setIsSubmitting(true);
 
-        fetch('/en/email-api/contact-form', {
+        fetch('/api-route/email-api/contact-form', {
             method: 'POST',
             body: JSON.stringify(values),
         })
