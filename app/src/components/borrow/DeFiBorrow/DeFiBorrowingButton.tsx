@@ -90,7 +90,7 @@ export default function DeFiBorrowingButton({ row }: { row: { original: Borrowin
             })
             .refine(value => {
                 const parsedValue = parseFloat(value);
-                return parsedValue > 0;
+                return parsedValue >= 0.00001;
             }, {
                 message: `${t('borrowAmountMsg2')}`,
             })

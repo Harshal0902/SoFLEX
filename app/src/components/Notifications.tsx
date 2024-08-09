@@ -65,7 +65,7 @@ export default function Notifications({ className, ...props }: CardProps) {
                 </div>
                 {/* <Button className='w-full' asChild>
                     <Link href='/notifications'>
-                        {t('allNotification)}
+                        {t('allNotifications)}
                     </Link>
                 </Button> */}
             </div>

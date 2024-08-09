@@ -267,7 +267,7 @@ export default function ResponsiveNavbar({ isWallet }: { isWallet: boolean }) {
                                                         </div>
                                                         {/* <Button className='w-full' asChild>
                                                             <Link href='/notifications'>
-                                                                {t('Notifications.allNotification')}
+                                                                {t('Notifications.allNotifications')}
                                                             </Link>
                                                         </Button> */}
                                                     </div>

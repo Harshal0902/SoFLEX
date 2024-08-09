@@ -64,8 +64,8 @@ export default function DeFiLendingButton({ row }: { row: { original: LendingAss
             .refine(value => !isNaN(Number(value)), {
                 message: `${t('amountMessage1')}`,
             })
-            .refine(value => Number(value) > 0, {
-                message: `${t('amountMessage3')}`,
+            .refine(value => Number(value) >= 0.00001, {
+                message: `${t('amountMessage2')}`,
             })
             .refine(value => {
                 const stringValue = String(value);
